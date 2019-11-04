@@ -42,7 +42,7 @@ public abstract class AbstractFlatDataItemDescriptor<T extends FlatDataItem<?>> 
      * @param name the name of the descriptor. Must not be empty.
      */
     protected AbstractFlatDataItemDescriptor(String name) {
-        if (Objects.requireNonNull(name).isEmpty()) {
+        if (Objects.requireNonNull(name, "Undefined descriptor name!").isEmpty()) {
             throw new IllegalArgumentException("Descriptor name cannot be empty!");
         }
         this.name = name;

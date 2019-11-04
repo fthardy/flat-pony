@@ -21,32 +21,39 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
-package de.fthardy.flatpony.core;
+package de.fthardy.flatpony.core.field;
 
-import java.util.Objects;
+import de.fthardy.flatpony.core.FlatDataItem;
 
 /**
- * An abstract base implementation for a flat data item implementation.
+ * The interface definition for a flat data field.
+ * <p>
+ * A flat data field is the most atomic part of flat data. Any other type of item which is not a field is or represents
+ * only structure.
+ * </p>
  *
- * @param <T> the descriptor type which creates the item type.
+ * @param <T> the type of the field descriptor which creates the field type.
  *
  * @author Frank Timothy Hardy
  */
-public abstract class AbstractFlatDataItem<T extends FlatDataItemDescriptor<?>> implements FlatDataItem<T> {
-
-    private final T descriptor;
+public interface FlatDataField<T extends FlatDataFieldDescriptor<?>> extends FlatDataItem<T> {
 
     /**
-     * Initialise a new instance of this flat data item.
-     *
-     * @param descriptor the descriptor which created this item.
+     * @return the length of the field.
      */
-    protected AbstractFlatDataItem(T descriptor) {
-        this.descriptor = Objects.requireNonNull(descriptor, "Undefined descriptor!");
-    }
+    int getLength();
 
-    @Override
-    public T getDescriptor() {
-        return this.descriptor;
-    }
+    /**
+     * Get the current value from the field content.
+     *
+     * @return the value from the field content.
+     */
+    String getValue();
+
+    /**
+     * Set a new value for the field content.
+     *
+     * @param value the value to set.
+     */
+    void setValue(String value);
 }

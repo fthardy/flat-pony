@@ -35,6 +35,6 @@ public class FlatDataReadException extends FlatDataIOException {
     }
 
     public FlatDataReadException(String message, Exception cause) {
-        super(message);
+        super(message, cause);
     }
 }

@@ -21,32 +21,38 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
-package de.fthardy.flatpony.core;
+package de.fthardy.flatpony.core.field;
 
-import java.util.Objects;
+import de.fthardy.flatpony.core.FlatDataItemDescriptor;
+
+import java.util.List;
 
 /**
- * An abstract base implementation for a flat data item implementation.
+ * The interface for a flat data field descriptor.
+ * <p>
+ * A flat data field is the most atomic part of flat data. Any other type of item which is not a field is or represents
+ * only structure.
+ * </p>
  *
- * @param <T> the descriptor type which creates the item type.
+ * @param <T> the type of the field created by the field descriptor.
  *
  * @author Frank Timothy Hardy
  */
-public abstract class AbstractFlatDataItem<T extends FlatDataItemDescriptor<?>> implements FlatDataItem<T> {
-
-    private final T descriptor;
+public interface FlatDataFieldDescriptor<T extends FlatDataField<?>> extends FlatDataItemDescriptor<T> {
 
     /**
-     * Initialise a new instance of this flat data item.
+     * Get the default value for the content of a new field instance.
      *
-     * @param descriptor the descriptor which created this item.
+     * @return the default value for the field.
      */
-    protected AbstractFlatDataItem(T descriptor) {
-        this.descriptor = Objects.requireNonNull(descriptor, "Undefined descriptor!");
-    }
+    String getDefaultValue();
 
-    @Override
-    public T getDescriptor() {
-        return this.descriptor;
-    }
+    /**
+     * Check a given value if it violates any constraints defined by the receiving descriptor instance.
+     *
+     * @param value the field value to check.
+     *
+     * @return the list of the violated constraint names.
+     */
+    List<String> determineConstraintViolationsFor(String value);
 }
