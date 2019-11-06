@@ -16,6 +16,16 @@ import static org.mockito.Mockito.*;
 class ConstantFieldDescriptorTest {
 
     @Test
+    void Cannot_create_with_null_name() {
+        assertThrows(NullPointerException.class, () -> new ConstantFieldDescriptor(null, null));
+    }
+
+    @Test
+    void Cannot_create_with_empty_name() {
+        assertThrows(IllegalArgumentException.class, () -> new ConstantFieldDescriptor("", null));
+    }
+
+    @Test
     void Cannot_create_with_null_constant() {
         assertThrows(NullPointerException.class, () -> new ConstantFieldDescriptor("Test", null));
     }
