@@ -26,6 +26,7 @@ package de.fthardy.flatpony.core.field;
 import de.fthardy.flatpony.core.FlatDataItemDescriptor;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * The interface for a flat data field descriptor.
@@ -54,5 +55,5 @@ public interface FlatDataFieldDescriptor<T extends FlatDataField<?>> extends Fla
      *
      * @return the list of the violated constraint names.
      */
-    List<String> determineConstraintViolationsFor(String value);
+    Set<String> determineConstraintViolationsFor(String value);
 }

@@ -24,6 +24,8 @@ SOFTWARE.
 package de.fthardy.flatpony.core.field;
 
 import de.fthardy.flatpony.core.AbstractFlatDataItemDescriptor;
+import de.fthardy.flatpony.core.FlatDataIOException;
+import de.fthardy.flatpony.core.FlatDataReadException;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -52,9 +54,100 @@ public abstract class AbstractFlatDataFieldDescriptor<T extends FlatDataField<?>
     public interface ValueConstraint extends Predicate<String> {
 
         /**
+         * Get the name of the value constraint.
+         * <p>
+         * The name of a constraint serves as an identifier which might be used as a simple name for direct display or
+         * as a key for resolving a (probably localized) message.
+         * </p>
+         *
          * @return the name of the constraint.
          */
         String getName();
+    }
+
+    /**
+     * The default implementation of a value constraint.
+     *
+     * @author Frank Timothy Hardy
+     */
+    public static final class DefaultValueConstraint implements ValueConstraint {
+
+        private final String name;
+        private final Predicate<String> predicate;
+
+        /**
+         * Create a new instance of a value constraint.
+         *
+         * @param name the name of the constraint.
+         * @param predicate the constraint predicate.
+         */
+        public DefaultValueConstraint(String name, Predicate<String> predicate) {
+            this.name = Objects.requireNonNull(name, "Undefined value constraint name!");
+            this.predicate = Objects.requireNonNull(predicate, "Undefined value constraint predicate!");
+        }
+
+        @Override
+        public String getName() {
+            return this.name;
+        }
+
+        @Override
+        public boolean test(String value) {
+            return this.predicate.test(value);
+        }
+    }
+
+    /**
+     * This runtime exception is thrown when a fields value constraints are violated.
+     *
+     * @author Frank Timothy Hardy
+     */
+    public static final class ValueConstraintViolationException extends FlatDataIOException {
+
+        private final String fieldName;
+        private final String value;
+        private final Set<String> constraintNames;
+
+        ValueConstraintViolationException(String fieldName, String value, Set<String> constraintNames) {
+            this.fieldName = fieldName;
+            this.value = value;
+            this.constraintNames = Collections.unmodifiableSet(new LinkedHashSet<>(constraintNames));
+        }
+
+        public String getFieldName() {
+            return fieldName;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public Set<String> getConstraintNames() {
+            return constraintNames;
+        }
+    }
+
+    /**
+     * Checks if the constraints have all unambiguous names.
+     * If any value constraints are ambiguous an {@code IllegalArgumentException} is thrown.
+     *
+     * @param constraints the set of value constraints.
+     *
+     * @return an unmodifiable set with the given constraints. The order of the elements is preserved.
+     */
+    static Set<ValueConstraint> makeUnmodifiableSetFrom(Set<ValueConstraint> constraints) {
+        if (Objects.requireNonNull(constraints, "Undefined value constraints!").isEmpty()) {
+            return Collections.emptySet();
+        } else {
+            List<String> names = constraints.stream().map(ValueConstraint::getName).collect(Collectors.toList());
+            Set<String> uniqueNames = new HashSet<>(names);
+            if (uniqueNames.size() != names.size()) {
+                uniqueNames.forEach(names::remove);
+                throw new IllegalArgumentException("Value constraints with ambiguous names: " +
+                        String.join(", ", names));
+            }
+            return Collections.unmodifiableSet(new LinkedHashSet<>(constraints));
+        }
     }
 
     private final Set<ValueConstraint> constraints;
@@ -65,24 +158,43 @@ public abstract class AbstractFlatDataFieldDescriptor<T extends FlatDataField<?>
      * @param name the name of the field.
      */
     protected AbstractFlatDataFieldDescriptor(String name) {
-        this(name, Collections.emptyList());
+        this(name, Collections.emptySet());
     }
 
     /**
      * Initialise a new instance of a field descriptor.
      *
      * @param name the name of the field.
-     * @param constraints the list of constraints for the field defined by the descriptor.
+     * @param constraints the set of value constraints. The order of the elements in the given set is preserved. The
+     *                    constraint check will test in this given order.
      */
-    protected AbstractFlatDataFieldDescriptor(String name, Collection<ValueConstraint> constraints) {
+    protected AbstractFlatDataFieldDescriptor(String name, Set<ValueConstraint> constraints) {
         super(name);
-        this.constraints = Objects.requireNonNull(constraints, "Undefined constraints!").isEmpty() ?
-                Collections.emptySet() : Collections.unmodifiableSet(new LinkedHashSet<>(constraints));
+        this.constraints = makeUnmodifiableSetFrom(constraints);
     }
 
     @Override
-    public List<String> determineConstraintViolationsFor(String value) {
+    public Set<String> determineConstraintViolationsFor(String value) {
         return constraints.stream().filter(c -> c.test(value)).map(ValueConstraint::getName).collect(
-                Collectors.toList());
+                Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    /**
+     * Check if a given value violates any of the constraints.
+     * <p>
+     * If so a {@link ValueConstraintViolationException} is thrown.
+     * </p>
+     *
+     * @param value the value to check. Might be {@code null}.
+     *
+     * @return the given value.
+     */
+    protected String checkForConstraintViolation(String value) {
+        Set<String> constraintViolations = this.determineConstraintViolationsFor(value);
+        if (constraintViolations.isEmpty()) {
+            return value;
+        } else {
+            throw new ValueConstraintViolationException(this.getName(), value, constraintViolations);
+        }
     }
 }

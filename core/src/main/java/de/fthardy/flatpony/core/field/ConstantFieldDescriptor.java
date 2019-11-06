@@ -27,8 +27,8 @@ import de.fthardy.flatpony.core.FlatDataReadException;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * The implementation of a descriptor for a field which represents an immutable constant value.
@@ -100,7 +100,7 @@ public final class ConstantFieldDescriptor extends AbstractFlatDataFieldDescript
     }
 
     @Override
-    public List<String> determineConstraintViolationsFor(String value) {
+    public Set<String> determineConstraintViolationsFor(String value) {
         throw new UnsupportedOperationException("A constant field is immutable!");
     }
 }
