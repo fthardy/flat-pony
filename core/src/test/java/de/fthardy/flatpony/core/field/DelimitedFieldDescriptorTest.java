@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.IOException;
+import java.io.Reader;
 import java.io.StringReader;
 import java.util.Arrays;
 import java.util.Collections;
@@ -12,8 +14,8 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
-
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class DelimitedFieldDescriptorTest {
@@ -63,6 +65,25 @@ class DelimitedFieldDescriptorTest {
 
         DelimitedField field = descriptor.readItemFrom(reader);
         assertThat(field.getValue()).isEqualTo("Test");
+    }
+
+    @Test
+    void The_reader_throws_an_IOException() throws IOException {
+        DelimitedFieldDescriptor descriptor = new DelimitedFieldDescriptor("Foo");
+
+        Reader readerMock = mock(Reader.class);
+
+        IOException ioException = new IOException();
+        when(readerMock.read()).thenThrow(ioException);
+
+        FlatDataReadException exception =
+                assertThrows(FlatDataReadException.class, () -> descriptor.readItemFrom(readerMock));
+
+        assertEquals(DelimitedFieldDescriptor.MSG_Read_failed(descriptor.getName()), exception.getMessage());
+        assertSame(ioException, exception.getCause());
+
+        verify(readerMock).read();
+        verifyNoMoreInteractions(readerMock);
     }
 
     @Test
