@@ -21,44 +21,48 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
-package de.fthardy.flatpony.core.field;
+package de.fthardy.flatpony.core.field.fixedsize;
 
 import de.fthardy.flatpony.core.AbstractFlatDataItem;
 import de.fthardy.flatpony.core.FlatDataWriteException;
+import de.fthardy.flatpony.core.field.FlatDataField;
 
 import java.io.IOException;
 import java.io.Writer;
 
 /**
- * The implementation of a constant field which is a special, immutable field with a constant value.
+ * The implementation of a fixed size field.
  *
  * @author Frank Timothy Hardy
  */
-public final class ConstantField extends AbstractFlatDataItem<ConstantFieldDescriptor>
-        implements FlatDataField<ConstantFieldDescriptor> {
+public final class FixedSizeField extends AbstractFlatDataItem<FixedSizeFieldDescriptor>
+        implements FlatDataField<FixedSizeFieldDescriptor> {
 
     static String MSG_Write_failed(String fieldName) {
-        return String.format("Failed to write constant field '%s' to target stream!", fieldName);
+        return String.format("Failed to write fixed size field '%s' to target stream!", fieldName);
     }
 
+    private String value;
+
     /**
-     * Creates a new instance of a constant field.
+     * Create a new fixed size field instance.
      *
      * @param descriptor the descriptor which is creating this field instance.
      */
-    ConstantField(ConstantFieldDescriptor descriptor) {
+    FixedSizeField(FixedSizeFieldDescriptor descriptor) {
         super(descriptor);
+        this.value = descriptor.getDefaultValue();
     }
 
     @Override
     public int getLength() {
-        return getDescriptor().getDefaultValue().length();
+        return this.getDescriptor().getFieldSize();
     }
 
     @Override
     public void writeTo(Writer target) {
         try {
-            target.write(this.getDescriptor().getDefaultValue());
+            target.write(this.getContent());
         } catch (IOException e) {
             throw new FlatDataWriteException(MSG_Write_failed(this.getDescriptor().getName()), e);
         }
@@ -66,11 +70,15 @@ public final class ConstantField extends AbstractFlatDataItem<ConstantFieldDescr
 
     @Override
     public String getValue() {
-        return this.getDescriptor().getDefaultValue();
+        return value;
     }
 
     @Override
     public void setValue(String value) {
-        throw new UnsupportedOperationException("A constant field is immutable!");
+        this.value = this.getDescriptor().checkForConstraintViolation(value);
+    }
+
+    private String getContent() {
+        return this.getDescriptor().makeContentFromValue(value);
     }
 }

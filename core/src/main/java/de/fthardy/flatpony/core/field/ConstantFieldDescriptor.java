@@ -24,11 +24,11 @@ SOFTWARE.
 package de.fthardy.flatpony.core.field;
 
 import de.fthardy.flatpony.core.FlatDataReadException;
+import de.fthardy.flatpony.core.field.constraint.ValueCannotBeEmptyConstraint;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 /**
  * The implementation of a descriptor for a field which represents an immutable constant value.
@@ -51,7 +51,6 @@ public final class ConstantFieldDescriptor extends AbstractFlatDataFieldDescript
                 " The read value is not equal to the constant: [%s] != [%s]!", value, constant);
     }
 
-    private final String constant;
     private final ConstantField fieldInstance;
 
     /**
@@ -61,11 +60,7 @@ public final class ConstantFieldDescriptor extends AbstractFlatDataFieldDescript
      * @param constant the constant content represented by the field.
      */
     public ConstantFieldDescriptor(String name, String constant) {
-        super(name);
-        if (Objects.requireNonNull(constant, "Undefined constant!").isEmpty()) {
-            throw new IllegalArgumentException("The constant cannot be empty!");
-        }
-        this.constant = constant;
+        super(name, constant, Collections.singleton(ValueCannotBeEmptyConstraint.INSTANCE));
         this.fieldInstance = new ConstantField(this);
     }
 
@@ -76,7 +71,7 @@ public final class ConstantFieldDescriptor extends AbstractFlatDataFieldDescript
 
     @Override
     public ConstantField readItemFrom(Reader source) {
-        char[] charsToRead = new char[constant.length()];
+        char[] charsToRead = new char[this.getDefaultValue().length()];
         try {
             int length = source.read(charsToRead);
             if (length != charsToRead.length) {
@@ -87,20 +82,10 @@ public final class ConstantFieldDescriptor extends AbstractFlatDataFieldDescript
         }
 
         String value = new String(charsToRead);
-        if (this.constant.equals(value)) {
+        if (this.getDefaultValue().equals(value)) {
             return fieldInstance;
         } else {
-            throw new FlatDataReadException(MSG_Invalid_value(this.getName(), value, this.constant));
+            throw new FlatDataReadException(MSG_Invalid_value(this.getName(), value, this.getDefaultValue()));
         }
-    }
-
-    @Override
-    public String getDefaultValue() {
-        return this.constant;
-    }
-
-    @Override
-    public Set<String> determineConstraintViolationsFor(String value) {
-        throw new UnsupportedOperationException("A constant field is immutable!");
     }
 }

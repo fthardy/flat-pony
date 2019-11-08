@@ -24,11 +24,10 @@ SOFTWARE.
 package de.fthardy.flatpony.core.field;
 
 import de.fthardy.flatpony.core.AbstractFlatDataItemDescriptor;
-import de.fthardy.flatpony.core.FlatDataIOException;
-import de.fthardy.flatpony.core.FlatDataReadException;
+import de.fthardy.flatpony.core.field.constraint.ValueConstraint;
+import de.fthardy.flatpony.core.field.constraint.ValueConstraintViolationException;
 
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -40,92 +39,6 @@ import java.util.stream.Collectors;
  */
 public abstract class AbstractFlatDataFieldDescriptor<T extends FlatDataField<?>>
         extends AbstractFlatDataItemDescriptor<T> implements FlatDataFieldDescriptor<T> {
-
-    /**
-     * An extended predicate which represents a field value constraint.
-     * <p>
-     * The semantics of this predicate is that it checks if a given value is violating the constraint represented by the
-     * receiving implementation instance. If so {@link #test(Object)} must return {@code true}. Otherwise, if the value
-     * is valid {@code false} must be returned.
-     * </p>
-     *
-     * @author Frank Timothy Hardy
-     */
-    public interface ValueConstraint extends Predicate<String> {
-
-        /**
-         * Get the name of the value constraint.
-         * <p>
-         * The name of a constraint serves as an identifier which might be used as a simple name for direct display or
-         * as a key for resolving a (probably localized) message.
-         * </p>
-         *
-         * @return the name of the constraint.
-         */
-        String getName();
-    }
-
-    /**
-     * The default implementation of a value constraint.
-     *
-     * @author Frank Timothy Hardy
-     */
-    public static final class DefaultValueConstraint implements ValueConstraint {
-
-        private final String name;
-        private final Predicate<String> predicate;
-
-        /**
-         * Create a new instance of a value constraint.
-         *
-         * @param name the name of the constraint.
-         * @param predicate the constraint predicate.
-         */
-        public DefaultValueConstraint(String name, Predicate<String> predicate) {
-            this.name = Objects.requireNonNull(name, "Undefined value constraint name!");
-            this.predicate = Objects.requireNonNull(predicate, "Undefined value constraint predicate!");
-        }
-
-        @Override
-        public String getName() {
-            return this.name;
-        }
-
-        @Override
-        public boolean test(String value) {
-            return this.predicate.test(value);
-        }
-    }
-
-    /**
-     * This runtime exception is thrown when a fields value constraints are violated.
-     *
-     * @author Frank Timothy Hardy
-     */
-    public static final class ValueConstraintViolationException extends FlatDataIOException {
-
-        private final String fieldName;
-        private final String value;
-        private final Set<String> constraintNames;
-
-        ValueConstraintViolationException(String fieldName, String value, Set<String> constraintNames) {
-            this.fieldName = fieldName;
-            this.value = value;
-            this.constraintNames = Collections.unmodifiableSet(new LinkedHashSet<>(constraintNames));
-        }
-
-        public String getFieldName() {
-            return fieldName;
-        }
-
-        public String getValue() {
-            return value;
-        }
-
-        public Set<String> getConstraintNames() {
-            return constraintNames;
-        }
-    }
 
     /**
      * Checks if the constraints have all unambiguous names.
@@ -150,27 +63,37 @@ public abstract class AbstractFlatDataFieldDescriptor<T extends FlatDataField<?>
         }
     }
 
+    private final String defaultValue;
     private final Set<ValueConstraint> constraints;
 
     /**
      * Initialise a new instance of a field descriptor.
      *
      * @param name the name of the field.
+     * @param defaultValue a default value.
      */
-    protected AbstractFlatDataFieldDescriptor(String name) {
-        this(name, Collections.emptySet());
+    protected AbstractFlatDataFieldDescriptor(String name, String defaultValue) {
+        this(name, defaultValue, Collections.emptySet());
     }
 
     /**
      * Initialise a new instance of a field descriptor.
      *
      * @param name the name of the field.
+     * @param defaultValue a default value.
      * @param constraints the set of value constraints. The order of the elements in the given set is preserved. The
      *                    constraint check will test in this given order.
      */
-    protected AbstractFlatDataFieldDescriptor(String name, Set<ValueConstraint> constraints) {
+    protected AbstractFlatDataFieldDescriptor(String name, String defaultValue, Set<ValueConstraint> constraints) {
         super(name);
         this.constraints = makeUnmodifiableSetFrom(constraints);
+        this.defaultValue = this.checkForConstraintViolation(
+                Objects.requireNonNull(defaultValue, "Undefined default value!"));
+    }
+
+    @Override
+    public String getDefaultValue() {
+        return defaultValue;
     }
 
     @Override
@@ -189,7 +112,7 @@ public abstract class AbstractFlatDataFieldDescriptor<T extends FlatDataField<?>
      *
      * @return the given value.
      */
-    protected String checkForConstraintViolation(String value) {
+    public String checkForConstraintViolation(String value) {
         Set<String> constraintViolations = this.determineConstraintViolationsFor(value);
         if (constraintViolations.isEmpty()) {
             return value;

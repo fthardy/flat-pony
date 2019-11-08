@@ -1,5 +1,7 @@
 package de.fthardy.flatpony.core.field;
 
+import de.fthardy.flatpony.core.field.constraint.DefaultValueConstraint;
+import de.fthardy.flatpony.core.field.constraint.ValueConstraint;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -27,39 +29,33 @@ class AbstractFlatDataFieldDescriptorTest {
     @Test
     void makeUnmodifiableSetFrom_Cannot_add_constraints_with_ambiguous_names() {
 
-        AbstractFlatDataFieldDescriptor.ValueConstraint c1 =
-                new AbstractFlatDataFieldDescriptor.DefaultValueConstraint("Empty", String::isEmpty);
-        AbstractFlatDataFieldDescriptor.ValueConstraint c2 =
-                new AbstractFlatDataFieldDescriptor.DefaultValueConstraint("Empty", String::isEmpty);
-        AbstractFlatDataFieldDescriptor.ValueConstraint c3 =
-                new AbstractFlatDataFieldDescriptor.DefaultValueConstraint("Size", v -> v.length() > 0);
+        ValueConstraint c1 = new DefaultValueConstraint("empty", String::isEmpty);
+        ValueConstraint c2 = new DefaultValueConstraint("empty", String::isEmpty);
+        ValueConstraint c3 = new DefaultValueConstraint("length", v -> v.length() > 0);
 
-        Set<AbstractFlatDataFieldDescriptor.ValueConstraint> constraints = new LinkedHashSet<>(
+        Set<ValueConstraint> constraints = new LinkedHashSet<>(
                 Arrays.asList(c1, c2, c3));
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
                 AbstractFlatDataFieldDescriptor.makeUnmodifiableSetFrom(constraints));
 
-        assertThat(exception.getMessage()).endsWith("Empty");
+        assertThat(exception.getMessage()).endsWith("empty");
     }
 
     @Test
     void makeUnmodifiableSetFrom_Resulting_set_preserves_order_and_is_unmodifiable() {
 
-        AbstractFlatDataFieldDescriptor.ValueConstraint c1 =
-                new AbstractFlatDataFieldDescriptor.DefaultValueConstraint("Empty", String::isEmpty);
-        AbstractFlatDataFieldDescriptor.ValueConstraint c2 =
-                new AbstractFlatDataFieldDescriptor.DefaultValueConstraint("Size", v -> v.length() > 0);
+        ValueConstraint c1 = new DefaultValueConstraint("empty", String::isEmpty);
+        ValueConstraint c2 = new DefaultValueConstraint("length", v -> v.length() > 0);
 
-        Set<AbstractFlatDataFieldDescriptor.ValueConstraint> constraints = new LinkedHashSet<>(Arrays.asList(c1, c2));
+        Set<ValueConstraint> constraints = new LinkedHashSet<>(Arrays.asList(c1, c2));
 
-        Set<AbstractFlatDataFieldDescriptor.ValueConstraint> result =
+        Set<ValueConstraint> result =
                 AbstractFlatDataFieldDescriptor.makeUnmodifiableSetFrom(constraints);
         assertThat(result).isNotSameAs(constraints);
         assertThat(result).containsExactlyElementsOf(constraints);
 
-        AbstractFlatDataFieldDescriptor.ValueConstraint c3 =
-                new AbstractFlatDataFieldDescriptor.DefaultValueConstraint("Foo", v -> false);
+        ValueConstraint c3 = new DefaultValueConstraint("false", v -> false);
         assertThrows(UnsupportedOperationException.class, () -> result.add(c3));
     }
 }

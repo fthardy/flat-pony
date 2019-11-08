@@ -1,6 +1,9 @@
 package de.fthardy.flatpony.core.field;
 
 import de.fthardy.flatpony.core.FlatDataReadException;
+import de.fthardy.flatpony.core.field.constraint.DefaultValueConstraint;
+import de.fthardy.flatpony.core.field.constraint.ValueConstraint;
+import de.fthardy.flatpony.core.field.constraint.ValueConstraintViolationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -17,7 +20,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
 class DelimitedFieldDescriptorTest {
 
     @Test
@@ -33,16 +35,13 @@ class DelimitedFieldDescriptorTest {
 
     @Test
     void The_default_value_violates_the_given_constraints() {
-        AbstractFlatDataFieldDescriptor.DefaultValueConstraint notEmpty1 =
-                new AbstractFlatDataFieldDescriptor.DefaultValueConstraint("Foo", String::isEmpty);
-        AbstractFlatDataFieldDescriptor.DefaultValueConstraint notEmpty2 =
-                new AbstractFlatDataFieldDescriptor.DefaultValueConstraint("Bar", String::isEmpty);
+        DefaultValueConstraint notEmpty1 = new DefaultValueConstraint("Foo", String::isEmpty);
+        DefaultValueConstraint notEmpty2 = new DefaultValueConstraint("Bar", String::isEmpty);
 
-        Set<AbstractFlatDataFieldDescriptor.ValueConstraint> constraints =
-                new LinkedHashSet<>(Arrays.asList(notEmpty1, notEmpty2));
+        Set<ValueConstraint> constraints = new LinkedHashSet<>(Arrays.asList(notEmpty1, notEmpty2));
 
-        AbstractFlatDataFieldDescriptor.ValueConstraintViolationException exception = assertThrows(
-                AbstractFlatDataFieldDescriptor.ValueConstraintViolationException.class, () ->
+        ValueConstraintViolationException exception = assertThrows(
+                ValueConstraintViolationException.class, () ->
                         new DelimitedFieldDescriptor("Field", ',', "", constraints));
         assertThat(exception.getFieldName()).isEqualTo("Field");
         assertThat(exception.getValue()).isEqualTo("");
@@ -88,10 +87,9 @@ class DelimitedFieldDescriptorTest {
 
     @Test
     void The_read_value_violates_the_given_constraints() {
-        AbstractFlatDataFieldDescriptor.DefaultValueConstraint dontBeAFoo =
-                new AbstractFlatDataFieldDescriptor.DefaultValueConstraint("You Foo!", v -> v.equals("Foo"));
+        DefaultValueConstraint dontBeAFoo = new DefaultValueConstraint("You Foo!", v -> v.equals("Foo"));
 
-        Set<AbstractFlatDataFieldDescriptor.ValueConstraint> constraints =
+        Set<ValueConstraint> constraints =
                 new LinkedHashSet<>(Collections.singletonList(dontBeAFoo));
 
         DelimitedFieldDescriptor descriptor =
@@ -103,8 +101,8 @@ class DelimitedFieldDescriptorTest {
                 assertThrows(FlatDataReadException.class, () -> descriptor.readItemFrom(reader));
         assertThat(readException.getMessage()).isEqualTo(DelimitedFieldDescriptor.MSG_Read_failed("Field"));
 
-        AbstractFlatDataFieldDescriptor.ValueConstraintViolationException exception =
-                (AbstractFlatDataFieldDescriptor.ValueConstraintViolationException) readException.getCause();
+        ValueConstraintViolationException exception =
+                (ValueConstraintViolationException) readException.getCause();
         assertThat(exception.getFieldName()).isEqualTo("Field");
         assertThat(exception.getValue()).isEqualTo("Foo");
         assertThat(exception.getConstraintNames()).containsExactly("You Foo!");

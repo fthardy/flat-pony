@@ -24,6 +24,8 @@ SOFTWARE.
 package de.fthardy.flatpony.core.field;
 
 import de.fthardy.flatpony.core.FlatDataReadException;
+import de.fthardy.flatpony.core.field.constraint.ValueConstraint;
+import de.fthardy.flatpony.core.field.constraint.ValueConstraintViolationException;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -55,7 +57,6 @@ public final class DelimitedFieldDescriptor extends AbstractFlatDataFieldDescrip
     }
 
     private final int delimiter;
-    private final String defaultValue;
 
     /**
      * Creates a new delimited field descriptor which has no constraints, uses the {@link #DEFAULT_DELIMITER} and has an
@@ -88,11 +89,9 @@ public final class DelimitedFieldDescriptor extends AbstractFlatDataFieldDescrip
     public DelimitedFieldDescriptor(
             String name, char delimiter, String defaultValue, Set<ValueConstraint> constraints) {
 
-        super(name, constraints);
+        super(name, defaultValue, constraints);
 
         this.delimiter = delimiter;
-        this.defaultValue = this.checkForConstraintViolation(
-                Objects.requireNonNull(defaultValue, "Undefined default value!"));
     }
 
     @Override
@@ -120,11 +119,6 @@ public final class DelimitedFieldDescriptor extends AbstractFlatDataFieldDescrip
             throw new FlatDataReadException(MSG_Read_failed(this.getName()), e);
         }
         return field;
-    }
-
-    @Override
-    public String getDefaultValue() {
-        return defaultValue;
     }
 
     int getDelimiter() {
