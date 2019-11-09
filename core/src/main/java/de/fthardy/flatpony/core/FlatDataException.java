@@ -24,17 +24,17 @@ SOFTWARE.
 package de.fthardy.flatpony.core;
 
 /**
- * The base type for all IO related exceptions.
+ * The base exception type for all flat data exceptions.
  *
  * @author Frank Timothy Hardy
  */
-public class FlatDataIOException extends FlatDataException {
+public abstract class FlatDataException extends RuntimeException {
 
-    public FlatDataIOException(String message) {
+    public FlatDataException(String message) {
         super(message);
     }
 
-    public FlatDataIOException(String message, Exception cause) {
+    public FlatDataException(String message, Exception cause) {
         super(message, cause);
     }
 }

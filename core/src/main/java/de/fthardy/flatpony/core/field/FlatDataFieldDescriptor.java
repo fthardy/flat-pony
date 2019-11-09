@@ -25,7 +25,6 @@ package de.fthardy.flatpony.core.field;
 
 import de.fthardy.flatpony.core.FlatDataItemDescriptor;
 
-import java.util.List;
 import java.util.Set;
 
 /**

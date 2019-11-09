@@ -21,20 +21,24 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
-package de.fthardy.flatpony.core;
+package de.fthardy.flatpony.core.structure;
+
+import de.fthardy.flatpony.core.FlatDataItemDescriptor;
+
+import java.util.List;
 
 /**
- * The base type for all IO related exceptions.
+ * The interface for a flat data structure descriptor.
+ *
+ * @param <T> the type of the structure item created by the descriptor type.
  *
  * @author Frank Timothy Hardy
  */
-public class FlatDataIOException extends FlatDataException {
+public interface FlatDataStructureDescriptor<T extends FlatDataStructure<?>> extends FlatDataItemDescriptor<T> {
 
-    public FlatDataIOException(String message) {
-        super(message);
-    }
-
-    public FlatDataIOException(String message, Exception cause) {
-        super(message, cause);
-    }
+    /**
+     * @return the list of the child descriptors.
+     */
+    List<FlatDataItemDescriptor<?>> getChildDescriptors();
 }
+
