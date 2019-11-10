@@ -23,11 +23,10 @@ SOFTWARE.
  */
 package de.fthardy.flatpony.core.field.fixedsize;
 
-import de.fthardy.flatpony.core.FlatDataItemDescriptorHandler;
+import de.fthardy.flatpony.core.FlatDataItemDescriptor;
 import de.fthardy.flatpony.core.FlatDataReadException;
 import de.fthardy.flatpony.core.field.AbstractFlatDataFieldDescriptor;
 import de.fthardy.flatpony.core.field.FlatDataFieldDescriptor;
-import de.fthardy.flatpony.core.field.FlatDataFieldDescriptorHandler;
 import de.fthardy.flatpony.core.field.constraint.ValueConstraint;
 import de.fthardy.flatpony.core.field.constraint.ValueMustHaveExactFieldLengthConstraint;
 
@@ -135,9 +134,9 @@ public final class FixedSizeFieldDescriptor extends AbstractFlatDataFieldDescrip
     }
 
     @Override
-    public void applyHandler(FlatDataItemDescriptorHandler handler) {
-        if (handler instanceof FlatDataFieldDescriptorHandler) {
-            ((FlatDataFieldDescriptorHandler) handler).handleFixedSizeFieldDescriptor(this);
+    public void applyHandler(FlatDataItemDescriptor.Handler handler) {
+        if (handler instanceof FlatDataFieldDescriptor.Handler) {
+            ((FlatDataFieldDescriptor.Handler) handler).handleFixedSizeFieldDescriptor(this);
         } else {
             handler.handleFlatDataItemDescriptor(this);
         }

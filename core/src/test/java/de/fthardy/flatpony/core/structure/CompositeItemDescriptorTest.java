@@ -1,9 +1,7 @@
 package de.fthardy.flatpony.core.structure;
 
-import de.fthardy.flatpony.core.FlatDataItemDescriptorHandler;
+import de.fthardy.flatpony.core.FlatDataItemDescriptor;
 import de.fthardy.flatpony.core.field.ConstantFieldDescriptor;
-import de.fthardy.flatpony.core.field.DelimitedFieldDescriptor;
-import de.fthardy.flatpony.core.field.FlatDataFieldDescriptorHandler;
 import de.fthardy.flatpony.core.field.fixedsize.FixedSizeFieldDescriptor;
 import org.junit.jupiter.api.Test;
 
@@ -62,8 +60,8 @@ class CompositeItemDescriptorTest {
         CompositeItemDescriptor descriptor = new CompositeItemDescriptor(
                 "Record", Collections.singletonList(new ConstantFieldDescriptor("ID", "Foo")));
 
-        FlatDataItemDescriptorHandler handlerMock = mock(FlatDataItemDescriptorHandler.class);
-        FlatDataStructureDescriptorHandler descriptorHandlerMock = mock(FlatDataStructureDescriptorHandler.class);
+        FlatDataItemDescriptor.Handler handlerMock = mock(FlatDataItemDescriptor.Handler.class);
+        FlatDataStructureDescriptor.Handler descriptorHandlerMock = mock(FlatDataStructureDescriptor.Handler.class);
 
         descriptor.applyHandler(handlerMock);
         descriptor.applyHandler(descriptorHandlerMock);

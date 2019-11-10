@@ -24,7 +24,6 @@ SOFTWARE.
 package de.fthardy.flatpony.core.field;
 
 import de.fthardy.flatpony.core.AbstractFlatDataItem;
-import de.fthardy.flatpony.core.FlatDataItemHandler;
 import de.fthardy.flatpony.core.FlatDataWriteException;
 
 import java.io.IOException;
@@ -76,9 +75,9 @@ public final class ConstantField extends AbstractFlatDataItem<ConstantFieldDescr
     }
 
     @Override
-    public void applyHandler(FlatDataItemHandler handler) {
-        if (handler instanceof FlatDataFieldHandler) {
-            ((FlatDataFieldHandler) handler).handleConstantField(this);
+    public void applyHandler(de.fthardy.flatpony.core.FlatDataItem.Handler handler) {
+        if (handler instanceof FlatDataField.Handler) {
+            ((FlatDataField.Handler) handler).handleConstantField(this);
         } else {
             handler.handleFlatDataItem(this);
         }

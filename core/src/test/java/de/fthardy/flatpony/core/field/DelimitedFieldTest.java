@@ -1,6 +1,6 @@
 package de.fthardy.flatpony.core.field;
 
-import de.fthardy.flatpony.core.FlatDataItemHandler;
+import de.fthardy.flatpony.core.FlatDataItem;
 import de.fthardy.flatpony.core.FlatDataWriteException;
 import org.junit.jupiter.api.Test;
 
@@ -58,8 +58,8 @@ class DelimitedFieldTest {
     void Calls_correct_handler_method() {
         DelimitedField field = new DelimitedFieldDescriptor("Foo", "Bar").createItem();
 
-        FlatDataItemHandler handlerMock = mock(FlatDataItemHandler.class);
-        FlatDataFieldHandler fieldHandlerMock = mock(FlatDataFieldHandler.class);
+        FlatDataItem.Handler handlerMock = mock(FlatDataItem.Handler.class);
+        FlatDataField.Handler fieldHandlerMock = mock(FlatDataField.Handler.class);
 
         field.applyHandler(handlerMock);
         field.applyHandler(fieldHandlerMock);

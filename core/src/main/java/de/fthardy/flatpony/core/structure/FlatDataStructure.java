@@ -37,6 +37,21 @@ import java.util.List;
 public interface FlatDataStructure<T extends FlatDataStructureDescriptor<?>> extends FlatDataItem<T> {
 
     /**
+     * The interface for a handler which can handle the various structure type implementations provided by the core package.
+     *
+     * @author Frank Timothy Hardy.
+     */
+    interface Handler extends FlatDataItem.Handler {
+
+        /**
+         * Handle a composite item.
+         *
+         * @param item the item to be handled by the receiving instance.
+         */
+        void handleCompositeItem(CompositeItem item);
+    }
+
+    /**
      * @return the list of child items.
      */
     List<FlatDataItem<?>> getChildItems();

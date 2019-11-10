@@ -24,6 +24,7 @@ SOFTWARE.
 package de.fthardy.flatpony.core.field;
 
 import de.fthardy.flatpony.core.FlatDataItemDescriptor;
+import de.fthardy.flatpony.core.field.fixedsize.FixedSizeFieldDescriptor;
 
 import java.util.Set;
 
@@ -39,6 +40,36 @@ import java.util.Set;
  * @author Frank Timothy Hardy
  */
 public interface FlatDataFieldDescriptor<T extends FlatDataField<?>> extends FlatDataItemDescriptor<T> {
+
+    /**
+     * The interface for a handler which can handle the various field descriptor type implementations provided by the core
+     * package.
+     *
+     * @author Frank Timothy Hardy.
+     */
+    interface Handler extends FlatDataItemDescriptor.Handler {
+
+        /**
+         * Handle a constant field descriptor.
+         *
+         * @param descriptor the descriptor to be handled by the receiving instance.
+         */
+        void handleConstantFieldDescriptor(ConstantFieldDescriptor descriptor);
+
+        /**
+         * Handle a delimited field descriptor.
+         *
+         * @param descriptor the descriptor to be handled by the receiving instance.
+         */
+        void handleDelimitedFieldDescriptor(DelimitedFieldDescriptor descriptor);
+
+        /**
+         * Handle a fixed size field descriptor.
+         *
+         * @param descriptor the descriptor to be handled by the receiving instance.
+         */
+        void handleFixedSizeFieldDescriptor(FixedSizeFieldDescriptor descriptor);
+    }
 
     /**
      * Get the default value for the content of a new field instance.

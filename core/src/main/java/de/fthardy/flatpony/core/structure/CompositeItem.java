@@ -25,13 +25,11 @@ package de.fthardy.flatpony.core.structure;
 
 import de.fthardy.flatpony.core.AbstractFlatDataItem;
 import de.fthardy.flatpony.core.FlatDataItem;
-import de.fthardy.flatpony.core.FlatDataItemHandler;
 
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * The implementation of a composite item.
@@ -73,9 +71,9 @@ public final class CompositeItem extends AbstractFlatDataItem<CompositeItemDescr
     }
 
     @Override
-    public void applyHandler(FlatDataItemHandler handler) {
-        if (handler instanceof FlatDataStructureHandler) {
-            ((FlatDataStructureHandler) handler).handleCompositeItem(this);
+    public void applyHandler(FlatDataItem.Handler handler) {
+        if (handler instanceof FlatDataStructure.Handler) {
+            ((FlatDataStructure.Handler) handler).handleCompositeItem(this);
         } else {
             handler.handleFlatDataItem(this);
         }

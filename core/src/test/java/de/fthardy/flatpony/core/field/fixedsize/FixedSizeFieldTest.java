@@ -1,10 +1,8 @@
 package de.fthardy.flatpony.core.field.fixedsize;
 
-import de.fthardy.flatpony.core.FlatDataItemHandler;
+import de.fthardy.flatpony.core.FlatDataItem;
 import de.fthardy.flatpony.core.FlatDataWriteException;
-import de.fthardy.flatpony.core.field.DelimitedField;
-import de.fthardy.flatpony.core.field.DelimitedFieldDescriptor;
-import de.fthardy.flatpony.core.field.FlatDataFieldHandler;
+import de.fthardy.flatpony.core.field.FlatDataField;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -55,8 +53,8 @@ class FixedSizeFieldTest {
     void Calls_correct_handler_method() {
         FixedSizeField field = new FixedSizeFieldDescriptor("Foo", 10).createItem();
 
-        FlatDataItemHandler handlerMock = mock(FlatDataItemHandler.class);
-        FlatDataFieldHandler fieldHandlerMock = mock(FlatDataFieldHandler.class);
+        FlatDataItem.Handler handlerMock = mock(FlatDataItem.Handler.class);
+        FlatDataField.Handler fieldHandlerMock = mock(FlatDataField.Handler.class);
 
         field.applyHandler(handlerMock);
         field.applyHandler(fieldHandlerMock);

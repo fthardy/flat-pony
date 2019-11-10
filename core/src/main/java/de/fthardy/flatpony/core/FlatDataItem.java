@@ -41,6 +41,27 @@ import java.io.Writer;
 public interface FlatDataItem<T extends FlatDataItemDescriptor<?>> {
 
     /**
+     * The interface definition for a handler which handles item instances.
+     * <p>
+     * This handler interface is part of the visitor pattern and takes the role of the visitor. The items are the visitable
+     * elements and provide for this purpose the method
+     * {@link FlatDataItem#applyHandler(Handler)} which allows to apply an implementation instance of this
+     * interface type.
+     * </p>
+     *
+     * @author Frank Timothy Hardy
+     */
+    interface Handler {
+
+        /**
+         * Handle a flat data item.
+         *
+         * @param item the item to be handled by the receiving instance.
+         */
+        void handleFlatDataItem(FlatDataItem<?> item);
+    }
+
+    /**
      * Get the descriptor of the flat data item.
      *
      * @return the descriptor which produced the receiving flat data item instance.
@@ -67,5 +88,5 @@ public interface FlatDataItem<T extends FlatDataItemDescriptor<?>> {
      *
      * @param handler the handler to be applied.
      */
-    void applyHandler(FlatDataItemHandler handler);
+    void applyHandler(Handler handler);
 }

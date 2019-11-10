@@ -23,7 +23,7 @@ SOFTWARE.
  */
 package de.fthardy.flatpony.core.field;
 
-import de.fthardy.flatpony.core.FlatDataItemDescriptorHandler;
+import de.fthardy.flatpony.core.FlatDataItemDescriptor;
 import de.fthardy.flatpony.core.FlatDataReadException;
 import de.fthardy.flatpony.core.field.constraint.ValueConstraint;
 import de.fthardy.flatpony.core.field.constraint.ValueConstraintViolationException;
@@ -31,7 +31,6 @@ import de.fthardy.flatpony.core.field.constraint.ValueConstraintViolationExcepti
 import java.io.IOException;
 import java.io.Reader;
 import java.util.Collections;
-import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -123,9 +122,9 @@ public final class DelimitedFieldDescriptor extends AbstractFlatDataFieldDescrip
     }
 
     @Override
-    public void applyHandler(FlatDataItemDescriptorHandler handler) {
-        if (handler instanceof FlatDataFieldDescriptorHandler) {
-            ((FlatDataFieldDescriptorHandler) handler).handleDelimitedFieldDescriptor(this);
+    public void applyHandler(FlatDataItemDescriptor.Handler handler) {
+        if (handler instanceof FlatDataFieldDescriptor.Handler) {
+            ((FlatDataFieldDescriptor.Handler) handler).handleDelimitedFieldDescriptor(this);
         } else {
             handler.handleFlatDataItemDescriptor(this);
         }

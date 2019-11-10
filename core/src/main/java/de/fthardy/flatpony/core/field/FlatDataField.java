@@ -24,6 +24,7 @@ SOFTWARE.
 package de.fthardy.flatpony.core.field;
 
 import de.fthardy.flatpony.core.FlatDataItem;
+import de.fthardy.flatpony.core.field.fixedsize.FixedSizeField;
 
 /**
  * The interface definition for a flat data field.
@@ -37,6 +38,35 @@ import de.fthardy.flatpony.core.FlatDataItem;
  * @author Frank Timothy Hardy
  */
 public interface FlatDataField<T extends FlatDataFieldDescriptor<?>> extends FlatDataItem<T> {
+
+    /**
+     * The interface for a handler which can handle the various field  type implementations provided by the core package.
+     *
+     * @author Frank Timothy Hardy.
+     */
+    interface Handler extends FlatDataItem.Handler {
+
+        /**
+         * Handle a constant field descriptor.
+         *
+         * @param item the item to be handled by the receiving instance.
+         */
+        void handleConstantField(ConstantField item);
+
+        /**
+         * Handle a delimited field descriptor.
+         *
+         * @param item the item to be handled by the receiving instance.
+         */
+        void handleDelimitedField(DelimitedField item);
+
+        /**
+         * Handle a fixed size field descriptor.
+         *
+         * @param item the item to be handled by the receiving instance.
+         */
+        void handleFixedSizeField(FixedSizeField item);
+    }
 
     /**
      * @return the length of the field.

@@ -24,13 +24,11 @@ SOFTWARE.
 package de.fthardy.flatpony.core.field;
 
 import de.fthardy.flatpony.core.AbstractFlatDataItem;
-import de.fthardy.flatpony.core.FlatDataItemHandler;
 import de.fthardy.flatpony.core.FlatDataWriteException;
 
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * The implementation of a delimited field.
@@ -86,9 +84,9 @@ public final class DelimitedField extends AbstractFlatDataItem<DelimitedFieldDes
     }
 
     @Override
-    public void applyHandler(FlatDataItemHandler handler) {
-        if (handler instanceof FlatDataFieldHandler) {
-            ((FlatDataFieldHandler) handler).handleDelimitedField(this);
+    public void applyHandler(de.fthardy.flatpony.core.FlatDataItem.Handler handler) {
+        if (handler instanceof FlatDataField.Handler) {
+            ((FlatDataField.Handler) handler).handleDelimitedField(this);
         } else {
             handler.handleFlatDataItem(this);
         }

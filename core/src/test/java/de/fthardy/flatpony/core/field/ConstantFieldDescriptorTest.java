@@ -1,13 +1,10 @@
 package de.fthardy.flatpony.core.field;
 
-import de.fthardy.flatpony.core.FlatDataItemDescriptorHandler;
-import de.fthardy.flatpony.core.FlatDataItemHandler;
+import de.fthardy.flatpony.core.FlatDataItemDescriptor;
 import de.fthardy.flatpony.core.FlatDataReadException;
 import de.fthardy.flatpony.core.field.constraint.ValueCannotBeEmptyConstraint;
 import de.fthardy.flatpony.core.field.constraint.ValueConstraintViolationException;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -104,8 +101,8 @@ class ConstantFieldDescriptorTest {
     void Calls_correct_handler_method() {
         ConstantFieldDescriptor descriptor = new ConstantFieldDescriptor("Test", "Foo");
 
-        FlatDataItemDescriptorHandler handlerMock = mock(FlatDataItemDescriptorHandler.class);
-        FlatDataFieldDescriptorHandler fieldDescriptorHandlerMock = mock(FlatDataFieldDescriptorHandler.class);
+        FlatDataItemDescriptor.Handler handlerMock = mock(FlatDataItemDescriptor.Handler.class);
+        FlatDataFieldDescriptor.Handler fieldDescriptorHandlerMock = mock(FlatDataFieldDescriptor.Handler.class);
 
         descriptor.applyHandler(handlerMock);
         descriptor.applyHandler(fieldDescriptorHandlerMock);

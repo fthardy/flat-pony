@@ -1,9 +1,8 @@
 package de.fthardy.flatpony.core.field.fixedsize;
 
-import de.fthardy.flatpony.core.FlatDataItemDescriptorHandler;
+import de.fthardy.flatpony.core.FlatDataItemDescriptor;
 import de.fthardy.flatpony.core.FlatDataReadException;
-import de.fthardy.flatpony.core.field.DelimitedFieldDescriptor;
-import de.fthardy.flatpony.core.field.FlatDataFieldDescriptorHandler;
+import de.fthardy.flatpony.core.field.FlatDataFieldDescriptor;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -66,8 +65,8 @@ class FixedSizeFieldDescriptorTest {
     void Calls_correct_handler_method() {
         FixedSizeFieldDescriptor descriptor = new FixedSizeFieldDescriptor("Foo", 10);
 
-        FlatDataItemDescriptorHandler handlerMock = mock(FlatDataItemDescriptorHandler.class);
-        FlatDataFieldDescriptorHandler fieldDescriptorHandlerMock = mock(FlatDataFieldDescriptorHandler.class);
+        FlatDataItemDescriptor.Handler handlerMock = mock(FlatDataItemDescriptor.Handler.class);
+        FlatDataFieldDescriptor.Handler fieldDescriptorHandlerMock = mock(FlatDataFieldDescriptor.Handler.class);
 
         descriptor.applyHandler(handlerMock);
         descriptor.applyHandler(fieldDescriptorHandlerMock);

@@ -1,13 +1,9 @@
 package de.fthardy.flatpony.core.structure;
 
-import de.fthardy.flatpony.core.FlatDataItemHandler;
+import de.fthardy.flatpony.core.FlatDataItem;
 import de.fthardy.flatpony.core.field.ConstantFieldDescriptor;
-import de.fthardy.flatpony.core.field.DelimitedField;
-import de.fthardy.flatpony.core.field.DelimitedFieldDescriptor;
-import de.fthardy.flatpony.core.field.FlatDataFieldHandler;
 import de.fthardy.flatpony.core.field.fixedsize.FixedSizeFieldDescriptor;
 import org.junit.jupiter.api.Test;
-import org.mockito.internal.matchers.Null;
 
 import java.io.Reader;
 import java.io.StringReader;
@@ -16,7 +12,6 @@ import java.util.Arrays;
 import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class CompositeItemTest {
@@ -62,8 +57,8 @@ class CompositeItemTest {
         CompositeItem item = new CompositeItemDescriptor("Record",
                 Collections.singletonList(new ConstantFieldDescriptor("ID", "Foo"))).createItem();
 
-        FlatDataItemHandler handlerMock = mock(FlatDataItemHandler.class);
-        FlatDataStructureHandler structureHandlerMock = mock(FlatDataStructureHandler.class);
+        FlatDataItem.Handler handlerMock = mock(FlatDataItem.Handler.class);
+        FlatDataStructure.Handler structureHandlerMock = mock(FlatDataStructure.Handler.class);
 
         item.applyHandler(handlerMock);
         item.applyHandler(structureHandlerMock);

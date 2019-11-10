@@ -1,10 +1,8 @@
 package de.fthardy.flatpony.core.field;
 
-import de.fthardy.flatpony.core.FlatDataItemHandler;
+import de.fthardy.flatpony.core.FlatDataItem;
 import de.fthardy.flatpony.core.FlatDataWriteException;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -61,8 +59,8 @@ class ConstantFieldTest {
     void Calls_correct_handler_method() {
         ConstantField field = new ConstantFieldDescriptor("Test", "Foo").createItem();
 
-        FlatDataItemHandler handlerMock = mock(FlatDataItemHandler.class);
-        FlatDataFieldHandler fieldHandlerMock = mock(FlatDataFieldHandler.class);
+        FlatDataItem.Handler handlerMock = mock(FlatDataItem.Handler.class);
+        FlatDataField.Handler fieldHandlerMock = mock(FlatDataField.Handler.class);
 
         field.applyHandler(handlerMock);
         field.applyHandler(fieldHandlerMock);

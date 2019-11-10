@@ -23,7 +23,7 @@ SOFTWARE.
  */
 package de.fthardy.flatpony.core.field;
 
-import de.fthardy.flatpony.core.FlatDataItemDescriptorHandler;
+import de.fthardy.flatpony.core.FlatDataItemDescriptor;
 import de.fthardy.flatpony.core.FlatDataReadException;
 import de.fthardy.flatpony.core.field.constraint.ValueCannotBeEmptyConstraint;
 
@@ -91,9 +91,9 @@ public final class ConstantFieldDescriptor extends AbstractFlatDataFieldDescript
     }
 
     @Override
-    public void applyHandler(FlatDataItemDescriptorHandler handler) {
-        if (handler instanceof FlatDataFieldDescriptorHandler) {
-            ((FlatDataFieldDescriptorHandler) handler).handleConstantFieldDescriptor(this);
+    public void applyHandler(FlatDataItemDescriptor.Handler handler) {
+        if (handler instanceof FlatDataFieldDescriptor.Handler) {
+            ((FlatDataFieldDescriptor.Handler) handler).handleConstantFieldDescriptor(this);
         } else {
             handler.handleFlatDataItemDescriptor(this);
         }

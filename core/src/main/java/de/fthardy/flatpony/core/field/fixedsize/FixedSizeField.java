@@ -24,10 +24,8 @@ SOFTWARE.
 package de.fthardy.flatpony.core.field.fixedsize;
 
 import de.fthardy.flatpony.core.AbstractFlatDataItem;
-import de.fthardy.flatpony.core.FlatDataItemHandler;
 import de.fthardy.flatpony.core.FlatDataWriteException;
 import de.fthardy.flatpony.core.field.FlatDataField;
-import de.fthardy.flatpony.core.field.FlatDataFieldHandler;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -81,9 +79,9 @@ public final class FixedSizeField extends AbstractFlatDataItem<FixedSizeFieldDes
     }
 
     @Override
-    public void applyHandler(FlatDataItemHandler handler) {
-        if (handler instanceof FlatDataFieldHandler) {
-            ((FlatDataFieldHandler) handler).handleFixedSizeField(this);
+    public void applyHandler(de.fthardy.flatpony.core.FlatDataItem.Handler handler) {
+        if (handler instanceof FlatDataField.Handler) {
+            ((FlatDataField.Handler) handler).handleFixedSizeField(this);
         } else {
             handler.handleFlatDataItem(this);
         }
