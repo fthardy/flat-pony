@@ -49,6 +49,13 @@ public interface FlatDataStructure<T extends FlatDataStructureDescriptor<?>> ext
          * @param item the item to be handled by the receiving instance.
          */
         void handleCompositeItem(CompositeItem item);
+
+        /**
+         * Handle a delimited item.
+         *
+         * @param item the item to be handled by the receiving instance.
+         */
+        void handleDelimitedItem(DelimitedItem item);
     }
 
     /**
