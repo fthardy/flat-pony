@@ -62,4 +62,11 @@ public interface FlatDataItemDescriptor<T extends FlatDataItem<?>> {
      * @return a new item instance with the read data.
      */
     T readItemFrom(Reader source);
+
+    /**
+     * Apply a handler to the receiving descriptor.
+     *
+     * @param handler the handler instance.
+     */
+    void applyHandler(FlatDataItemDescriptorHandler handler);
 }

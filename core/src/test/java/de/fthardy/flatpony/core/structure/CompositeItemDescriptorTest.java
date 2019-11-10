@@ -1,6 +1,9 @@
 package de.fthardy.flatpony.core.structure;
 
+import de.fthardy.flatpony.core.FlatDataItemDescriptorHandler;
 import de.fthardy.flatpony.core.field.ConstantFieldDescriptor;
+import de.fthardy.flatpony.core.field.DelimitedFieldDescriptor;
+import de.fthardy.flatpony.core.field.FlatDataFieldDescriptorHandler;
 import de.fthardy.flatpony.core.field.fixedsize.FixedSizeFieldDescriptor;
 import org.junit.jupiter.api.Test;
 
@@ -11,6 +14,7 @@ import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class CompositeItemDescriptorTest {
 
@@ -51,5 +55,22 @@ class CompositeItemDescriptorTest {
 
         CompositeItem compositeItem = descriptor.createItem();
         assertThat(compositeItem.getLength()).isEqualTo(17);
+    }
+
+    @Test
+    void Calls_correct_handler_method() {
+        CompositeItemDescriptor descriptor = new CompositeItemDescriptor(
+                "Record", Collections.singletonList(new ConstantFieldDescriptor("ID", "Foo")));
+
+        FlatDataItemDescriptorHandler handlerMock = mock(FlatDataItemDescriptorHandler.class);
+        FlatDataStructureDescriptorHandler descriptorHandlerMock = mock(FlatDataStructureDescriptorHandler.class);
+
+        descriptor.applyHandler(handlerMock);
+        descriptor.applyHandler(descriptorHandlerMock);
+
+        verify(handlerMock).handleFlatDataItemDescriptor(descriptor);
+        verifyNoMoreInteractions(handlerMock);
+        verify(descriptorHandlerMock).handleCompositeItemDescriptor(descriptor);
+        verifyNoMoreInteractions(descriptorHandlerMock);
     }
 }

@@ -25,6 +25,7 @@ package de.fthardy.flatpony.core.structure;
 
 import de.fthardy.flatpony.core.AbstractFlatDataItemDescriptor;
 import de.fthardy.flatpony.core.FlatDataItemDescriptor;
+import de.fthardy.flatpony.core.FlatDataItemDescriptorHandler;
 
 import java.io.Reader;
 import java.util.*;
@@ -72,5 +73,14 @@ public final class CompositeItemDescriptor extends AbstractFlatDataItemDescripto
     @Override
     public List<FlatDataItemDescriptor<?>> getChildDescriptors() {
         return this.descriptors;
+    }
+
+    @Override
+    public void applyHandler(FlatDataItemDescriptorHandler handler) {
+        if (handler instanceof FlatDataStructureDescriptorHandler) {
+            ((FlatDataStructureDescriptorHandler) handler).handleCompositeItemDescriptor(this);
+        } else {
+            handler.handleFlatDataItemDescriptor(this);
+        }
     }
 }

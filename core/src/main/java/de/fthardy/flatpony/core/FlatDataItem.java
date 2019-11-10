@@ -61,4 +61,11 @@ public interface FlatDataItem<T extends FlatDataItemDescriptor<?>> {
      *               instance to it.
      */
     void writeTo(Writer target);
+
+    /**
+     * Apply a handler to the receiving item instance.
+     *
+     * @param handler the handler to be applied.
+     */
+    void applyHandler(FlatDataItemHandler handler);
 }

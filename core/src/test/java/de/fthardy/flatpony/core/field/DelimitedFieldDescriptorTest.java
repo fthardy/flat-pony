@@ -1,5 +1,6 @@
 package de.fthardy.flatpony.core.field;
 
+import de.fthardy.flatpony.core.FlatDataItemDescriptorHandler;
 import de.fthardy.flatpony.core.FlatDataReadException;
 import de.fthardy.flatpony.core.field.constraint.DefaultValueConstraint;
 import de.fthardy.flatpony.core.field.constraint.ValueConstraint;
@@ -106,5 +107,21 @@ class DelimitedFieldDescriptorTest {
         assertThat(exception.getFieldName()).isEqualTo("Field");
         assertThat(exception.getValue()).isEqualTo("Foo");
         assertThat(exception.getConstraintNames()).containsExactly("You Foo!");
+    }
+
+    @Test
+    void Calls_correct_handler_method() {
+        DelimitedFieldDescriptor descriptor = new DelimitedFieldDescriptor("Foo");
+
+        FlatDataItemDescriptorHandler handlerMock = mock(FlatDataItemDescriptorHandler.class);
+        FlatDataFieldDescriptorHandler fieldDescriptorHandlerMock = mock(FlatDataFieldDescriptorHandler.class);
+
+        descriptor.applyHandler(handlerMock);
+        descriptor.applyHandler(fieldDescriptorHandlerMock);
+
+        verify(handlerMock).handleFlatDataItemDescriptor(descriptor);
+        verifyNoMoreInteractions(handlerMock);
+        verify(fieldDescriptorHandlerMock).handleDelimitedFieldDescriptor(descriptor);
+        verifyNoMoreInteractions(fieldDescriptorHandlerMock);
     }
 }

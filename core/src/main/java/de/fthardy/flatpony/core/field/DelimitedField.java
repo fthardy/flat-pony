@@ -24,6 +24,7 @@ SOFTWARE.
 package de.fthardy.flatpony.core.field;
 
 import de.fthardy.flatpony.core.AbstractFlatDataItem;
+import de.fthardy.flatpony.core.FlatDataItemHandler;
 import de.fthardy.flatpony.core.FlatDataWriteException;
 
 import java.io.IOException;
@@ -83,4 +84,14 @@ public final class DelimitedField extends AbstractFlatDataItem<DelimitedFieldDes
         this.value = this.getDescriptor().checkForConstraintViolation(
                 Objects.requireNonNull(value, "Undefined field value!"));
     }
+
+    @Override
+    public void applyHandler(FlatDataItemHandler handler) {
+        if (handler instanceof FlatDataFieldHandler) {
+            ((FlatDataFieldHandler) handler).handleDelimitedField(this);
+        } else {
+            handler.handleFlatDataItem(this);
+        }
+    }
+
 }
