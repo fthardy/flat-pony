@@ -38,7 +38,7 @@ class CompositeItemDescriptorTest {
 
         Reader reader = new StringReader("FOOTest1123456789");
 
-        CompositeItem compositeItem = descriptor.readItemFrom(reader);
+        CompositeItemEntity compositeItem = descriptor.readItemFrom(reader);
         assertThat(compositeItem).isNotNull();
     }
 
@@ -51,7 +51,7 @@ class CompositeItemDescriptorTest {
         CompositeItemDescriptor descriptor = new CompositeItemDescriptor(
                 "Record", Arrays.asList(constantFieldDescriptor, field1Descriptor, field2Descriptor));
 
-        CompositeItem compositeItem = descriptor.createItem();
+        CompositeItemEntity compositeItem = descriptor.createItem();
         assertThat(compositeItem.getLength()).isEqualTo(17);
     }
 

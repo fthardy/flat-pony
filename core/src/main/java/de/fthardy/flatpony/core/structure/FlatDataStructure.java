@@ -23,43 +23,46 @@ SOFTWARE.
  */
 package de.fthardy.flatpony.core.structure;
 
-import de.fthardy.flatpony.core.FlatDataItem;
+import de.fthardy.flatpony.core.FlatDataItemEntity;
 
 import java.util.List;
 
 /**
  * The interface for a flat data structure.
+ * <p>
+ * A flat data structure is a flat data item entity which represents a particular data structure.
+ * </p>
  *
  * @param <T> the type of the structure descriptor which creates the structure type.
  *
  * @author Frank Timothy Hardy
  */
-public interface FlatDataStructure<T extends FlatDataStructureDescriptor<?>> extends FlatDataItem<T> {
+public interface FlatDataStructure<T extends FlatDataStructureDescriptor<?>> extends FlatDataItemEntity<T> {
 
     /**
      * The interface for a handler which can handle the various structure type implementations provided by the core package.
      *
      * @author Frank Timothy Hardy.
      */
-    interface Handler extends FlatDataItem.Handler {
+    interface Handler extends FlatDataItemEntity.Handler {
 
         /**
          * Handle a composite item.
          *
          * @param item the item to be handled by the receiving instance.
          */
-        void handleCompositeItem(CompositeItem item);
+        void handleCompositeItem(CompositeItemEntity item);
 
         /**
          * Handle a delimited item.
          *
          * @param item the item to be handled by the receiving instance.
          */
-        void handleDelimitedItem(DelimitedItem item);
+        void handleDelimitedItem(DelimitedItemEntity item);
     }
 
     /**
      * @return the list of child items.
      */
-    List<FlatDataItem<?>> getChildItems();
+    List<FlatDataItemEntity<?>> getChildItems();
 }

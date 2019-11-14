@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
-import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.assertj.core.api.Assertions.*;
@@ -35,7 +34,7 @@ class DelimitedItemDescriptorTest {
     void Normal_read_with_delimiter() {
         Reader reader = new StringReader("Test\n123");
 
-        DelimitedItem item = new DelimitedItemDescriptor(
+        DelimitedItemEntity item = new DelimitedItemDescriptor(
                 "Foo", new ConstantFieldDescriptor("ID", "Test")).readItemFrom(reader);
         assertNotNull(item);
     }
@@ -44,7 +43,7 @@ class DelimitedItemDescriptorTest {
     void Read_without_delimiter_but_end_of_stream() {
         Reader reader = new StringReader("Test");
 
-        DelimitedItem item = new DelimitedItemDescriptor(
+        DelimitedItemEntity item = new DelimitedItemDescriptor(
                 "Foo", new ConstantFieldDescriptor("ID", "Test")).readItemFrom(reader);
         assertNotNull(item);
     }

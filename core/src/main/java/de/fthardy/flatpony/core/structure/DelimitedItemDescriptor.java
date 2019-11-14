@@ -24,7 +24,7 @@ SOFTWARE.
 package de.fthardy.flatpony.core.structure;
 
 import de.fthardy.flatpony.core.AbstractFlatDataItemDescriptor;
-import de.fthardy.flatpony.core.FlatDataItem;
+import de.fthardy.flatpony.core.FlatDataItemEntity;
 import de.fthardy.flatpony.core.FlatDataItemDescriptor;
 import de.fthardy.flatpony.core.FlatDataReadException;
 
@@ -42,8 +42,8 @@ import java.util.Objects;
  *
  * @author Frank Timothy Hardy
  */
-public final class DelimitedItemDescriptor extends AbstractFlatDataItemDescriptor<DelimitedItem>
-        implements FlatDataStructureDescriptor<DelimitedItem> {
+public final class DelimitedItemDescriptor extends AbstractFlatDataItemDescriptor<DelimitedItemEntity>
+        implements FlatDataStructureDescriptor<DelimitedItemEntity> {
 
     /** The definition of the default delimiter character. */
     public static final char DEFAULT_DELIMITER = '\n';
@@ -83,21 +83,21 @@ public final class DelimitedItemDescriptor extends AbstractFlatDataItemDescripto
     }
 
     @Override
-    public DelimitedItem createItem() {
-        return new DelimitedItem(this, itemDescriptor.createItem());
+    public DelimitedItemEntity createItem() {
+        return new DelimitedItemEntity(this, itemDescriptor.createItem());
     }
 
     @Override
-    public DelimitedItem readItemFrom(Reader source) {
+    public DelimitedItemEntity readItemFrom(Reader source) {
         try {
-            FlatDataItem<?> item = itemDescriptor.readItemFrom(source);
+            FlatDataItemEntity<?> item = itemDescriptor.readItemFrom(source);
 
             int i = source.read();
             if (i != -1 && i != delimiter) {
                 throw new FlatDataReadException(MSG_No_delimiter_found(this.getName(), this.itemDescriptor.getName()));
             }
 
-            return new DelimitedItem(this, item);
+            return new DelimitedItemEntity(this, item);
         } catch (IOException e) {
             throw new FlatDataReadException(MSG_Read_failed(this.getName()), e);
         }

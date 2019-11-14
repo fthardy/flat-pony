@@ -31,8 +31,9 @@ import java.util.Set;
 /**
  * The interface for a flat data field descriptor.
  * <p>
- * A flat data field is the most atomic part of flat data. Any other type of item which is not a field is or represents
- * only structure.
+ * A flat data field is an item that represents some specific data and is for fixed size field and delimited formats the
+ * most atomic part. Any other type of item which is not a field is structure. Structure descriptors are represented by
+ * an implementation instance of a {@link de.fthardy.flatpony.core.structure.FlatDataStructureDescriptor}.
  * </p>
  *
  * @param <T> the type of the field created by the field descriptor.

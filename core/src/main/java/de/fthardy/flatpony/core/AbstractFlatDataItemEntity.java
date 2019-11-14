@@ -32,7 +32,7 @@ import java.util.Objects;
  *
  * @author Frank Timothy Hardy
  */
-public abstract class AbstractFlatDataItem<T extends FlatDataItemDescriptor<?>> implements FlatDataItem<T> {
+public abstract class AbstractFlatDataItemEntity<T extends FlatDataItemDescriptor<?>> implements FlatDataItemEntity<T> {
 
     private final T descriptor;
 
@@ -41,7 +41,7 @@ public abstract class AbstractFlatDataItem<T extends FlatDataItemDescriptor<?>> 
      *
      * @param descriptor the descriptor which created this item.
      */
-    protected AbstractFlatDataItem(T descriptor) {
+    protected AbstractFlatDataItemEntity(T descriptor) {
         this.descriptor = Objects.requireNonNull(descriptor, "Undefined descriptor!");
     }
 

@@ -26,27 +26,32 @@ package de.fthardy.flatpony.core;
 import java.io.Writer;
 
 /**
- * Represents the model for flat data which can be read from or written to a character stream.
+ * The interface for a flat data item entity.
  * <p>
- * A flat data item represents and encapsulates a particular data section of a character stream (flat data stream). Each
- * item implementation has a pendant descriptor implementation. Both implementations are tied together and form a unit.
- * Each item has a reference to the descriptor which created it. By using {@link #writeTo(Writer)} the data represented
- * by an item instance can be written to a given character stream.
+ * A flat data item entity represents and encapsulates a particular data section of a character (flat data) stream. Each
+ * item entity implementation has its corresponding descriptor implementation. Both implementations are tightly coupled
+ * and represent the item as a unit. In other words: a (flat data) item is only a conceptual term which is represented
+ * by a pair of a descriptor and entity implementation.
+ * </p>
+ * <p>
+ * While an item entity is representing concrete data it provides access to the descriptor which created it and its
+ * length in characters. Concrete sub types may allow to change the data of the entity and will provide a corresponding
+ * API for this purpose. However, every item entity can be written to a given character stream by calling
+ * {@link #writeTo(Writer)}.
  * </p>
  *
  * @param <T> the type of the descriptor.
  *
  * @author Frank Timothy Hardy
  */
-public interface FlatDataItem<T extends FlatDataItemDescriptor<?>> {
+public interface FlatDataItemEntity<T extends FlatDataItemDescriptor<?>> {
 
     /**
      * The interface definition for a handler which handles item instances.
      * <p>
-     * This handler interface is part of the visitor pattern and takes the role of the visitor. The items are the visitable
-     * elements and provide for this purpose the method
-     * {@link FlatDataItem#applyHandler(Handler)} which allows to apply an implementation instance of this
-     * interface type.
+     * This handler interface is part of the visitor pattern and takes the role of the visitor. The items are the
+     * visitable elements and provide for this purpose the method {@link FlatDataItemEntity#applyHandler(Handler)} which
+     * allows to apply an implementation instance of this interface type.
      * </p>
      *
      * @author Frank Timothy Hardy
@@ -58,7 +63,7 @@ public interface FlatDataItem<T extends FlatDataItemDescriptor<?>> {
          *
          * @param item the item to be handled by the receiving instance.
          */
-        void handleFlatDataItem(FlatDataItem<?> item);
+        void handleFlatDataItem(FlatDataItemEntity<?> item);
     }
 
     /**

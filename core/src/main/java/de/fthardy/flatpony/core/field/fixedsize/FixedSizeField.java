@@ -23,7 +23,8 @@ SOFTWARE.
  */
 package de.fthardy.flatpony.core.field.fixedsize;
 
-import de.fthardy.flatpony.core.AbstractFlatDataItem;
+import de.fthardy.flatpony.core.AbstractFlatDataItemEntity;
+import de.fthardy.flatpony.core.FlatDataItemEntity;
 import de.fthardy.flatpony.core.FlatDataWriteException;
 import de.fthardy.flatpony.core.field.FlatDataField;
 
@@ -35,7 +36,7 @@ import java.io.Writer;
  *
  * @author Frank Timothy Hardy
  */
-public final class FixedSizeField extends AbstractFlatDataItem<FixedSizeFieldDescriptor>
+public final class FixedSizeField extends AbstractFlatDataItemEntity<FixedSizeFieldDescriptor>
         implements FlatDataField<FixedSizeFieldDescriptor> {
 
     static String MSG_Write_failed(String fieldName) {
@@ -79,7 +80,7 @@ public final class FixedSizeField extends AbstractFlatDataItem<FixedSizeFieldDes
     }
 
     @Override
-    public void applyHandler(de.fthardy.flatpony.core.FlatDataItem.Handler handler) {
+    public void applyHandler(FlatDataItemEntity.Handler handler) {
         if (handler instanceof FlatDataField.Handler) {
             ((FlatDataField.Handler) handler).handleFixedSizeField(this);
         } else {

@@ -32,7 +32,7 @@ import java.util.Objects;
  *
  * @author Frank Timothy Hardy
  */
-public abstract class AbstractFlatDataItemDescriptor<T extends FlatDataItem<?>> implements FlatDataItemDescriptor<T> {
+public abstract class AbstractFlatDataItemDescriptor<T extends FlatDataItemEntity<?>> implements FlatDataItemDescriptor<T> {
 
     private final String name;
 

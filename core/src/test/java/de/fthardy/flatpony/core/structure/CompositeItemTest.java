@@ -1,6 +1,6 @@
 package de.fthardy.flatpony.core.structure;
 
-import de.fthardy.flatpony.core.FlatDataItem;
+import de.fthardy.flatpony.core.FlatDataItemEntity;
 import de.fthardy.flatpony.core.field.ConstantFieldDescriptor;
 import de.fthardy.flatpony.core.field.fixedsize.FixedSizeFieldDescriptor;
 import org.junit.jupiter.api.Test;
@@ -27,7 +27,7 @@ class CompositeItemTest {
 
         Reader reader = new StringReader("FOOTest1123456789");
 
-        CompositeItem compositeItem = descriptor.readItemFrom(reader);
+        CompositeItemEntity compositeItem = descriptor.readItemFrom(reader);
         assertThat(compositeItem.getLength()).isEqualTo(17);
     }
 
@@ -44,7 +44,7 @@ class CompositeItemTest {
 
         Reader reader = new StringReader(data);
 
-        CompositeItem compositeItem = descriptor.readItemFrom(reader);
+        CompositeItemEntity compositeItem = descriptor.readItemFrom(reader);
 
         StringWriter writer = new StringWriter();
         compositeItem.writeTo(writer);
@@ -54,10 +54,10 @@ class CompositeItemTest {
 
     @Test
     void Calls_correct_handler_method() {
-        CompositeItem item = new CompositeItemDescriptor("Record",
+        CompositeItemEntity item = new CompositeItemDescriptor("Record",
                 Collections.singletonList(new ConstantFieldDescriptor("ID", "Foo"))).createItem();
 
-        FlatDataItem.Handler handlerMock = mock(FlatDataItem.Handler.class);
+        FlatDataItemEntity.Handler handlerMock = mock(FlatDataItemEntity.Handler.class);
         FlatDataStructure.Handler structureHandlerMock = mock(FlatDataStructure.Handler.class);
 
         item.applyHandler(handlerMock);

@@ -26,19 +26,25 @@ package de.fthardy.flatpony.core;
 import java.io.Reader;
 
 /**
- * Represents a descriptor of a flat data item.
+ * The interface for a flat data item descriptor.
  * <p>
- * A flat data item descriptor describes a particular data section of a character stream (flat data stream). Each
- * descriptor implementation has a pendant item implementation. Both implementations are tied together and form a unit.
- * The descriptor serves as a factory for item instances. With {@link #createItem()} new item instances can be created
- * or with {@link #readItemFrom(Reader)} an item can be created by reading flat data from a given character stream.
+ * A flat data item descriptor describes a particular data section of a character (flat data) stream. Each descriptor
+ * implementation has a corresponding item entity implementation. Both implementations are tightly coupled and represent
+ * the item as a unit. In other words: a (flat data) item is only a conceptual term which is represented by a pair of a
+ * descriptor and entity implementation.
+ * </p>
+ * <p>
+ * The descriptor serves as a factory for creating new instances of the entity. A descriptor can be used to create as
+ * many entities as desired. Each of the entity instances has a reference to the descriptor instance that created it.
+ * There are two ways to create an entity. Either create a new entity instance by calling {@link #createItem()} or by
+ * reading from a given character stream by calling {@link #readItemFrom(Reader)}.
  * </p>
  *
  * @param <T> the type of the item produced by the descriptor.
  *
  * @author Frank Timothy Hardy
  */
-public interface FlatDataItemDescriptor<T extends FlatDataItem<?>> {
+public interface FlatDataItemDescriptor<T extends FlatDataItemEntity<?>> {
 
     /**
      * The interface definition for a handler which handles descriptor instances.

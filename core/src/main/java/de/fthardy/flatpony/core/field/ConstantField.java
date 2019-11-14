@@ -23,7 +23,8 @@ SOFTWARE.
  */
 package de.fthardy.flatpony.core.field;
 
-import de.fthardy.flatpony.core.AbstractFlatDataItem;
+import de.fthardy.flatpony.core.AbstractFlatDataItemEntity;
+import de.fthardy.flatpony.core.FlatDataItemEntity;
 import de.fthardy.flatpony.core.FlatDataWriteException;
 
 import java.io.IOException;
@@ -34,7 +35,7 @@ import java.io.Writer;
  *
  * @author Frank Timothy Hardy
  */
-public final class ConstantField extends AbstractFlatDataItem<ConstantFieldDescriptor>
+public final class ConstantField extends AbstractFlatDataItemEntity<ConstantFieldDescriptor>
         implements FlatDataField<ConstantFieldDescriptor> {
 
     static String MSG_Write_failed(String fieldName) {
@@ -75,7 +76,7 @@ public final class ConstantField extends AbstractFlatDataItem<ConstantFieldDescr
     }
 
     @Override
-    public void applyHandler(de.fthardy.flatpony.core.FlatDataItem.Handler handler) {
+    public void applyHandler(FlatDataItemEntity.Handler handler) {
         if (handler instanceof FlatDataField.Handler) {
             ((FlatDataField.Handler) handler).handleConstantField(this);
         } else {

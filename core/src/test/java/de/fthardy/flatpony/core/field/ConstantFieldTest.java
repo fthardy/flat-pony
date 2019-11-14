@@ -1,6 +1,6 @@
 package de.fthardy.flatpony.core.field;
 
-import de.fthardy.flatpony.core.FlatDataItem;
+import de.fthardy.flatpony.core.FlatDataItemEntity;
 import de.fthardy.flatpony.core.FlatDataWriteException;
 import org.junit.jupiter.api.Test;
 
@@ -59,7 +59,7 @@ class ConstantFieldTest {
     void Calls_correct_handler_method() {
         ConstantField field = new ConstantFieldDescriptor("Test", "Foo").createItem();
 
-        FlatDataItem.Handler handlerMock = mock(FlatDataItem.Handler.class);
+        FlatDataItemEntity.Handler handlerMock = mock(FlatDataItemEntity.Handler.class);
         FlatDataField.Handler fieldHandlerMock = mock(FlatDataField.Handler.class);
 
         field.applyHandler(handlerMock);

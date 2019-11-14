@@ -33,13 +33,14 @@ import java.util.stream.Collectors;
 /**
  * The implementation of a composite item descriptor.
  * <p>
- * A composite represents a structure of (and therefore contains) other item descriptors.
+ * A composite item is a composition of several other flat data items. Because composite items can contain other
+ * composite items it is possible to build complex, nested, tree structures with this kind of item.
  * </p>
  *
  * @author Frank Timothy Hardy
  */
-public final class CompositeItemDescriptor extends AbstractFlatDataItemDescriptor<CompositeItem>
-        implements FlatDataStructureDescriptor<CompositeItem> {
+public final class CompositeItemDescriptor extends AbstractFlatDataItemDescriptor<CompositeItemEntity>
+        implements FlatDataStructureDescriptor<CompositeItemEntity> {
 
     private final List<FlatDataItemDescriptor<?>> descriptors;
 
@@ -58,14 +59,14 @@ public final class CompositeItemDescriptor extends AbstractFlatDataItemDescripto
     }
 
     @Override
-    public CompositeItem createItem() {
-        return new CompositeItem(this,
+    public CompositeItemEntity createItem() {
+        return new CompositeItemEntity(this,
                 descriptors.stream().map(FlatDataItemDescriptor::createItem).collect(Collectors.toList()));
     }
 
     @Override
-    public CompositeItem readItemFrom(Reader source) {
-        return new CompositeItem(this, this.descriptors.stream().map(descriptor ->
+    public CompositeItemEntity readItemFrom(Reader source) {
+        return new CompositeItemEntity(this, this.descriptors.stream().map(descriptor ->
                 descriptor.readItemFrom(source)).collect(Collectors.toList()));
     }
 

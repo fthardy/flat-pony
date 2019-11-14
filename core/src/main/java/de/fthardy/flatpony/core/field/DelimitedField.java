@@ -23,7 +23,8 @@ SOFTWARE.
  */
 package de.fthardy.flatpony.core.field;
 
-import de.fthardy.flatpony.core.AbstractFlatDataItem;
+import de.fthardy.flatpony.core.AbstractFlatDataItemEntity;
+import de.fthardy.flatpony.core.FlatDataItemEntity;
 import de.fthardy.flatpony.core.FlatDataWriteException;
 
 import java.io.IOException;
@@ -38,7 +39,7 @@ import java.util.Objects;
  *
  * @author Frank Timothy Hardy
  */
-public final class DelimitedField extends AbstractFlatDataItem<DelimitedFieldDescriptor>
+public final class DelimitedField extends AbstractFlatDataItemEntity<DelimitedFieldDescriptor>
         implements FlatDataField<DelimitedFieldDescriptor> {
 
     static String MSG_Write_failed(String fieldName) {
@@ -84,7 +85,7 @@ public final class DelimitedField extends AbstractFlatDataItem<DelimitedFieldDes
     }
 
     @Override
-    public void applyHandler(de.fthardy.flatpony.core.FlatDataItem.Handler handler) {
+    public void applyHandler(FlatDataItemEntity.Handler handler) {
         if (handler instanceof FlatDataField.Handler) {
             ((FlatDataField.Handler) handler).handleDelimitedField(this);
         } else {

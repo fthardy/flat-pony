@@ -23,59 +23,69 @@ SOFTWARE.
  */
 package de.fthardy.flatpony.core.structure;
 
-import de.fthardy.flatpony.core.AbstractFlatDataItem;
-import de.fthardy.flatpony.core.FlatDataItem;
+import de.fthardy.flatpony.core.AbstractFlatDataItemEntity;
+import de.fthardy.flatpony.core.FlatDataItemEntity;
+import de.fthardy.flatpony.core.FlatDataWriteException;
 
+import java.io.IOException;
 import java.io.Writer;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 /**
- * The implementation of a composite item.
+ * The implementation of a delimited item entity.
  * <p>
- * A composite item is a composition of several other flat data items.
+ * A delimited item entity represents an item entity which has an extra delimiter at its end.
  * </p>
  *
  * @author Frank Timothy Hardy
  */
-public final class CompositeItem extends AbstractFlatDataItem<CompositeItemDescriptor>
-        implements FlatDataStructure<CompositeItemDescriptor> {
+public final class DelimitedItemEntity extends AbstractFlatDataItemEntity<DelimitedItemDescriptor>
+        implements FlatDataStructure<DelimitedItemDescriptor> {
 
-    private final List<FlatDataItem<?>> items;
+    static String MSG_Write_failed(String itemName) {
+        return String.format("Failed to write delimited item '%s' to target stream!", itemName);
+    }
+
+    private final FlatDataItemEntity<?> item;
 
     /**
-     * Creates a new instance of this composite item.
+     * Creates a new instance of this item.
      *
-     * @param descriptor the descriptor which is creating this item instance.
-     * @param items the list of items which make up this composite item.
+     * @param descriptor the descriptor which is creating this item.
+     * @param item the inner item.
      */
-    CompositeItem(CompositeItemDescriptor descriptor, List<FlatDataItem<?>> items) {
+    DelimitedItemEntity(DelimitedItemDescriptor descriptor, FlatDataItemEntity<?> item) {
         super(descriptor);
-        this.items = Collections.unmodifiableList(new ArrayList<>(items));
+        this.item = item;
     }
 
     @Override
     public int getLength() {
-        return items.stream().mapToInt(FlatDataItem::getLength).sum();
+        return item.getLength();
     }
 
     @Override
     public void writeTo(Writer target) {
-        items.forEach(dataItem -> dataItem.writeTo(target));
+        try {
+            item.writeTo(target);
+            target.write(this.getDescriptor().getDelimiter());
+        } catch (IOException e) {
+            throw new FlatDataWriteException(MSG_Write_failed(this.getDescriptor().getName()), e);
+        }
     }
 
     @Override
-    public List<FlatDataItem<?>> getChildItems() {
-        return this.items;
-    }
-
-    @Override
-    public void applyHandler(FlatDataItem.Handler handler) {
+    public void applyHandler(FlatDataItemEntity.Handler handler) {
         if (handler instanceof FlatDataStructure.Handler) {
-            ((FlatDataStructure.Handler) handler).handleCompositeItem(this);
+            ((FlatDataStructure.Handler) handler).handleDelimitedItem(this);
         } else {
             handler.handleFlatDataItem(this);
         }
+    }
+
+    @Override
+    public List<FlatDataItemEntity<?>> getChildItems() {
+        return Collections.singletonList(this.item);
     }
 }

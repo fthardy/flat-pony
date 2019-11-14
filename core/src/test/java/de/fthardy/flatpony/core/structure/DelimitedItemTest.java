@@ -1,6 +1,6 @@
 package de.fthardy.flatpony.core.structure;
 
-import de.fthardy.flatpony.core.FlatDataItem;
+import de.fthardy.flatpony.core.FlatDataItemEntity;
 import de.fthardy.flatpony.core.FlatDataWriteException;
 import de.fthardy.flatpony.core.field.ConstantFieldDescriptor;
 import org.junit.jupiter.api.Test;
@@ -17,7 +17,7 @@ class DelimitedItemTest {
 
     @Test
     void Write_to_target_stream() {
-        DelimitedItem item = new DelimitedItemDescriptor(
+        DelimitedItemEntity item = new DelimitedItemDescriptor(
                 "Foo", new ConstantFieldDescriptor("Id", "Test")).createItem();
 
         StringWriter writer = new StringWriter();
@@ -35,15 +35,15 @@ class DelimitedItemTest {
         IOException ioException = new IOException();
         doThrow(ioException).when(writerMock).write(anyInt());
 
-        FlatDataItem<?> innerItemMock = mock(FlatDataItem.class);
+        FlatDataItemEntity<?> innerItemMock = mock(FlatDataItemEntity.class);
 
-        DelimitedItem item = new DelimitedItem(
+        DelimitedItemEntity item = new DelimitedItemEntity(
                 new DelimitedItemDescriptor("Foo", new ConstantFieldDescriptor("Id", "Test")),
                 innerItemMock);
 
         FlatDataWriteException exception = assertThrows(FlatDataWriteException.class, () -> item.writeTo(writerMock));
 
-        assertThat(exception.getMessage()).isEqualTo(DelimitedItem.MSG_Write_failed("Foo"));
+        assertThat(exception.getMessage()).isEqualTo(DelimitedItemEntity.MSG_Write_failed("Foo"));
         assertThat(exception.getCause()).isSameAs(ioException);
 
         verify(innerItemMock).writeTo(writerMock);
@@ -55,10 +55,10 @@ class DelimitedItemTest {
 
     @Test
     void Calls_correct_handler_method() {
-        DelimitedItem item = new DelimitedItemDescriptor(
+        DelimitedItemEntity item = new DelimitedItemDescriptor(
                 "Foo", new ConstantFieldDescriptor("Id", "Test")).createItem();
 
-        FlatDataItem.Handler handlerMock = mock(FlatDataItem.Handler.class);
+        FlatDataItemEntity.Handler handlerMock = mock(FlatDataItemEntity.Handler.class);
         FlatDataStructure.Handler structureHandlerMock = mock(FlatDataStructure.Handler.class);
 
         item.applyHandler(handlerMock);

@@ -23,28 +23,29 @@ SOFTWARE.
  */
 package de.fthardy.flatpony.core.field;
 
-import de.fthardy.flatpony.core.FlatDataItem;
+import de.fthardy.flatpony.core.FlatDataItemEntity;
 import de.fthardy.flatpony.core.field.fixedsize.FixedSizeField;
 
 /**
  * The interface definition for a flat data field.
  * <p>
- * A flat data field is the most atomic part of flat data. Any other type of item which is not a field is or represents
- * only structure.
+ * A flat data field is an item that represents some specific data and is for fixed size field and delimited formats the
+ * most atomic part. Any other type of item which is not a field is structure. Structure entities are represented by an
+ * implementation instance of a {@link de.fthardy.flatpony.core.structure.FlatDataStructure}.
  * </p>
  *
  * @param <T> the type of the field descriptor which creates the field type.
  *
  * @author Frank Timothy Hardy
  */
-public interface FlatDataField<T extends FlatDataFieldDescriptor<?>> extends FlatDataItem<T> {
+public interface FlatDataField<T extends FlatDataFieldDescriptor<?>> extends FlatDataItemEntity<T> {
 
     /**
      * The interface for a handler which can handle the various field  type implementations provided by the core package.
      *
      * @author Frank Timothy Hardy.
      */
-    interface Handler extends FlatDataItem.Handler {
+    interface Handler extends FlatDataItemEntity.Handler {
 
         /**
          * Handle a constant field descriptor.
