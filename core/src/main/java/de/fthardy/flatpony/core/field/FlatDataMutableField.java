@@ -23,35 +23,17 @@ SOFTWARE.
  */
 package de.fthardy.flatpony.core.field;
 
-import de.fthardy.flatpony.core.AbstractFlatDataItemDescriptor;
-
-import java.util.Objects;
-
 /**
- * Abstract base implementation for flat data field descriptors.
+ * The interface of a mutable flat data field.
  *
- * @param <T> the field type created by the descriptor.
- *
- * @author Frank Timothy Hardy
+ * @param <T> the type of the descriptor.
  */
-public abstract class AbstractFlatDataFieldDescriptor<T extends FlatDataField<?>>
-        extends AbstractFlatDataItemDescriptor<T> implements FlatDataFieldDescriptor<T> {
-
-    private final String defaultValue;
+public interface FlatDataMutableField<T extends FlatDataFieldDescriptor<?>> extends FlatDataField<T> {
 
     /**
-     * Initialise a new instance of a field descriptor.
+     * Set a new value for the field content.
      *
-     * @param name the name of the field.
-     * @param defaultValue a default value.
+     * @param value the value to set.
      */
-    protected AbstractFlatDataFieldDescriptor(String name, String defaultValue) {
-        super(name);
-        this.defaultValue = Objects.requireNonNull(defaultValue, "Undefined default value!");
-    }
-
-    @Override
-    public String getDefaultValue() {
-        return defaultValue;
-    }
+    void setValue(String value);
 }

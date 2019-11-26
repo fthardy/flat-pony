@@ -27,12 +27,10 @@ import de.fthardy.flatpony.core.FlatDataItemDescriptor;
 import de.fthardy.flatpony.core.FlatDataReadException;
 import de.fthardy.flatpony.core.field.AbstractFlatDataFieldDescriptor;
 import de.fthardy.flatpony.core.field.FlatDataFieldDescriptor;
-import de.fthardy.flatpony.core.field.constraint.ValueConstraint;
-import de.fthardy.flatpony.core.field.constraint.ValueMustHaveExactFieldLengthConstraint;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.util.*;
+import java.util.Objects;
 
 /**
  * The implementation of a descriptor for a fixed size field.
@@ -42,35 +40,8 @@ import java.util.*;
 public final class FixedSizeFieldDescriptor extends AbstractFlatDataFieldDescriptor<FixedSizeField>
         implements FlatDataFieldDescriptor<FixedSizeField> {
 
-    // This transformer is used when no content value transformer is defined
-    private static final ContentValueTransformer DUMMY_TRANSFORMER = new ContentValueTransformer() {
-
-        @Override
-        public String makeContentFromValue(String value, int fieldLength) {
-            return value;
-        }
-
-        @Override
-        public String extractValueFromContent(String content) {
-            return content;
-        }
-    };
-
     static String MSG_Read_failed(String fieldName) {
         return String.format("Failed to read value of fixed size field '%s' from source stream!", fieldName);
-    }
-
-    /**
-     * Creates a default value in case when no content value transformer is used.
-     *
-     * @param fieldSize the size of the field.
-     *
-     * @return the default value which is a string of blanks in the given size.
-     */
-    static String makeDefaultValue(int fieldSize) {
-        char[] content = new char[fieldSize];
-        Arrays.fill(content, ' ');
-        return String.valueOf(content);
     }
 
     private final int fieldSize;
@@ -83,8 +54,7 @@ public final class FixedSizeFieldDescriptor extends AbstractFlatDataFieldDescrip
      * @param fieldSize the length for this field.
      */
     public FixedSizeFieldDescriptor(String name, int fieldSize) {
-        this(name, fieldSize, makeDefaultValue(fieldSize), DUMMY_TRANSFORMER,
-                Collections.singleton(new ValueMustHaveExactFieldLengthConstraint(fieldSize)));
+        this(name, fieldSize, "", new DefaultFieldContentValueTransformer(' ', true));
     }
 
     /**
@@ -94,14 +64,11 @@ public final class FixedSizeFieldDescriptor extends AbstractFlatDataFieldDescrip
      * @param fieldSize the size for this field.
      * @param defaultValue the default value for this field.
      * @param contentValueTransformer the content value transformer.
-     * @param constraints the constraints.
      */
     public FixedSizeFieldDescriptor(
-            String name, int fieldSize, String defaultValue,
-            ContentValueTransformer contentValueTransformer,
-            Set<ValueConstraint> constraints) {
+            String name, int fieldSize, String defaultValue, ContentValueTransformer contentValueTransformer) {
 
-        super(name, defaultValue, constraints);
+        super(name, defaultValue);
 
         if (fieldSize < 1) {
             throw new IllegalArgumentException("Field size must be at least 1!");

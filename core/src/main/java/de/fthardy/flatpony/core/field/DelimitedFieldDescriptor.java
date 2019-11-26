@@ -75,7 +75,7 @@ public final class DelimitedFieldDescriptor extends AbstractFlatDataFieldDescrip
      * @param defaultValue a default value for the field.
      */
     public DelimitedFieldDescriptor(String name, String defaultValue) {
-        this(name, DEFAULT_DELIMITER, defaultValue, Collections.emptySet());
+        this(name, DEFAULT_DELIMITER, defaultValue);
     }
 
     /**
@@ -84,12 +84,10 @@ public final class DelimitedFieldDescriptor extends AbstractFlatDataFieldDescrip
      * @param name the name of the field.
      * @param delimiter the delimiter which delimits the end of the field data.
      * @param defaultValue a default value for the field.
-     * @param constraints the constraints.
      */
-    public DelimitedFieldDescriptor(
-            String name, char delimiter, String defaultValue, Set<ValueConstraint> constraints) {
+    public DelimitedFieldDescriptor(String name, char delimiter, String defaultValue) {
 
-        super(name, defaultValue, constraints);
+        super(name, defaultValue);
 
         this.delimiter = delimiter;
     }

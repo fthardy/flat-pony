@@ -26,14 +26,12 @@ package de.fthardy.flatpony.core.field;
 import de.fthardy.flatpony.core.FlatDataItemDescriptor;
 import de.fthardy.flatpony.core.field.fixedsize.FixedSizeFieldDescriptor;
 
-import java.util.Set;
-
 /**
  * The interface for a flat data field descriptor.
  * <p>
- * A flat data field is an item that represents some specific data and is for fixed size field and delimited formats the
- * most atomic part. Any other type of item which is not a field is structure. Structure descriptors are represented by
- * an implementation instance of a {@link de.fthardy.flatpony.core.structure.FlatDataStructureDescriptor}.
+ * A flat data field is an item that represents some data and is either for fixed size field and delimited formats the
+ * most atomic element. Any other type of item which is not a field is structure. However, structure descriptors are
+ * represented by an implementations of {@link de.fthardy.flatpony.core.structure.FlatDataStructureDescriptor}.
  * </p>
  *
  * @param <T> the type of the field created by the field descriptor.
@@ -43,8 +41,8 @@ import java.util.Set;
 public interface FlatDataFieldDescriptor<T extends FlatDataField<?>> extends FlatDataItemDescriptor<T> {
 
     /**
-     * The interface for a handler which can handle the various field descriptor type implementations provided by the core
-     * package.
+     * The interface for a handler which can handle the various field descriptor type implementations provided by the
+     * core package.
      *
      * @author Frank Timothy Hardy.
      */
@@ -70,6 +68,13 @@ public interface FlatDataFieldDescriptor<T extends FlatDataField<?>> extends Fla
          * @param descriptor the descriptor to be handled by the receiving instance.
          */
         void handleFixedSizeFieldDescriptor(FixedSizeFieldDescriptor descriptor);
+
+        /**
+         * Handle a constrained field descriptor.
+         *
+         * @param descriptor the descriptor to be handled by the receiving instance.
+         */
+        void handleConstrainedFieldDescriptor(ConstrainedFieldDescriptor descriptor);
     }
 
     /**
@@ -78,13 +83,4 @@ public interface FlatDataFieldDescriptor<T extends FlatDataField<?>> extends Fla
      * @return the default value for the field.
      */
     String getDefaultValue();
-
-    /**
-     * Check a given value if it violates any constraints defined by the receiving descriptor instance.
-     *
-     * @param value the field value to check.
-     *
-     * @return the list of the violated constraint names.
-     */
-    Set<String> determineConstraintViolationsFor(String value);
 }

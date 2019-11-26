@@ -2,8 +2,6 @@ package de.fthardy.flatpony.core.field;
 
 import de.fthardy.flatpony.core.FlatDataItemDescriptor;
 import de.fthardy.flatpony.core.FlatDataReadException;
-import de.fthardy.flatpony.core.field.constraint.ValueCannotBeEmptyConstraint;
-import de.fthardy.flatpony.core.field.constraint.ValueConstraintViolationException;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -12,7 +10,6 @@ import java.io.StringReader;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static org.assertj.core.api.Assertions.*;
 
 class ConstantFieldDescriptorTest {
 
@@ -33,10 +30,7 @@ class ConstantFieldDescriptorTest {
 
     @Test
     void Cannot_create_with_empty_constant() {
-        ValueConstraintViolationException exception = assertThrows(
-                ValueConstraintViolationException.class, () -> new ConstantFieldDescriptor("Test", ""));
-
-        assertThat(exception.getConstraintNames()).containsExactly(ValueCannotBeEmptyConstraint.class.getName());
+        assertThrows(IllegalArgumentException.class, () -> new ConstantFieldDescriptor("Test", ""));
     }
 
     @Test

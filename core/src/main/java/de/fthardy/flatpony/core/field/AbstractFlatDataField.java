@@ -21,42 +21,42 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
-package de.fthardy.flatpony.core.field.constraint;
+package de.fthardy.flatpony.core.field;
+
+import de.fthardy.flatpony.core.AbstractFlatDataItemEntity;
 
 import java.util.Objects;
-import java.util.function.Predicate;
 
 /**
- * The default implementation of a value constraint which simply takes a {@link Predicate} to which it delegates.
+ * An abstract base implementation for a flat data field.
  *
  * @author Frank Timothy Hardy
  */
-public final class DefaultValueConstraint extends AbstractValueConstraint {
+public abstract class AbstractFlatDataField<T extends FlatDataFieldDescriptor<?>> extends AbstractFlatDataItemEntity<T>
+        implements FlatDataField<T> {
 
-    private final String name;
-    private final Predicate<String> predicate;
+    private String value;
 
     /**
-     * Create a new instance of a value constraint.
+     * Initialise a new instance of this flat data field.
      *
-     * @param name the name of the constraint.
-     * @param predicate the constraint predicate.
+     * @param descriptor the descriptor which created this field.
      */
-    public DefaultValueConstraint(String name, Predicate<String> predicate) {
-        if (Objects.requireNonNull(name, "Undefined constraint name!").isEmpty()) {
-            throw new IllegalArgumentException("Constraint name cannot be empty!");
-        }
-        this.name = name;
-        this.predicate = Objects.requireNonNull(predicate, "Undefined value constraint predicate!");
+    protected AbstractFlatDataField(T descriptor) {
+        super(descriptor);
     }
 
     @Override
-    public String getName() {
-        return this.name;
+    public String getValue() {
+        return this.value;
     }
 
     @Override
-    public boolean test(String value) {
-        return this.predicate.test(value);
+    public FlatDataMutableField<T> asMutableField() {
+        throw new UnsupportedOperationException("This field is not mutable!");
+    }
+
+    protected void setValue(String value) {
+        this.value = Objects.requireNonNull(value, "Undefined field value!");
     }
 }

@@ -25,11 +25,9 @@ package de.fthardy.flatpony.core.field;
 
 import de.fthardy.flatpony.core.FlatDataItemDescriptor;
 import de.fthardy.flatpony.core.FlatDataReadException;
-import de.fthardy.flatpony.core.field.constraint.ValueCannotBeEmptyConstraint;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.util.*;
 
 /**
  * The implementation of a descriptor for a field which represents an immutable constant value.
@@ -61,7 +59,10 @@ public final class ConstantFieldDescriptor extends AbstractFlatDataFieldDescript
      * @param constant the constant content represented by the field.
      */
     public ConstantFieldDescriptor(String name, String constant) {
-        super(name, constant, Collections.singleton(ValueCannotBeEmptyConstraint.INSTANCE));
+        super(name, constant);
+        if (constant.isEmpty()) {
+            throw new IllegalArgumentException("The constant value cannot be empty!");
+        }
         this.fieldInstance = new ConstantField(this);
     }
 

@@ -21,61 +21,75 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
-package de.fthardy.flatpony.core.field.fixedsize;
+package de.fthardy.flatpony.core.field;
 
+import de.fthardy.flatpony.core.AbstractFlatDataItemEntity;
 import de.fthardy.flatpony.core.FlatDataItemEntity;
-import de.fthardy.flatpony.core.FlatDataWriteException;
-import de.fthardy.flatpony.core.field.AbstractFlatDataMutableField;
-import de.fthardy.flatpony.core.field.FlatDataField;
 
-import java.io.IOException;
 import java.io.Writer;
 
 /**
- * The implementation of a fixed size field.
+ * A decorator implementation for a constrained field entity implementation.
  *
  * @author Frank Timothy Hardy
  */
-public final class FixedSizeField extends AbstractFlatDataMutableField<FixedSizeFieldDescriptor> {
+public final class ConstrainedField extends AbstractFlatDataItemEntity<ConstrainedFieldDescriptor>
+        implements FlatDataMutableField<ConstrainedFieldDescriptor>{
 
-    static String MSG_Write_failed(String fieldName) {
-        return String.format("Failed to write fixed size field '%s' to target stream!", fieldName);
-    }
+    private final FlatDataMutableField<?> field;
 
     /**
-     * Create a new fixed size field instance.
+     * Creates a new instance of this field decorator.
      *
-     * @param descriptor the descriptor which is creating this field instance.
+     * @param descriptor the descriptor which created this field decorator.
+     * @param field the mutable field to be decorated by this field decorator.
      */
-    FixedSizeField(FixedSizeFieldDescriptor descriptor) {
+    ConstrainedField(ConstrainedFieldDescriptor descriptor, FlatDataMutableField<?> field) {
         super(descriptor);
-        this.setValue(descriptor.getDefaultValue());
+        this.field = field;
     }
 
     @Override
     public int getLength() {
-        return this.getDescriptor().getFieldSize();
+        return this.field.getLength();
     }
 
     @Override
     public void writeTo(Writer target) {
-        try {
-            target.write(this.getContent());
-        } catch (IOException e) {
-            throw new FlatDataWriteException(MSG_Write_failed(this.getDescriptor().getName()), e);
-        }
+        this.field.writeTo(target);
     }
 
     @Override
     public void applyHandler(FlatDataItemEntity.Handler handler) {
         if (handler instanceof FlatDataField.Handler) {
-            ((FlatDataField.Handler) handler).handleFixedSizeField(this);
+            ((FlatDataField.Handler) handler).handleConstrainedField(this);
         } else {
             handler.handleFlatDataItem(this);
         }
     }
 
-    private String getContent() {
-        return this.getDescriptor().makeContentFromValue(this.getValue());
+    @Override
+    public String getValue() {
+        return this.field.getValue();
+    }
+
+    @Override
+    public void setValue(String value) {
+        this.getDescriptor().checkForConstraintViolation(value);
+        this.field.setValue(value);
+    }
+
+    @Override
+    public FlatDataMutableField<ConstrainedFieldDescriptor> asMutableField() {
+        return this;
+    }
+
+    /**
+     * Get the decorated field instance.
+     *
+     * @return the decorated field instance.
+     */
+    public FlatDataMutableField<?> getField() {
+        return this.field;
     }
 }

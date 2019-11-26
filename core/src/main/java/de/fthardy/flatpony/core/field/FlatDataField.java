@@ -48,25 +48,32 @@ public interface FlatDataField<T extends FlatDataFieldDescriptor<?>> extends Fla
     interface Handler extends FlatDataItemEntity.Handler {
 
         /**
-         * Handle a constant field descriptor.
+         * Handle a constant field.
          *
-         * @param item the item to be handled by the receiving instance.
+         * @param field the field to be handled
          */
-        void handleConstantField(ConstantField item);
+        void handleConstantField(ConstantField field);
 
         /**
-         * Handle a delimited field descriptor.
+         * Handle a delimited field.
          *
-         * @param item the item to be handled by the receiving instance.
+         * @param field the field to be handled
          */
-        void handleDelimitedField(DelimitedField item);
+        void handleDelimitedField(DelimitedField field);
 
         /**
-         * Handle a fixed size field descriptor.
+         * Handle a fixed size field.
          *
-         * @param item the item to be handled by the receiving instance.
+         * @param field the field to be handled
          */
-        void handleFixedSizeField(FixedSizeField item);
+        void handleFixedSizeField(FixedSizeField field);
+
+        /**
+         * Handle a constrained field.
+         *
+         * @param field the field to be handled.
+         */
+        void handleConstrainedField(ConstrainedField field);
     }
 
     /**
@@ -82,9 +89,11 @@ public interface FlatDataField<T extends FlatDataFieldDescriptor<?>> extends Fla
     String getValue();
 
     /**
-     * Set a new value for the field content.
+     * Get the receiving field instance as a mutable field.
      *
-     * @param value the value to set.
+     * @return the receiving field instance as a mutable field.
+     *
+     * @throws UnsupportedOperationException when the field is not mutable.
      */
-    void setValue(String value);
+    FlatDataMutableField<T> asMutableField();
 }

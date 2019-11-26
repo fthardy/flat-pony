@@ -21,37 +21,33 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
-package de.fthardy.flatpony.core.field;
-
-import de.fthardy.flatpony.core.AbstractFlatDataItemDescriptor;
-
-import java.util.Objects;
+package de.fthardy.flatpony.core.field.converter;
 
 /**
- * Abstract base implementation for flat data field descriptors.
+ * The interface for a converter which can convert from a field value string to a value with a particular target type
+ * and vice versa convert a value of the target type into a field value string.
  *
- * @param <T> the field type created by the descriptor.
+ * @param <T> the target type to and from which the field value string can be converted.
  *
  * @author Frank Timothy Hardy
  */
-public abstract class AbstractFlatDataFieldDescriptor<T extends FlatDataField<?>>
-        extends AbstractFlatDataItemDescriptor<T> implements FlatDataFieldDescriptor<T> {
-
-    private final String defaultValue;
+public interface FieldValueConverter<T> {
 
     /**
-     * Initialise a new instance of a field descriptor.
+     * Convert the field value to a value with the target type.
      *
-     * @param name the name of the field.
-     * @param defaultValue a default value.
+     * @param fieldValue the field value to convert.
+     *
+     * @return the value in the target type.
      */
-    protected AbstractFlatDataFieldDescriptor(String name, String defaultValue) {
-        super(name);
-        this.defaultValue = Objects.requireNonNull(defaultValue, "Undefined default value!");
-    }
+    T convertFromFieldValue(String fieldValue);
 
-    @Override
-    public String getDefaultValue() {
-        return defaultValue;
-    }
+    /**
+     * Convert a value to a field value.
+     *
+     * @param value the value to convert.
+     *
+     * @return the field value.
+     */
+    String convertToFieldValue(T value);
 }

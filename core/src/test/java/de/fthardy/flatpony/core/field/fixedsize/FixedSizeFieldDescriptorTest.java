@@ -8,10 +8,9 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
-import java.util.Collections;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 class FixedSizeFieldDescriptorTest {
@@ -24,14 +23,13 @@ class FixedSizeFieldDescriptorTest {
     @Test
     void Cannot_create_with_null_ContentValueTransformer() {
         assertThrows(NullPointerException.class, () ->
-                new FixedSizeFieldDescriptor(
-                        "Foo", 1, "J", null, Collections.emptySet()));
+                new FixedSizeFieldDescriptor("Foo", 1, "J", null));
     }
 
     @Test
     void New_field_has_default_value() {
         FixedSizeField field = new FixedSizeFieldDescriptor("Foo", 10).createItem();
-        assertThat(field.getValue()).isEqualTo("          ");
+        assertThat(field.getValue()).isEmpty();
     }
 
     @Test
@@ -41,8 +39,7 @@ class FixedSizeFieldDescriptorTest {
                 "Foo",
                 10,
                 "",
-                new DefaultFieldContentValueTransformer(' ', true),
-                Collections.emptySet()).readItemFrom(reader);
+                new DefaultFieldContentValueTransformer(' ', true)).readItemFrom(reader);
         assertThat(field.getValue()).isEqualTo("FooBar");
     }
 

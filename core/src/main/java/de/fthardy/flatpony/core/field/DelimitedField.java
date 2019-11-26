@@ -23,13 +23,11 @@ SOFTWARE.
  */
 package de.fthardy.flatpony.core.field;
 
-import de.fthardy.flatpony.core.AbstractFlatDataItemEntity;
 import de.fthardy.flatpony.core.FlatDataItemEntity;
 import de.fthardy.flatpony.core.FlatDataWriteException;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Objects;
 
 /**
  * The implementation of a delimited field.
@@ -39,14 +37,11 @@ import java.util.Objects;
  *
  * @author Frank Timothy Hardy
  */
-public final class DelimitedField extends AbstractFlatDataItemEntity<DelimitedFieldDescriptor>
-        implements FlatDataField<DelimitedFieldDescriptor> {
+public final class DelimitedField extends AbstractFlatDataMutableField<DelimitedFieldDescriptor> {
 
     static String MSG_Write_failed(String fieldName) {
         return String.format("Failed to write delimited field '%s' to target stream!", fieldName);
     }
-
-    private String value;
 
     /**
      * Create a new instance of a delimited field.
@@ -60,28 +55,17 @@ public final class DelimitedField extends AbstractFlatDataItemEntity<DelimitedFi
 
     @Override
     public int getLength() {
-        return value.length();
+        return this.getValue().length();
     }
 
     @Override
     public void writeTo(Writer target) {
         try {
-            target.write(value);
+            target.write(this.getValue());
             target.write(this.getDescriptor().getDelimiter());
         } catch (IOException e) {
             throw new FlatDataWriteException(MSG_Write_failed(this.getDescriptor().getName()), e);
         }
-    }
-
-    @Override
-    public String getValue() {
-        return value;
-    }
-
-    @Override
-    public void setValue(String value) {
-        this.value = this.getDescriptor().checkForConstraintViolation(
-                Objects.requireNonNull(value, "Undefined field value!"));
     }
 
     @Override
@@ -92,5 +76,4 @@ public final class DelimitedField extends AbstractFlatDataItemEntity<DelimitedFi
             handler.handleFlatDataItem(this);
         }
     }
-
 }

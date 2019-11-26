@@ -71,7 +71,7 @@ public final class ConstantField extends AbstractFlatDataItemEntity<ConstantFiel
     }
 
     @Override
-    public void setValue(String value) {
+    public FlatDataMutableField<ConstantFieldDescriptor> asMutableField() {
         throw new UnsupportedOperationException("A constant field is immutable!");
     }
 

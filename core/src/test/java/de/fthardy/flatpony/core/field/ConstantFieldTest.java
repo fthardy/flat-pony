@@ -26,7 +26,7 @@ class ConstantFieldTest {
     @Test
     void Field_is_immutable() {
         assertThrows(UnsupportedOperationException.class, () ->
-                new ConstantFieldDescriptor("Test", "Foo").createItem().setValue("Bar"));
+                new ConstantFieldDescriptor("Test", "Foo").createItem().asMutableField());
     }
 
     @Test
