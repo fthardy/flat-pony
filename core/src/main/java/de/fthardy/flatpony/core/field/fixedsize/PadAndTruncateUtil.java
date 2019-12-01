@@ -63,7 +63,7 @@ final class PadAndTruncateUtil {
      */
     static String truncateString(String string, boolean fromRight, char padChar) {
         int index = fromRight ? string.length() - 1 : 0;
-        while (string.charAt(index) == padChar) {
+        while (index != -1 && string.charAt(index) == padChar) {
             index += fromRight ? -1 : 1;
         }
         return fromRight ? string.substring(0, index + 1) : string.substring(index);

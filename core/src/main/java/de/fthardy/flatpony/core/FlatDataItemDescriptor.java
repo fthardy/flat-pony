@@ -75,6 +75,13 @@ public interface FlatDataItemDescriptor<T extends FlatDataItemEntity<?>> {
     String getName();
 
     /**
+     * Get the minimum length of the item.
+     *
+     * @return the minimum length of the item. If the minimum length is not known return 0.
+     */
+    int getMinLength();
+
+    /**
      * Create a new item.
      *
      * @return the new item instance.

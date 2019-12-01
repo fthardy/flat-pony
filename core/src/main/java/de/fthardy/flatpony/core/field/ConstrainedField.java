@@ -29,7 +29,10 @@ import de.fthardy.flatpony.core.FlatDataItemEntity;
 import java.io.Writer;
 
 /**
- * A decorator implementation for a constrained field entity implementation.
+ * The implementation of the constrained field.
+ * <p>
+ * A constrained field is wrapping a target field that is to be constrained.
+ * </p>
  *
  * @author Frank Timothy Hardy
  */

@@ -32,7 +32,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * The implementation of a composite item entity.
+ * The implementation of the composite item entity type.
  * <p>
  * A composite item is a composition of several other flat data items. Because composite items can contain other
  * composite items it is possible to build complex, nested, tree structures with this kind of item.

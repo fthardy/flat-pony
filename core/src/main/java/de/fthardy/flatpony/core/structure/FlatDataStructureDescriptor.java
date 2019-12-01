@@ -57,6 +57,20 @@ public interface FlatDataStructureDescriptor<T extends FlatDataStructure<?>> ext
          * @param descriptor the descriptor to be handled by the receiving instance.
          */
         void handleDelimitedItemDescriptor(DelimitedItemDescriptor descriptor);
+
+        /**
+         * Handle an optional item descriptor.
+         *
+         * @param descriptor the descriptor to be handled by the receiving instance.
+         */
+        void handleOptionalItemDescriptor(OptionalItemDescriptor descriptor);
+
+        /**
+         * Handle a sequence item descriptor.
+         *
+         * @param descriptor the descriptor to be handled by the receiving instance.
+         */
+        void handleSequenceItemDescriptor(SequenceItemDescriptor descriptor);
     }
 
     /**

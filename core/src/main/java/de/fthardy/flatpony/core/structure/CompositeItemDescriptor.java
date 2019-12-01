@@ -59,9 +59,14 @@ public final class CompositeItemDescriptor extends AbstractFlatDataItemDescripto
     }
 
     @Override
+    public int getMinLength() {
+        return this.descriptors.stream().mapToInt(FlatDataItemDescriptor::getMinLength).sum();
+    }
+
+    @Override
     public CompositeItemEntity createItem() {
         return new CompositeItemEntity(this,
-                descriptors.stream().map(FlatDataItemDescriptor::createItem).collect(Collectors.toList()));
+                this.descriptors.stream().map(FlatDataItemDescriptor::createItem).collect(Collectors.toList()));
     }
 
     @Override

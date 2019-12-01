@@ -21,40 +21,25 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
-package de.fthardy.flatpony.core;
+package de.fthardy.flatpony.core.util;
 
-import java.util.Objects;
+import de.fthardy.flatpony.core.FlatDataItemEntity;
+
+import java.io.Reader;
 
 /**
- * An abstract base implementation for flat data item descriptor implementations.
- *
- * @param <T> the item type created by the descriptor type.
+ * The interface for an item entity read strategy.
  *
  * @author Frank Timothy Hardy
  */
-public abstract class AbstractFlatDataItemDescriptor<T extends FlatDataItemEntity<?>> implements FlatDataItemDescriptor<T> {
-
-    private final String name;
+public interface ItemEntityReadStrategy {
 
     /**
-     * Initialise a new instance of a flat data item descriptor.
+     * Read an item entity from the given source stream.
      *
-     * @param name the name of the descriptor. Must not be empty.
+     * @param source the source stream to read the item entity from.
+     *
+     * @return the read item entity.
      */
-    protected AbstractFlatDataItemDescriptor(String name) {
-        if (Objects.requireNonNull(name, "Undefined descriptor name!").isEmpty()) {
-            throw new IllegalArgumentException("Descriptor name cannot be empty!");
-        }
-        this.name = name;
-    }
-
-    @Override
-    public String getName() {
-        return this.name;
-    }
-
-    @Override
-    public int getMinLength() {
-        return 0;
-    }
+    FlatDataItemEntity<?> readItemFrom(Reader source);
 }

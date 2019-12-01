@@ -33,6 +33,12 @@ class FixedSizeFieldDescriptorTest {
     }
 
     @Test
+    void Min_Lenght_is_size() {
+        FixedSizeFieldDescriptor descriptor = new FixedSizeFieldDescriptor("Foo", 10);
+        assertThat(descriptor.getMinLength()).isEqualTo(descriptor.getFieldSize());
+    }
+
+    @Test
     void Field_is_read_from_source_stream() {
         Reader reader = new StringReader("FooBar    ");
         FixedSizeField field = new FixedSizeFieldDescriptor(

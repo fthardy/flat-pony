@@ -40,6 +40,12 @@ class DelimitedItemDescriptorTest {
     }
 
     @Test
+    void Min_length_is_min_length_of_inner_item() {
+        DelimitedItemDescriptor descriptor = new DelimitedItemDescriptor("Foo", new ConstantFieldDescriptor("ID", "Test"));
+        assertThat(descriptor.getMinLength()).isEqualTo(4);
+    }
+
+    @Test
     void Read_without_delimiter_but_end_of_stream() {
         Reader reader = new StringReader("Test");
 

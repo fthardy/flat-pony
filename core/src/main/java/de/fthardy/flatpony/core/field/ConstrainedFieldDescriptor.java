@@ -89,6 +89,11 @@ public final class ConstrainedFieldDescriptor implements FlatDataFieldDescriptor
     }
 
     @Override
+    public int getMinLength() {
+        return this.fieldDescriptor.getMinLength();
+    }
+
+    @Override
     public ConstrainedField createItem() {
         return new ConstrainedField(this, this.fieldDescriptor.createItem().asMutableField());
     }

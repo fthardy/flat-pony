@@ -83,17 +83,22 @@ public final class DelimitedItemDescriptor extends AbstractFlatDataItemDescripto
     }
 
     @Override
+    public int getMinLength() {
+        return this.itemDescriptor.getMinLength();
+    }
+
+    @Override
     public DelimitedItemEntity createItem() {
-        return new DelimitedItemEntity(this, itemDescriptor.createItem());
+        return new DelimitedItemEntity(this, this.itemDescriptor.createItem());
     }
 
     @Override
     public DelimitedItemEntity readItemFrom(Reader source) {
         try {
-            FlatDataItemEntity<?> item = itemDescriptor.readItemFrom(source);
+            FlatDataItemEntity<?> item = this.itemDescriptor.readItemFrom(source);
 
             int i = source.read();
-            if (i != -1 && i != delimiter) {
+            if (i != -1 && i != this.delimiter) {
                 throw new FlatDataReadException(MSG_No_delimiter_found(this.getName(), this.itemDescriptor.getName()));
             }
 
@@ -118,6 +123,6 @@ public final class DelimitedItemDescriptor extends AbstractFlatDataItemDescripto
     }
 
     int getDelimiter() {
-        return delimiter;
+        return this.delimiter;
     }
 }

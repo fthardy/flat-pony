@@ -59,6 +59,20 @@ public interface FlatDataStructure<T extends FlatDataStructureDescriptor<?>> ext
          * @param item the item to be handled by the receiving instance.
          */
         void handleDelimitedItem(DelimitedItemEntity item);
+
+        /**
+         * Handle an optional item.
+         *
+         * @param item the item to be handled by the receiving instance.
+         */
+        void handleOptionalItem(OptionalItemEntity item);
+
+        /**
+         * Handle a sequence item.
+         *
+         * @param item the item to be handled by the receiving instance.
+         */
+        void handleSequenceItem(SequenceItemEntity item);
     }
 
     /**

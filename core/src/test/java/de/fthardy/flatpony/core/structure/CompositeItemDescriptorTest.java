@@ -41,6 +41,17 @@ class CompositeItemDescriptorTest {
         CompositeItemEntity compositeItem = descriptor.readItemFrom(reader);
         assertThat(compositeItem).isNotNull();
     }
+    @Test
+    void Min_length_is_sum_of_lengths() {
+        ConstantFieldDescriptor constantFieldDescriptor = new ConstantFieldDescriptor("ID", "FOO");
+        FixedSizeFieldDescriptor field1Descriptor = new FixedSizeFieldDescriptor("Field1", 5);
+        FixedSizeFieldDescriptor field2Descriptor = new FixedSizeFieldDescriptor("Field2", 9);
+
+        CompositeItemDescriptor descriptor = new CompositeItemDescriptor(
+                "Record", Arrays.asList(constantFieldDescriptor, field1Descriptor, field2Descriptor));
+
+        assertThat(descriptor.getMinLength()).isEqualTo(17);
+    }
 
     @Test
     void Create_new_item() {

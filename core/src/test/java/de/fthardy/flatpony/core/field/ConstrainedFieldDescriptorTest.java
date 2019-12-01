@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
@@ -84,6 +85,19 @@ class ConstrainedFieldDescriptorTest {
                         return false;
                     }
                 })));
+    }
+
+    @Test
+    void Min_length_is_min_length_of_field() {
+        ConstrainedFieldDescriptor descriptor = new ConstrainedFieldDescriptor(
+                new DelimitedFieldDescriptor("Foo"),
+                new HashSet<>(Collections.singletonList(new AbstractValueConstraint() {
+                    @Override
+                    public boolean test(String s) {
+                        return false;
+                    }
+                })));
+        assertEquals(descriptor.getFieldDescriptor().getMinLength(), descriptor.getMinLength());
     }
 
     @Test

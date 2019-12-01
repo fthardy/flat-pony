@@ -67,6 +67,11 @@ public final class ConstantFieldDescriptor extends AbstractFlatDataFieldDescript
     }
 
     @Override
+    public int getMinLength() {
+        return this.getDefaultValue().length();
+    }
+
+    @Override
     public ConstantField createItem() {
         return fieldInstance;
     }

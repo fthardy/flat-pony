@@ -44,6 +44,13 @@ class DelimitedFieldDescriptorTest {
     }
 
     @Test
+    void Min_length_is_0() {
+        DelimitedFieldDescriptor descriptor = new DelimitedFieldDescriptor("Foo");
+
+        assertThat(descriptor.getMinLength()).isEqualTo(0);
+    }
+
+    @Test
     void The_reader_throws_an_IOException() throws IOException {
         DelimitedFieldDescriptor descriptor = new DelimitedFieldDescriptor("Foo");
 

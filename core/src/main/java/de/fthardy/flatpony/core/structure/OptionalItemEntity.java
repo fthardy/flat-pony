@@ -25,6 +25,7 @@ package de.fthardy.flatpony.core.structure;
 
 import de.fthardy.flatpony.core.AbstractFlatDataItemEntity;
 import de.fthardy.flatpony.core.FlatDataItemEntity;
+import de.fthardy.flatpony.core.util.TypedFieldDecorator;
 
 import java.io.Writer;
 import java.util.Collections;
@@ -32,9 +33,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * The entity implementation for an optional item.
- *
- * @see OptionalItemDescriptor
+ * The implementation of the optional item entity type.
  *
  * @author Frank Timothy Hardy
  */
@@ -43,14 +42,7 @@ public final class OptionalItemEntity extends AbstractFlatDataItemEntity<Optiona
 
     private FlatDataItemEntity<?> targetItem;
 
-    /**
-     * Creates an empty instance of this optional item entity.
-     *
-     * @param descriptor the descriptor which created this item entity.
-     */
-    OptionalItemEntity(OptionalItemDescriptor descriptor) {
-        this(descriptor, null);
-    }
+    private final TypedFieldDecorator<Boolean> flagField;
 
     /**
      * Creates a non-empty instance of this option item entity.
@@ -58,9 +50,13 @@ public final class OptionalItemEntity extends AbstractFlatDataItemEntity<Optiona
      * @param descriptor the descriptor which created this item entity.
      * @param targetItem the target item entity.
      */
-    OptionalItemEntity(OptionalItemDescriptor descriptor, FlatDataItemEntity<?> targetItem) {
+    OptionalItemEntity(
+            OptionalItemDescriptor descriptor,
+            FlatDataItemEntity<?> targetItem,
+            TypedFieldDecorator<Boolean> flagField) {
         super(descriptor);
         this.targetItem = targetItem;
+        this.flagField = flagField;
     }
 
     @Override
@@ -77,7 +73,11 @@ public final class OptionalItemEntity extends AbstractFlatDataItemEntity<Optiona
 
     @Override
     public void applyHandler(FlatDataItemEntity.Handler handler) {
-        // TODO Implementation
+        if (handler instanceof FlatDataStructure.Handler) {
+            ((FlatDataStructure.Handler) handler).handleOptionalItem(this);
+        } else {
+            handler.handleFlatDataItem(this);
+        }
     }
 
     @Override
@@ -89,42 +89,50 @@ public final class OptionalItemEntity extends AbstractFlatDataItemEntity<Optiona
      * @return {@code true} if this optional item has currently no target item entity. Otherwise {@code false} is
      * returned.
      */
-    public boolean isEmpty() {
-        return this.targetItem == null;
+    public boolean isTargetItemPresent() {
+        return this.targetItem != null;
     }
 
     /**
      * @return an optional providing the target item entity or is empty.
      */
     public Optional<FlatDataItemEntity<?>> getTargetItem() {
-        return Optional.of(this.targetItem);
+        return Optional.ofNullable(this.targetItem);
     }
 
     /**
-     * Discard the current referenced target item entity.
-     * <p>
-     * Discarding a target item entity doesn't destroy the target item entity. Only the internal reference to the item
-     * is set to {@code null}. If the target item entity is still referenced somewhere it continues to exist. However,
-     * it cannot be reattached to this item.
-     * </p>
-     */
-    public void discardTargetItem() {
-        if (this.targetItem != null) {
-            this.targetItem = null;
-        }
-    }
-
-    /**
-     * Create a new target item entity. This item has to be empty otherwise an {@link IllegalStateException} is
-     * thrown.
+     * Set a particular target item entity or discard the current target item entity.
      *
-     * @see #isEmpty()
+     * @param targetItem the target item entity to set or {@code null} to discard the current target item entity.
+     *
+     * @throws IllegalArgumentException when this optional item entity already has a target item entity or the given
+     *                                  target item entity doesn't have the same descriptor as the target item
+     *                                  descriptor of this optional items descriptor.
      */
-    public void newTargetItem() {
-        if (this.targetItem != null) {
-            throw new IllegalStateException("There is already a target item entity referenced. " +
-                    "Make sure to clear the existing item before calling this method!");
+    public void setTargetItem(FlatDataItemEntity<?> targetItem) {
+        if (targetItem != null && targetItem.getDescriptor() != this.getDescriptor().getTargetItemDescriptor()) {
+            throw new IllegalArgumentException(
+                    "Invalid target item! Descriptor is not the target item descriptor of this optional items descriptor.");
         }
-        this.targetItem = this.getDescriptor().createNewTargetItem();
+        this.targetItem = targetItem;
+        updateFlagField();
+    }
+
+    /**
+     * Create a new target item entity.
+     *
+     * @return the new target item entity.
+     *
+     * @throws IllegalArgumentException when this optional item entity already has a target item entity.
+     */
+    public FlatDataItemEntity<?> newTargetItem() {
+        this.setTargetItem(this.getDescriptor().getTargetItemDescriptor().createItem());
+        return this.targetItem;
+    }
+
+    private void updateFlagField() {
+        if (this.flagField != null) {
+            this.flagField.setTypedValue(this.targetItem != null);
+        }
     }
 }

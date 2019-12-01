@@ -79,6 +79,11 @@ public final class FixedSizeFieldDescriptor extends AbstractFlatDataFieldDescrip
     }
 
     @Override
+    public int getMinLength() {
+        return this.fieldSize;
+    }
+
+    @Override
     public FixedSizeField createItem() {
         return new FixedSizeField(this);
     }

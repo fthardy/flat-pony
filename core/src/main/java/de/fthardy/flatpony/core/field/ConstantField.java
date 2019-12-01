@@ -31,7 +31,7 @@ import java.io.IOException;
 import java.io.Writer;
 
 /**
- * The implementation of a constant field which is a special, immutable field with a constant value.
+ * The implementation of the constant field which is a special, immutable field with a constant value.
  *
  * @author Frank Timothy Hardy
  */

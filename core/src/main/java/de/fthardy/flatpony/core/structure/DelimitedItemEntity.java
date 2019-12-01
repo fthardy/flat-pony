@@ -33,7 +33,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * The implementation of a delimited item entity.
+ * The implementation of the delimited item entity type.
  * <p>
  * A delimited item entity represents an item entity which has an extra delimiter at its end.
  * </p>

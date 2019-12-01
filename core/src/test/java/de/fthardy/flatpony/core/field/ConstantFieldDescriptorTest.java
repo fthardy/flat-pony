@@ -39,6 +39,12 @@ class ConstantFieldDescriptorTest {
     }
 
     @Test
+    void Min_length_is_length_of_constant() {
+        ConstantFieldDescriptor descriptor = new ConstantFieldDescriptor("Test", "Foo");
+        assertEquals(descriptor.getDefaultValue().length(), descriptor.getMinLength());
+    }
+
+    @Test
     void Read_from_stream_which_is_too_short() {
         ConstantFieldDescriptor descriptor = new ConstantFieldDescriptor("Test", "Foo");
 

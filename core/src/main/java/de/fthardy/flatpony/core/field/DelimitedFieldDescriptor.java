@@ -25,13 +25,10 @@ package de.fthardy.flatpony.core.field;
 
 import de.fthardy.flatpony.core.FlatDataItemDescriptor;
 import de.fthardy.flatpony.core.FlatDataReadException;
-import de.fthardy.flatpony.core.field.constraint.ValueConstraint;
 import de.fthardy.flatpony.core.field.constraint.ValueConstraintViolationException;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.util.Collections;
-import java.util.Set;
 
 /**
  * The implementation of the descriptor for a delimited field.

@@ -30,7 +30,7 @@ import java.io.IOException;
 import java.io.Writer;
 
 /**
- * The implementation of a delimited field.
+ * The implementation of the delimited field.
  * <p>
  * A delimited field has a variable content length. The end of the field is recognized by a delimiter character.
  * </p>

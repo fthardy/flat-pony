@@ -32,7 +32,7 @@ import java.io.IOException;
 import java.io.Writer;
 
 /**
- * The implementation of a fixed size field.
+ * The implementation of the fixed size field.
  *
  * @author Frank Timothy Hardy
  */
