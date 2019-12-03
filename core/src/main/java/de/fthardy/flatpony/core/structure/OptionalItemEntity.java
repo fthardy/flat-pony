@@ -24,6 +24,7 @@ SOFTWARE.
 package de.fthardy.flatpony.core.structure;
 
 import de.fthardy.flatpony.core.AbstractFlatDataItemEntity;
+import de.fthardy.flatpony.core.FlatDataItemDescriptor;
 import de.fthardy.flatpony.core.FlatDataItemEntity;
 import de.fthardy.flatpony.core.util.TypedFieldDecorator;
 

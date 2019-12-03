@@ -51,7 +51,7 @@ import java.util.Objects;
 public final class OptionalItemDescriptor extends AbstractFlatDataItemDescriptor<OptionalItemEntity>
         implements FlatDataStructureDescriptor<OptionalItemEntity> {
 
-    private final FlatDataItemDescriptor<? extends FlatDataItemEntity<?>> targetItemDescriptor;
+    private final FlatDataItemDescriptor<?> targetItemDescriptor;
     private final ThreadLocal<TypedFieldDecorator<Boolean>> threadLocalFlagField;
 
     /**
@@ -60,9 +60,7 @@ public final class OptionalItemDescriptor extends AbstractFlatDataItemDescriptor
      * @param name the name of the descriptor.
      * @param targetItemDescriptor the target item descriptor.
      */
-    public OptionalItemDescriptor(
-            String name,
-            FlatDataItemDescriptor<? extends FlatDataItemEntity<?>> targetItemDescriptor) {
+    public OptionalItemDescriptor(String name, FlatDataItemDescriptor<?> targetItemDescriptor) {
         this(name, targetItemDescriptor, null);
     }
 
@@ -75,7 +73,7 @@ public final class OptionalItemDescriptor extends AbstractFlatDataItemDescriptor
      */
     public OptionalItemDescriptor(
             String name,
-            FlatDataItemDescriptor<? extends FlatDataItemEntity<?>> targetItemDescriptor,
+            FlatDataItemDescriptor<?> targetItemDescriptor,
             FieldReferenceConfig<Boolean> fieldReferenceConfig) {
         super(name);
         this.targetItemDescriptor = Objects.requireNonNull(
@@ -86,6 +84,9 @@ public final class OptionalItemDescriptor extends AbstractFlatDataItemDescriptor
 
     @Override
     public OptionalItemEntity createItem() {
+
+        assertCountFieldExistsWhenCountFieldIsReferenced();
+
         return new OptionalItemEntity(
                 this,
                 null,
@@ -94,6 +95,9 @@ public final class OptionalItemDescriptor extends AbstractFlatDataItemDescriptor
 
     @Override
     public OptionalItemEntity readItemFrom(Reader source) {
+
+        this.assertCountFieldExistsWhenCountFieldIsReferenced();
+
         TypedFieldDecorator<Boolean> flagField = this.threadLocalFlagField == null ?
                 null : this.threadLocalFlagField.get();
 
@@ -124,7 +128,13 @@ public final class OptionalItemDescriptor extends AbstractFlatDataItemDescriptor
     /**
      * @return the descriptor of the target item.
      */
-    public FlatDataItemDescriptor<? extends FlatDataItemEntity<?>> getTargetItemDescriptor() {
+    public FlatDataItemDescriptor<?> getTargetItemDescriptor() {
         return this.targetItemDescriptor;
+    }
+
+    private void assertCountFieldExistsWhenCountFieldIsReferenced() {
+        if (this.threadLocalFlagField != null && this.threadLocalFlagField.get() == null) {
+            throw new IllegalStateException("Expected a flag field because flag field reference has been defined!");
+        }
     }
 }

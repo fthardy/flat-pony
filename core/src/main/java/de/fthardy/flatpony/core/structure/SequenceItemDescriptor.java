@@ -25,6 +25,7 @@ package de.fthardy.flatpony.core.structure;
 
 import de.fthardy.flatpony.core.*;
 import de.fthardy.flatpony.core.util.FieldReferenceConfig;
+import de.fthardy.flatpony.core.util.ItemEntityReadStrategy;
 import de.fthardy.flatpony.core.util.TypedFieldDecorator;
 import de.fthardy.flatpony.core.util.TrialAndErrorReadStrategy;
 
@@ -83,18 +84,43 @@ public class SequenceItemDescriptor extends AbstractFlatDataItemDescriptor<Seque
             }
             this.maxOccurrences = Math.max(bound1, bound2);
             this.minOccurrences = Math.min(bound1, bound2);
-            if (maxOccurrences == 0 || maxOccurrences < minOccurrences) {
-                throw new IllegalArgumentException(
-                        "Maximum occurrences must be at least 1 and greater than minimum occurrences!");
+            if (maxOccurrences == 0) {
+                throw new IllegalArgumentException("A multiplicity of 0 to 0 is not allowed!");
             }
         }
 
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Multiplicity that = (Multiplicity) o;
+            return this.minOccurrences == that.minOccurrences && this.maxOccurrences == that.maxOccurrences;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(minOccurrences, maxOccurrences);
+        }
+
+        @Override
         public String toString() {
             return String.format("%d to %d", this.minOccurrences, this.maxOccurrences);
         }
 
+        public int getMinOccurrences() {
+            return this.minOccurrences;
+        }
+
+        public int getMaxOccurrences() {
+            return this.maxOccurrences;
+        }
+
         public boolean isSizeWithinBounds(int size) {
             return size >= this.minOccurrences && size <= this.maxOccurrences;
+        }
+
+        public boolean isSizeNotWithinBounds(int size) {
+            return !this.isSizeWithinBounds(size);
         }
     }
 
@@ -104,7 +130,7 @@ public class SequenceItemDescriptor extends AbstractFlatDataItemDescriptor<Seque
                 sequenceName, multiplicity);
     }
 
-    private final FlatDataItemDescriptor<FlatDataItemEntity<?>> elementItemDescriptor;
+    private final FlatDataItemDescriptor<?> elementItemDescriptor;
     private final ThreadLocal<TypedFieldDecorator<Integer>> threadLocalCountField;
     private final Multiplicity multiplicity;
 
@@ -115,7 +141,7 @@ public class SequenceItemDescriptor extends AbstractFlatDataItemDescriptor<Seque
      * @param name the name of this sequence item.
      * @param elementItemDescriptor the descriptor of the sequence elements.
      */
-    public SequenceItemDescriptor(String name, FlatDataItemDescriptor<FlatDataItemEntity<?>> elementItemDescriptor) {
+    public SequenceItemDescriptor(String name, FlatDataItemDescriptor<?> elementItemDescriptor) {
         this(name, elementItemDescriptor, null, null);
     }
 
@@ -129,14 +155,14 @@ public class SequenceItemDescriptor extends AbstractFlatDataItemDescriptor<Seque
      */
     public SequenceItemDescriptor(
             String name,
-            FlatDataItemDescriptor<FlatDataItemEntity<?>> elementItemDescriptor,
+            FlatDataItemDescriptor<?> elementItemDescriptor,
             FieldReferenceConfig<Integer> countFieldReferenceConfig,
             Multiplicity multiplicity) {
         super(name);
         this.elementItemDescriptor = Objects.requireNonNull(
                 elementItemDescriptor, "Undefined sequence descriptor!");
-        this.threadLocalCountField = countFieldReferenceConfig == null ?
-                null : countFieldReferenceConfig.linkWithField();
+        this.threadLocalCountField =
+                countFieldReferenceConfig == null ? null : countFieldReferenceConfig.linkWithField();
         this.multiplicity = multiplicity;
     }
 
@@ -156,40 +182,28 @@ public class SequenceItemDescriptor extends AbstractFlatDataItemDescriptor<Seque
 
     @Override
     public SequenceItemEntity createItem() {
+
+        this.assertCountFieldExistsWhenCountFieldIsReferenced();
+
         return new SequenceItemEntity(
                 this, this.threadLocalCountField == null ? null : this.threadLocalCountField.get());
     }
 
     @Override
     public SequenceItemEntity readItemFrom(Reader source) {
-        Integer count = this.threadLocalCountField == null ? null : this.threadLocalCountField.get().getTypedValue();
 
-        List<FlatDataItemEntity<?>> elementItems = new ArrayList<>();
-        if (count == null) {
-            TrialAndErrorReadStrategy readStrategy =
-                    new TrialAndErrorReadStrategy(this.getName(), this.elementItemDescriptor);
+        this.assertCountFieldExistsWhenCountFieldIsReferenced();
 
-            FlatDataItemEntity<?> itemEntity = null;
-            do {
-                itemEntity = readStrategy.readItemFrom(source);
-                if (itemEntity != null) {
-                    elementItems.add(itemEntity);
-                }
-            } while(itemEntity != null);
-        } else {
-            for (int i = 0; i < count; i++) {
-                elementItems.add(this.elementItemDescriptor.readItemFrom(source));
-            }
-        }
+        TypedFieldDecorator<Integer> countField = this.threadLocalCountField == null ?
+                null : this.threadLocalCountField.get();
 
-        if (multiplicity == null || multiplicity.isSizeWithinBounds(elementItems.size())) {
-            return new SequenceItemEntity(
-                    this,
-                    elementItems,
-                    this.threadLocalCountField == null ? null : this.threadLocalCountField.get());
-        } else {
+        List<FlatDataItemEntity<?>> elementItems = countField == null ?
+                this.readWithTrialAndErrorStrategy(source) : this.readWithCountField(source, countField);
+
+        if (multiplicity != null && multiplicity.isSizeNotWithinBounds(elementItems.size())) {
             throw new FlatDataReadException(MSG_Multiplicity_constraint_violated(this.getName(), this.multiplicity));
         }
+        return new SequenceItemEntity(this, elementItems, countField);
     }
 
     @Override
@@ -204,7 +218,7 @@ public class SequenceItemDescriptor extends AbstractFlatDataItemDescriptor<Seque
     /**
      * @return the descriptor of the element items.
      */
-    public FlatDataItemDescriptor<FlatDataItemEntity<?>> getElementItemDescriptor() {
+    public FlatDataItemDescriptor<?> getElementItemDescriptor() {
         return this.elementItemDescriptor;
     }
 
@@ -213,5 +227,32 @@ public class SequenceItemDescriptor extends AbstractFlatDataItemDescriptor<Seque
      */
     public Multiplicity getMultiplicity() {
         return multiplicity;
+    }
+
+    private void assertCountFieldExistsWhenCountFieldIsReferenced() {
+        if (this.threadLocalCountField != null && this.threadLocalCountField.get() == null) {
+            throw new IllegalStateException("Expected a count field because count field reference has been defined!");
+        }
+    }
+
+    private List<FlatDataItemEntity<?>> readWithTrialAndErrorStrategy(Reader source) {
+        List<FlatDataItemEntity<?>> elementItems = new ArrayList<>();
+        ItemEntityReadStrategy strategy = new TrialAndErrorReadStrategy(this.getName(), this.elementItemDescriptor);
+        FlatDataItemEntity<?> itemEntity;
+        do {
+            itemEntity = strategy.readItemFrom(source);
+            if (itemEntity != null) {
+                elementItems.add(itemEntity);
+            }
+        } while(itemEntity != null);
+        return elementItems;
+    }
+
+    private List<FlatDataItemEntity<?>> readWithCountField(Reader source, TypedFieldDecorator<Integer> countField) {
+        List<FlatDataItemEntity<?>> elementItems = new ArrayList<>();
+        for (int i = 0; i < countField.getTypedValue(); i++) {
+            elementItems.add(this.elementItemDescriptor.readItemFrom(source));
+        }
+        return elementItems;
     }
 }

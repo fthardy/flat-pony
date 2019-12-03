@@ -24,6 +24,7 @@ SOFTWARE.
 package de.fthardy.flatpony.core.structure;
 
 import de.fthardy.flatpony.core.AbstractFlatDataItemEntity;
+import de.fthardy.flatpony.core.FlatDataItemDescriptor;
 import de.fthardy.flatpony.core.FlatDataItemEntity;
 import de.fthardy.flatpony.core.FlatDataWriteException;
 import de.fthardy.flatpony.core.util.TypedFieldDecorator;
@@ -42,6 +43,15 @@ import java.util.Objects;
 public class SequenceItemEntity extends AbstractFlatDataItemEntity<SequenceItemDescriptor>
         implements FlatDataStructure<SequenceItemDescriptor> {
 
+    private static List<FlatDataItemEntity<?>> createElementList(
+            FlatDataItemDescriptor<? extends FlatDataItemEntity<?>> descriptor, int size) {
+        List<FlatDataItemEntity<?>> elements = new ArrayList<>();
+        for (int i = 0; i < size; i++) {
+            elements.add(descriptor.createItem());
+        }
+        return elements;
+    }
+
     private final List<FlatDataItemEntity<?>> elementItems;
     private final TypedFieldDecorator<Integer> countField;
 
@@ -52,7 +62,12 @@ public class SequenceItemEntity extends AbstractFlatDataItemEntity<SequenceItemD
      * @param countField the count field entity instance or {@code null}.
      */
     SequenceItemEntity(SequenceItemDescriptor descriptor, TypedFieldDecorator<Integer> countField) {
-        this(descriptor, Collections.emptyList(), countField);
+        this(
+                descriptor,
+                createElementList(
+                        descriptor.getElementItemDescriptor(),
+                        countField == null ? 0 : countField.getTypedValue()),
+                countField);
     }
 
     /**
@@ -107,7 +122,7 @@ public class SequenceItemEntity extends AbstractFlatDataItemEntity<SequenceItemD
      * @param elementItem the element item to discard.
      */
     public void discardElement(FlatDataItemEntity<?> elementItem) {
-        if (this.elementItems.remove(elementItem)) {
+        if (!this.elementItems.remove(elementItem)) {
             throw new IllegalArgumentException("Invalid element item!");
         }
         this.updateCountField();
@@ -130,7 +145,7 @@ public class SequenceItemEntity extends AbstractFlatDataItemEntity<SequenceItemD
      *                                  item descriptor from this optional items descriptor.
      */
     public void addElementItem(FlatDataItemEntity<?> elementItem) {
-        if (this.elementItems.contains(Objects.requireNonNull(elementItem, "Undefined element item entity!"))
+        if (!this.elementItems.contains(Objects.requireNonNull(elementItem, "Undefined element item entity!"))
                 || elementItem.getDescriptor() != this.getDescriptor().getElementItemDescriptor()) {
             throw new IllegalArgumentException("Invalid element item!");
         }
