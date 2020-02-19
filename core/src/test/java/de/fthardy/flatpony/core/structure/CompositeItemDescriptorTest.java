@@ -1,3 +1,26 @@
+/*
+MIT License
+
+Copyright (c) 2019 Frank Hardy
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+ */
 package de.fthardy.flatpony.core.structure;
 
 import de.fthardy.flatpony.core.FlatDataItemDescriptor;
@@ -8,68 +31,77 @@ import org.junit.jupiter.api.Test;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.Arrays;
-import java.util.Collections;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 class CompositeItemDescriptorTest {
 
     @Test
-    void Cannot_create_when_child_list_is_null() {
-        assertThrows(NullPointerException.class, () -> new CompositeItemDescriptor("Foo", null));
-    }
-
-    @Test
-    void Cannot_create_when_child_list_is_empty() {
-        assertThrows(IllegalArgumentException.class, () ->
-                new CompositeItemDescriptor("Foo", Collections.emptyList()));
+    void Cannot_add_null() {
+        assertThrows(NullPointerException.class, () -> CompositeItemDescriptor.newInstance("Foo")
+                .addItemDescriptor(null));
     }
 
     @Test
     void Read_from_a_source_stream() {
-        ConstantFieldDescriptor constantFieldDescriptor = new ConstantFieldDescriptor("ID", "FOO");
-        FixedSizeFieldDescriptor field1Descriptor = new FixedSizeFieldDescriptor("Field1", 5);
-        FixedSizeFieldDescriptor field2Descriptor = new FixedSizeFieldDescriptor("Field2", 9);
+        ConstantFieldDescriptor constantFieldDescriptor =
+                ConstantFieldDescriptor.newInstance("ID").withConstant("FOO").build();
+        FixedSizeFieldDescriptor field1Descriptor = FixedSizeFieldDescriptor.newInstance("Field1")
+                .withFieldSize(5).build();
+        FixedSizeFieldDescriptor field2Descriptor = FixedSizeFieldDescriptor.newInstance("Field2")
+                .withFieldSize(9).build();
 
-        CompositeItemDescriptor descriptor = new CompositeItemDescriptor(
-                "Record", Arrays.asList(constantFieldDescriptor, field1Descriptor, field2Descriptor));
+        CompositeItemDescriptor descriptor = CompositeItemDescriptor.newInstance("Record")
+                .addItemDescriptors(constantFieldDescriptor, field1Descriptor, field2Descriptor)
+                .build();
 
         Reader reader = new StringReader("FOOTest1123456789");
 
-        CompositeItemEntity compositeItem = descriptor.readItemFrom(reader);
+        CompositeItemEntity compositeItem = descriptor.readItemEntityFrom(reader);
         assertThat(compositeItem).isNotNull();
     }
     @Test
     void Min_length_is_sum_of_lengths() {
-        ConstantFieldDescriptor constantFieldDescriptor = new ConstantFieldDescriptor("ID", "FOO");
-        FixedSizeFieldDescriptor field1Descriptor = new FixedSizeFieldDescriptor("Field1", 5);
-        FixedSizeFieldDescriptor field2Descriptor = new FixedSizeFieldDescriptor("Field2", 9);
+        ConstantFieldDescriptor constantFieldDescriptor =
+                ConstantFieldDescriptor.newInstance("ID").withConstant("FOO").build();
+        FixedSizeFieldDescriptor field1Descriptor = FixedSizeFieldDescriptor.newInstance("Field1")
+                .withFieldSize(5).build();
+        FixedSizeFieldDescriptor field2Descriptor = FixedSizeFieldDescriptor.newInstance("Field2")
+                .withFieldSize(9).build();
 
-        CompositeItemDescriptor descriptor = new CompositeItemDescriptor(
-                "Record", Arrays.asList(constantFieldDescriptor, field1Descriptor, field2Descriptor));
+        CompositeItemDescriptor descriptor = CompositeItemDescriptor.newInstance("Record")
+                .addItemDescriptors(Arrays.asList(constantFieldDescriptor, field1Descriptor, field2Descriptor))
+                .build();
 
         assertThat(descriptor.getMinLength()).isEqualTo(17);
     }
 
     @Test
     void Create_new_item() {
-        ConstantFieldDescriptor constantFieldDescriptor = new ConstantFieldDescriptor("ID", "FOO");
-        FixedSizeFieldDescriptor field1Descriptor = new FixedSizeFieldDescriptor("Field1", 5);
-        FixedSizeFieldDescriptor field2Descriptor = new FixedSizeFieldDescriptor("Field2", 9);
+        ConstantFieldDescriptor constantFieldDescriptor =
+                ConstantFieldDescriptor.newInstance("ID").withConstant("FOO").build();
+        FixedSizeFieldDescriptor field1Descriptor = FixedSizeFieldDescriptor.newInstance("Field1")
+                .withFieldSize(5).build();
+        FixedSizeFieldDescriptor field2Descriptor = FixedSizeFieldDescriptor.newInstance("Field2")
+                .withFieldSize(9).build();
 
-        CompositeItemDescriptor descriptor = new CompositeItemDescriptor(
-                "Record", Arrays.asList(constantFieldDescriptor, field1Descriptor, field2Descriptor));
+        CompositeItemDescriptor descriptor = CompositeItemDescriptor.newInstance("Record")
+                .addItemDescriptor(constantFieldDescriptor)
+                .addItemDescriptor(field1Descriptor)
+                .addItemDescriptor(field2Descriptor)
+                .build();
 
-        CompositeItemEntity compositeItem = descriptor.createItem();
+        CompositeItemEntity compositeItem = descriptor.createItemEntity();
         assertThat(compositeItem.getLength()).isEqualTo(17);
     }
 
     @Test
     void Calls_correct_handler_method() {
-        CompositeItemDescriptor descriptor = new CompositeItemDescriptor(
-                "Record", Collections.singletonList(new ConstantFieldDescriptor("ID", "Foo")));
+        CompositeItemDescriptor descriptor = CompositeItemDescriptor.newInstance("Record")
+                .addItemDescriptor(ConstantFieldDescriptor.newInstance("ID").withConstant("Foo").build())
+                .build();
 
         FlatDataItemDescriptor.Handler handlerMock = mock(FlatDataItemDescriptor.Handler.class);
         FlatDataStructureDescriptor.Handler descriptorHandlerMock = mock(FlatDataStructureDescriptor.Handler.class);

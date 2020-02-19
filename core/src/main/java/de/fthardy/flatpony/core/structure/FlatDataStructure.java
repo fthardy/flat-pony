@@ -47,36 +47,36 @@ public interface FlatDataStructure<T extends FlatDataStructureDescriptor<?>> ext
     interface Handler extends FlatDataItemEntity.Handler {
 
         /**
-         * Handle a composite item.
+         * Handle a composite item entity.
          *
-         * @param item the item to be handled by the receiving instance.
+         * @param item the item entity to be handled by the receiving instance.
          */
-        void handleCompositeItem(CompositeItemEntity item);
+        void handleCompositeItemEntity(CompositeItemEntity item);
 
         /**
-         * Handle a delimited item.
+         * Handle a delimited item entity.
          *
-         * @param item the item to be handled by the receiving instance.
+         * @param item the item entity to be handled by the receiving instance.
          */
-        void handleDelimitedItem(DelimitedItemEntity item);
+        void handleDelimitedItemEntity(DelimitedItemEntity item);
 
         /**
-         * Handle an optional item.
+         * Handle an optional item entity.
          *
-         * @param item the item to be handled by the receiving instance.
+         * @param item the item entity to be handled by the receiving instance.
          */
-        void handleOptionalItem(OptionalItemEntity item);
+        void handleOptionalItemEntity(OptionalItemEntity item);
 
         /**
-         * Handle a sequence item.
+         * Handle a sequence item entity.
          *
-         * @param item the item to be handled by the receiving instance.
+         * @param item the item entity to be handled by the receiving instance.
          */
-        void handleSequenceItem(SequenceItemEntity item);
+        void handleSequenceItemEntity(SequenceItemEntity item);
     }
 
     /**
-     * @return the list of child items.
+     * @return the list of children.
      */
-    List<FlatDataItemEntity<?>> getChildItems();
+    List<FlatDataItemEntity<?>> getChildren();
 }

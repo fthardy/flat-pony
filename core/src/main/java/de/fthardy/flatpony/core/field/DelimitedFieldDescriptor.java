@@ -26,9 +26,13 @@ package de.fthardy.flatpony.core.field;
 import de.fthardy.flatpony.core.FlatDataItemDescriptor;
 import de.fthardy.flatpony.core.FlatDataReadException;
 import de.fthardy.flatpony.core.field.constraint.ValueConstraintViolationException;
+import de.fthardy.flatpony.core.structure.DelimitedItemDescriptor;
+import de.fthardy.flatpony.core.util.AbstractItemDescriptorBuilder;
+import de.fthardy.flatpony.core.util.ObjectBuilder;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.util.Objects;
 
 /**
  * The implementation of the descriptor for a delimited field.
@@ -46,6 +50,100 @@ import java.io.Reader;
 public final class DelimitedFieldDescriptor extends AbstractFlatDataFieldDescriptor<DelimitedField>
         implements FlatDataFieldDescriptor<DelimitedField> {
 
+    /**
+     * The builder which creates the new field descriptor instance.
+     * 
+     * @author Frank Timothy Hardy
+     */
+    public interface Builder extends ObjectBuilder<DelimitedFieldDescriptor> {
+        // no additional methods
+    }
+
+    /**
+     * Allows to define a default value for the field.
+     * <p>
+     * By default the default value is an empty string.
+     * </p>
+     * 
+     * @author Frank Timothy Hardy
+     */
+    public interface DefineDefaultValue extends Builder {
+
+        /**
+         * Define a different default value.
+         * 
+         * @param defaultValue the default value for the field.
+         *                     
+         * @return the builder for further configuration or instance creation.
+         */
+        DefineDelimiter withDefaultValue(String defaultValue);
+    }
+
+    /**
+     * Allows to define a delimiter.
+     * <p>
+     * By default the delimiter is {@link DelimitedItemDescriptor#DEFAULT_DELIMITER}.
+     * </p>
+     * 
+     * @author Frank Timothy Hardy
+     */
+    public interface DefineDelimiter extends Builder {
+
+        /**
+         * Define a different delimiter character.
+         * 
+         * @param delimiter the delimiter character.
+         *                  
+         * @return the builder for further configuration or instance creation.
+         */
+        Builder withDelimiter(char delimiter);
+    }
+    
+    private interface BuildParams {
+        
+        String getDescriptorName();
+        String getDefaultValue();
+        int getDelimiter();
+    }
+    
+    private static final class BuilderImpl extends AbstractItemDescriptorBuilder<DelimitedFieldDescriptor>
+            implements DefineDefaultValue, DefineDelimiter, BuildParams {
+        
+        private String defaultValue = "";
+        private int delimiter = DEFAULT_DELIMITER;
+        
+        BuilderImpl(String descriptorName) {
+            super(descriptorName);
+        }
+
+        @Override
+        public DefineDelimiter withDefaultValue(String defaultValue) {
+            this.defaultValue = Objects.requireNonNull(defaultValue);
+            return this;
+        }
+
+        @Override
+        public Builder withDelimiter(char delimiter) {
+            this.delimiter = delimiter;
+            return this;
+        }
+
+        @Override
+        public String getDefaultValue() {
+            return this.defaultValue;
+        }
+
+        @Override
+        public int getDelimiter() {
+            return this.delimiter;
+        }
+
+        @Override
+        protected DelimitedFieldDescriptor createItemDescriptorInstance() {
+            return new DelimitedFieldDescriptor(this);
+        }
+    }
+
     /** The default delimiter definition used by this implementation. */
     public static final char DEFAULT_DELIMITER = ',';
 
@@ -53,49 +151,31 @@ public final class DelimitedFieldDescriptor extends AbstractFlatDataFieldDescrip
         return String.format("Failed to read separated field '%s' from source stream!", fieldName);
     }
 
+    /**
+     * Create a builder to configure and create a new instance of this field descriptor.
+     * 
+     * @param name the name for this new field descriptor.
+     *             
+     * @return the builder instance.
+     */
+    public static DefineDefaultValue newInstance(String name) {
+        return new BuilderImpl(name);
+    }
+
     private final int delimiter;
-
-    /**
-     * Creates a new delimited field descriptor which has no constraints, uses the {@link #DEFAULT_DELIMITER} and has an
-     * empty string as default value.
-     *
-     * @param name the name of the field.
-     */
-    public DelimitedFieldDescriptor(String name) {
-        this(name, "");
-    }
-
-    /**
-     * Creates a new delimited field descriptor which has no constraints and uses {@link #DEFAULT_DELIMITER}.
-     *
-     * @param name the name of the field.
-     * @param defaultValue a default value for the field.
-     */
-    public DelimitedFieldDescriptor(String name, String defaultValue) {
-        this(name, DEFAULT_DELIMITER, defaultValue);
-    }
-
-    /**
-     * Creates a new delimited field descriptor.
-     *
-     * @param name the name of the field.
-     * @param delimiter the delimiter which delimits the end of the field data.
-     * @param defaultValue a default value for the field.
-     */
-    public DelimitedFieldDescriptor(String name, char delimiter, String defaultValue) {
-
-        super(name, defaultValue);
-
-        this.delimiter = delimiter;
+    
+    private DelimitedFieldDescriptor(BuildParams params) {
+        super(params.getDescriptorName(), params.getDefaultValue());
+        this.delimiter = params.getDelimiter();
     }
 
     @Override
-    public DelimitedField createItem() {
+    public DelimitedField createItemEntity() {
         return new DelimitedField(this);
     }
 
     @Override
-    public DelimitedField readItemFrom(Reader source) {
+    public DelimitedField readItemEntityFrom(Reader source) {
         StringBuilder valueBuilder = new StringBuilder();
         try {
             int i = source.read();
@@ -107,7 +187,7 @@ public final class DelimitedFieldDescriptor extends AbstractFlatDataFieldDescrip
             throw new FlatDataReadException(MSG_Read_failed(this.getName()), e);
         }
 
-        DelimitedField field = this.createItem();
+        DelimitedField field = this.createItemEntity();
         try {
             field.setValue(valueBuilder.toString());
         } catch (ValueConstraintViolationException e) {

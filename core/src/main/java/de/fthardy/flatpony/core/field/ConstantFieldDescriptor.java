@@ -25,9 +25,12 @@ package de.fthardy.flatpony.core.field;
 
 import de.fthardy.flatpony.core.FlatDataItemDescriptor;
 import de.fthardy.flatpony.core.FlatDataReadException;
+import de.fthardy.flatpony.core.util.AbstractItemDescriptorBuilder;
+import de.fthardy.flatpony.core.util.ObjectBuilder;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.util.Objects;
 
 /**
  * The implementation of a descriptor for a field which represents an immutable constant value.
@@ -37,6 +40,58 @@ import java.io.Reader;
 public final class ConstantFieldDescriptor extends AbstractFlatDataFieldDescriptor<ConstantField>
         implements FlatDataFieldDescriptor<ConstantField> {
 
+    /**
+     * Demand the definition of the constant value for the item.
+     * 
+     * @author Frank Timothy Hardy
+     */
+    public interface DefineConstant {
+
+        /**
+         * Define the constant for this item.
+         * 
+         * @param constant the constant value.
+         *                 
+         * @return the builder instance to create the new instance.
+         */
+        ObjectBuilder<ConstantFieldDescriptor> withConstant(String constant);
+    }
+    
+    private interface BuildParams {
+        
+        String getDescriptorName();
+        String getConstant();
+    }
+    
+    private static final class BuilderImpl extends AbstractItemDescriptorBuilder<ConstantFieldDescriptor> 
+            implements DefineConstant, ObjectBuilder<ConstantFieldDescriptor>, BuildParams {
+        
+        private String constant;
+        
+        BuilderImpl(String descriptorName) {
+            super(descriptorName);
+        }
+
+        @Override
+        public ObjectBuilder<ConstantFieldDescriptor> withConstant(String constant) {
+            this.constant = Objects.requireNonNull(constant, "Undefined constant value!");
+            if (this.constant.isEmpty()) {
+                throw new IllegalArgumentException("The constant value cannot be empty!");
+            }
+            return this;
+        }
+
+        @Override
+        public String getConstant() {
+            return this.constant;
+        }
+
+        @Override
+        protected ConstantFieldDescriptor createItemDescriptorInstance() {
+            return new ConstantFieldDescriptor(this);
+        }
+    }
+    
     static String MSG_Read_failed(String fieldName) {
         return String.format("Failed to read constant field '%s' from source stream!", fieldName);
     }
@@ -50,19 +105,21 @@ public final class ConstantFieldDescriptor extends AbstractFlatDataFieldDescript
                 " The read value is not equal to the constant: [%s] != [%s]!", value, constant);
     }
 
+    /**
+     * Create a builder for configuration and creation of a new instance of this item descriptor.
+     * 
+     * @param name the name of the descriptor.
+     *             
+     * @return the builder instance.
+     */
+    public static DefineConstant newInstance(String name) {
+        return new BuilderImpl(name);
+    }
+
     private final ConstantField fieldInstance;
 
-    /**
-     * Creates a new instance of this constant field descriptor.
-     *
-     * @param name the name of the constant field.
-     * @param constant the constant content represented by the field.
-     */
-    public ConstantFieldDescriptor(String name, String constant) {
-        super(name, constant);
-        if (constant.isEmpty()) {
-            throw new IllegalArgumentException("The constant value cannot be empty!");
-        }
+    private ConstantFieldDescriptor(BuildParams params) {
+        super(params.getDescriptorName(), params.getConstant());
         this.fieldInstance = new ConstantField(this);
     }
 
@@ -72,12 +129,12 @@ public final class ConstantFieldDescriptor extends AbstractFlatDataFieldDescript
     }
 
     @Override
-    public ConstantField createItem() {
+    public ConstantField createItemEntity() {
         return fieldInstance;
     }
 
     @Override
-    public ConstantField readItemFrom(Reader source) {
+    public ConstantField readItemEntityFrom(Reader source) {
         char[] charsToRead = new char[this.getDefaultValue().length()];
         try {
             int length = source.read(charsToRead);

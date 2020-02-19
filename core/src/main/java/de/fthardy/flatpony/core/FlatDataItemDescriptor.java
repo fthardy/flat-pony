@@ -36,8 +36,8 @@ import java.io.Reader;
  * <p>
  * The descriptor serves as a factory for creating new instances of the entity. A descriptor can be used to create as
  * many entities as desired. Each of the entity instances has a reference to the descriptor instance that created it.
- * There are two ways to create an entity. Either create a new entity instance by calling {@link #createItem()} or by
- * reading from a given character stream by calling {@link #readItemFrom(Reader)}.
+ * There are two ways to create an entity. Either create a new entity instance by calling {@link #createItemEntity()} or by
+ * reading from a given character stream by calling {@link #readItemEntityFrom(Reader)}.
  * </p>
  *
  * @param <T> the type of the item produced by the descriptor.
@@ -82,20 +82,20 @@ public interface FlatDataItemDescriptor<T extends FlatDataItemEntity<?>> {
     int getMinLength();
 
     /**
-     * Create a new item.
+     * Create a new item entity.
      *
-     * @return the new item instance.
+     * @return the new item entity instance.
      */
-    T createItem();
+    T createItemEntity();
 
     /**
-     * Read the data from a given input source and provide an item instance that encapsulates the read data.
+     * Read the data from a given source stream and provide an item entity instance that encapsulates the read data.
      *
-     * @param source the reader providing the data from the input source.
+     * @param source the reader providing the data from the source stream.
      *
-     * @return a new item instance with the read data.
+     * @return a new item entity instance with the read data.
      */
-    T readItemFrom(Reader source);
+    T readItemEntityFrom(Reader source);
 
     /**
      * Apply a handler to the receiving descriptor.

@@ -80,7 +80,7 @@ public final class ConstantField extends AbstractFlatDataItemEntity<ConstantFiel
         if (handler instanceof FlatDataField.Handler) {
             ((FlatDataField.Handler) handler).handleConstantField(this);
         } else {
-            handler.handleFlatDataItem(this);
+            handler.handleFlatDataItemEntity(this);
         }
     }
 }

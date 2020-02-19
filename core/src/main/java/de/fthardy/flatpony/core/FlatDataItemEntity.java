@@ -59,11 +59,11 @@ public interface FlatDataItemEntity<T extends FlatDataItemDescriptor<?>> {
     interface Handler {
 
         /**
-         * Handle a flat data item.
+         * Handle a flat data item entity.
          *
-         * @param item the item to be handled by the receiving instance.
+         * @param item the item entity to be handled by the receiving instance.
          */
-        void handleFlatDataItem(FlatDataItemEntity<?> item);
+        void handleFlatDataItemEntity(FlatDataItemEntity<?> item);
     }
 
     /**

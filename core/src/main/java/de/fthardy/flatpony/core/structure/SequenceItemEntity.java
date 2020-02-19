@@ -40,14 +40,14 @@ import java.util.Objects;
  *
  * @author Frank Timothy Hardy
  */
-public class SequenceItemEntity extends AbstractFlatDataItemEntity<SequenceItemDescriptor>
+public final class SequenceItemEntity extends AbstractFlatDataItemEntity<SequenceItemDescriptor>
         implements FlatDataStructure<SequenceItemDescriptor> {
 
     private static List<FlatDataItemEntity<?>> createElementList(
             FlatDataItemDescriptor<? extends FlatDataItemEntity<?>> descriptor, int size) {
         List<FlatDataItemEntity<?>> elements = new ArrayList<>();
         for (int i = 0; i < size; i++) {
-            elements.add(descriptor.createItem());
+            elements.add(descriptor.createItemEntity());
         }
         return elements;
     }
@@ -87,7 +87,7 @@ public class SequenceItemEntity extends AbstractFlatDataItemEntity<SequenceItemD
     }
 
     @Override
-    public List<FlatDataItemEntity<?>> getChildItems() {
+    public List<FlatDataItemEntity<?>> getChildren() {
         return Collections.unmodifiableList(this.elementItems);
     }
 
@@ -110,9 +110,9 @@ public class SequenceItemEntity extends AbstractFlatDataItemEntity<SequenceItemD
     @Override
     public void applyHandler(FlatDataItemEntity.Handler handler) {
         if (handler instanceof FlatDataStructure.Handler) {
-            ((FlatDataStructure.Handler) handler).handleSequenceItem(this);
+            ((FlatDataStructure.Handler) handler).handleSequenceItemEntity(this);
         } else {
-            handler.handleFlatDataItem(this);
+            handler.handleFlatDataItemEntity(this);
         }
     }
 
@@ -159,7 +159,7 @@ public class SequenceItemEntity extends AbstractFlatDataItemEntity<SequenceItemD
      * @return the new element item.
      */
     public FlatDataItemEntity<?> addNewElementItem() {
-        FlatDataItemEntity<?> newElementItem = this.getDescriptor().getElementItemDescriptor().createItem();
+        FlatDataItemEntity<?> newElementItem = this.getDescriptor().getElementItemDescriptor().createItemEntity();
         this.addElementItem(newElementItem);
         return newElementItem;
     }

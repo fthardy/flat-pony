@@ -1,3 +1,26 @@
+/*
+MIT License
+
+Copyright (c) 2019 Frank Hardy
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+ */
 package de.fthardy.flatpony.core.field;
 
 import de.fthardy.flatpony.core.FlatDataItemDescriptor;
@@ -5,10 +28,6 @@ import de.fthardy.flatpony.core.field.constraint.AbstractValueConstraint;
 import de.fthardy.flatpony.core.field.constraint.ValueConstraint;
 import de.fthardy.flatpony.core.field.constraint.ValueConstraintViolationException;
 import org.junit.jupiter.api.Test;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -18,19 +37,7 @@ class ConstrainedFieldDescriptorTest {
 
     @Test
     void cannot_create_with_null_descriptor() {
-        assertThrows(NullPointerException.class, () -> new ConstrainedFieldDescriptor(null, null));
-    }
-
-    @Test
-    void cannot_create_with_null_constraints() {
-        assertThrows(NullPointerException.class, () -> new ConstrainedFieldDescriptor(
-                new DelimitedFieldDescriptor("Foo"), null));
-    }
-
-    @Test
-    void cannot_create_with_empty_constraints() {
-        assertThrows(IllegalArgumentException.class, () -> new ConstrainedFieldDescriptor(
-                new DelimitedFieldDescriptor("Foo"), Collections.emptySet()));
+        assertThrows(NullPointerException.class, () -> ConstrainedFieldDescriptor.newInstance(null));
     }
 
     @Test
@@ -59,57 +66,58 @@ class ConstrainedFieldDescriptorTest {
             }
         };
 
-        assertThrows(IllegalArgumentException.class, () -> new ConstrainedFieldDescriptor(
-                new DelimitedFieldDescriptor("Foo"), new HashSet<>(Arrays.asList(constraint1, constraint2))));
+        assertThrows(IllegalArgumentException.class, () -> ConstrainedFieldDescriptor.newInstance(
+                DelimitedFieldDescriptor.newInstance("Foo").build())
+                .addConstraint(constraint1).addConstraint(constraint2));
     }
 
     @Test
     void default_value_violates_constraint() {
-        assertThrows(ValueConstraintViolationException.class, () -> new ConstrainedFieldDescriptor(
-                new DelimitedFieldDescriptor("Foo"), new HashSet<>(Collections.singletonList(
-                        new AbstractValueConstraint() {
-            @Override
-            public boolean test(String s) {
-                return true;
-            }
-        }))));
+        assertThrows(ValueConstraintViolationException.class, () -> ConstrainedFieldDescriptor.newInstance(
+                DelimitedFieldDescriptor.newInstance("Foo").build())
+                .addConstraint(new AbstractValueConstraint() {
+                    @Override
+                    public boolean test(String s) {
+                        return true;
+                    }
+                }).build());
     }
 
     @Test
     void create_without_constraint_violations() {
-        new ConstrainedFieldDescriptor(
-                new DelimitedFieldDescriptor("Foo"),
-                new HashSet<>(Collections.singletonList(new AbstractValueConstraint() {
+        ConstrainedFieldDescriptor.newInstance(
+                DelimitedFieldDescriptor.newInstance("Foo").build())
+                .addConstraint(new AbstractValueConstraint() {
                     @Override
                     public boolean test(String s) {
                         return false;
                     }
-                })));
+                });
     }
 
     @Test
     void Min_length_is_min_length_of_field() {
-        ConstrainedFieldDescriptor descriptor = new ConstrainedFieldDescriptor(
-                new DelimitedFieldDescriptor("Foo"),
-                new HashSet<>(Collections.singletonList(new AbstractValueConstraint() {
+        ConstrainedFieldDescriptor descriptor = ConstrainedFieldDescriptor.newInstance(
+                DelimitedFieldDescriptor.newInstance("Foo").build())
+                .addConstraint(new AbstractValueConstraint() {
                     @Override
                     public boolean test(String s) {
                         return false;
                     }
-                })));
+                }).build();
         assertEquals(descriptor.getFieldDescriptor().getMinLength(), descriptor.getMinLength());
     }
 
     @Test
     void Calls_correct_handler_method() {
-        ConstrainedFieldDescriptor descriptor = new ConstrainedFieldDescriptor(
-                new DelimitedFieldDescriptor("Foo"),
-                new HashSet<>(Collections.singleton(new AbstractValueConstraint() {
+        ConstrainedFieldDescriptor descriptor = ConstrainedFieldDescriptor.newInstance(
+                DelimitedFieldDescriptor.newInstance("Foo").build())
+                .addConstraint(new AbstractValueConstraint() {
                     @Override
                     public boolean test(String s) {
                         return false;
                     }
-                })));
+                }).build();
 
         FlatDataItemDescriptor.Handler handlerMock = mock(FlatDataItemDescriptor.Handler.class);
         FlatDataFieldDescriptor.Handler fieldDescriptorHandlerMock = mock(FlatDataFieldDescriptor.Handler.class);

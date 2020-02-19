@@ -23,23 +23,19 @@ SOFTWARE.
  */
 package de.fthardy.flatpony.core.util;
 
-import de.fthardy.flatpony.core.FlatDataItemEntity;
-
-import java.io.Reader;
-
 /**
- * The interface for an item entity read strategy.
- *
+ * A generic object builder interface.
+ * 
+ * @param <T> the type of object to build.
+ *           
  * @author Frank Timothy Hardy
  */
-public interface ItemEntityReadStrategy {
+public interface ObjectBuilder<T> {
 
     /**
-     * Read an item entity from the given source stream.
-     *
-     * @param source the source stream to read the item entity from.
-     *
-     * @return the read item entity.
+     * Build the object instance.
+     * 
+     * @return a new object instance.
      */
-    FlatDataItemEntity<?> readItemFrom(Reader source);
+    T build();
 }

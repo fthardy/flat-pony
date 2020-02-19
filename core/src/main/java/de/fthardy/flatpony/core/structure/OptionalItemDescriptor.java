@@ -26,11 +26,10 @@ package de.fthardy.flatpony.core.structure;
 import de.fthardy.flatpony.core.AbstractFlatDataItemDescriptor;
 import de.fthardy.flatpony.core.FlatDataItemDescriptor;
 import de.fthardy.flatpony.core.FlatDataItemEntity;
-import de.fthardy.flatpony.core.util.FieldReferenceConfig;
-import de.fthardy.flatpony.core.util.ItemEntityReadStrategy;
-import de.fthardy.flatpony.core.util.TrialAndErrorReadStrategy;
-import de.fthardy.flatpony.core.util.TypedFieldDecorator;
+import de.fthardy.flatpony.core.FlatDataReadException;
+import de.fthardy.flatpony.core.util.*;
 
+import java.io.IOException;
 import java.io.Reader;
 import java.util.Collections;
 import java.util.List;
@@ -39,11 +38,11 @@ import java.util.Objects;
 /**
  * The descriptor implementation for an optional item.
  * <p>
- * An optional item represents a target item with might be present or not. The optional item can optionally be linked
- * with a field that contains/represents a flag indicating the presence and/or absence of the target item. Such a field
- * is expected to be defined before (upstream) the optional item. If no reference flag field is defined then the read
- * strategy is trial and error which means the read algorithm tries to read the target item and if it fails it stops
- * reading. For further details see {@link TrialAndErrorReadStrategy}.
+ * An optional item represents some target item which might be present or absent. This descriptor can be optionally
+ * linked with a field which is before (upstream) the optional item. Such a field might represent a flag indicating the
+ * presence or absence of the target item represented by this descriptor. If no linked to a flag field is defined then
+ * the read strategy is "trial and error" which means the read algorithm tries to read the target item and if it fails
+ * it stops reading, resets to the position where the item read started assuming that there is no target item.
  * </p>
  *
  * @author Frank Timothy Hardy
@@ -51,64 +50,155 @@ import java.util.Objects;
 public final class OptionalItemDescriptor extends AbstractFlatDataItemDescriptor<OptionalItemEntity>
         implements FlatDataStructureDescriptor<OptionalItemEntity> {
 
-    private final FlatDataItemDescriptor<?> targetItemDescriptor;
-    private final ThreadLocal<TypedFieldDecorator<Boolean>> threadLocalFlagField;
-
     /**
-     * Create a new instance of this descriptor with no flag field reference.
-     *
-     * @param name the name of the descriptor.
-     * @param targetItemDescriptor the target item descriptor.
+     * Demands the definition of a target item descriptor.
+     * 
+     * @author Frank Timothy Hardy
      */
-    public OptionalItemDescriptor(String name, FlatDataItemDescriptor<?> targetItemDescriptor) {
-        this(name, targetItemDescriptor, null);
+    public interface DefineTargetItemDescriptor {
+
+        /**
+         * Define the descriptor for the target item which might be present or absent.
+         * 
+         * @param targetItemDescriptor the target item descriptor.
+         *                             
+         * @return the builder instance for further configuration or instance creation.
+         */
+        DefineFlagFieldReference withTargetItemDescriptor(FlatDataItemDescriptor<?> targetItemDescriptor);
     }
 
     /**
-     * Create a new instance of this descriptor with a custom read ahead limit.
-     *
-     * @param name the name of the descriptor.
-     * @param targetItemDescriptor the target item descriptor.
-     * @param fieldReferenceConfig the config for the flag reference field.
+     * Allows to optionally define a reference to a flag field.
+     * 
+     * @author Frank Timothy Hardy
      */
-    public OptionalItemDescriptor(
-            String name,
-            FlatDataItemDescriptor<?> targetItemDescriptor,
-            FieldReferenceConfig<Boolean> fieldReferenceConfig) {
-        super(name);
-        this.targetItemDescriptor = Objects.requireNonNull(
-                targetItemDescriptor, "Undefined target item descriptor!");
-        this.threadLocalFlagField = fieldReferenceConfig == null ?
-                null : fieldReferenceConfig.linkWithField();
+    public interface DefineFlagFieldReference extends ObjectBuilder<OptionalItemDescriptor> {
+
+        /**
+         * Define a reference to a flag field.
+         *
+         * @param fieldReference the field reference.
+         *
+         * @return the builder instance for creating the new instance.
+         */
+        ObjectBuilder<OptionalItemDescriptor> withFlagFieldReference(FieldReference<Boolean> fieldReference);
+    }
+
+    private interface BuildParams {
+
+        String getDescriptorName();
+        FlatDataItemDescriptor<?> getTargetItemDescriptor();
+        FieldReference<Boolean> getFieldReference();
+    }
+    
+    private static final class BuilderImpl extends AbstractItemDescriptorBuilder<OptionalItemDescriptor>
+            implements DefineTargetItemDescriptor, DefineFlagFieldReference, BuildParams {
+        
+        private FlatDataItemDescriptor<?> targetItemDescriptor;
+        private FieldReference<Boolean> fieldReference;
+        
+        BuilderImpl(String descriptorName) {
+            super(descriptorName);
+        }
+
+        @Override
+        public FlatDataItemDescriptor<?> getTargetItemDescriptor() {
+            return this.targetItemDescriptor;
+        }
+
+        @Override
+        public FieldReference<Boolean> getFieldReference() {
+            return this.fieldReference;
+        }
+
+        @Override
+        public DefineFlagFieldReference withTargetItemDescriptor(FlatDataItemDescriptor<?> targetItemDescriptor) {
+            this.targetItemDescriptor = Objects.requireNonNull(
+                    targetItemDescriptor, "Undefined target item descriptor!");
+            return this;
+        }
+
+        @Override
+        public ObjectBuilder<OptionalItemDescriptor> withFlagFieldReference(
+                FieldReference<Boolean> fieldReference) {
+            
+            if (this.fieldReference != null) {
+                throw new IllegalStateException("A flag field reference has been already defined!");
+            }
+            this.fieldReference = Objects.requireNonNull(fieldReference);
+            return this;
+        }
+
+        @Override
+        protected OptionalItemDescriptor createItemDescriptorInstance() {
+            return new OptionalItemDescriptor(this);
+        }
+    }
+
+    /**
+     * Create a new instance of this item descriptor.
+     * 
+     * @param name the name of the item descriptor.
+     *             
+     * @return a builder instance to configure and create a new item descriptor instance. 
+     */
+    public static DefineTargetItemDescriptor newInstance(String name) {
+        return new BuilderImpl(name);
+    }
+
+    static String MSG_Failed_to_mark_stream(String itemName) {
+        return MSG_Read_failed(itemName) + " Failed to mark the input source stream.";
+    }
+
+    static String MSG_Failed_to_reset_stream(String itemName) {
+        return MSG_Read_failed(itemName) + " Failed to reset the input source stream.";
+    }
+
+    static String MSG_Mark_not_supported(String itemName) {
+        return MSG_Read_failed(itemName) + " The input source stream doesn't support marking which is essential for " +
+                "this item to function.";
+    }
+
+    private static String MSG_Read_failed(String itemName) {
+        return String.format("Failed to read optional item '%s' from source stream!", itemName);
+    }
+
+    private final FlatDataItemDescriptor<?> targetItemDescriptor;
+    private final FieldReference<Boolean> flagFieldReference;
+
+    private OptionalItemDescriptor(BuildParams params) {
+        super(params.getDescriptorName());
+        this.targetItemDescriptor = params.getTargetItemDescriptor();
+        this.flagFieldReference = params.getFieldReference();
     }
 
     @Override
-    public OptionalItemEntity createItem() {
+    public OptionalItemEntity createItemEntity() {
 
         assertCountFieldExistsWhenCountFieldIsReferenced();
 
         return new OptionalItemEntity(
                 this,
                 null,
-                this.threadLocalFlagField == null ? null : this.threadLocalFlagField.get());
+                this.flagFieldReference == null ? null : this.flagFieldReference.getReferencedField());
     }
 
     @Override
-    public OptionalItemEntity readItemFrom(Reader source) {
+    public OptionalItemEntity readItemEntityFrom(Reader source) {
 
-        this.assertCountFieldExistsWhenCountFieldIsReferenced();
-
-        TypedFieldDecorator<Boolean> flagField = this.threadLocalFlagField == null ?
-                null : this.threadLocalFlagField.get();
-
-        ItemEntityReadStrategy strategy = flagField == null ?
-                new TrialAndErrorReadStrategy(this.getName(), this.targetItemDescriptor) :
-                (Reader reader) -> flagField.getTypedValue() ?
-                        this.targetItemDescriptor.readItemFrom(reader) : null;
-
-        FlatDataItemEntity<?> itemEntity = strategy.readItemFrom(source);
-
-        return new OptionalItemEntity(this, itemEntity, flagField);
+        assertCountFieldExistsWhenCountFieldIsReferenced();
+        
+        OptionalItemEntity optionalItemEntity;
+        if (this.flagFieldReference == null) {
+            optionalItemEntity = new OptionalItemEntity(
+                    this, this.readItemEntityByTrialAndErrorFrom(source), null);
+        } else {
+            TypedFieldDecorator<Boolean> flagField = this.flagFieldReference.getReferencedField();
+            FlatDataItemEntity<?> itemEntity = flagField.getTypedValue() ?
+                    this.targetItemDescriptor.readItemEntityFrom(source) : null;
+            optionalItemEntity = new OptionalItemEntity(this, itemEntity, flagField);
+        }
+        return optionalItemEntity;
     }
 
     @Override
@@ -121,7 +211,7 @@ public final class OptionalItemDescriptor extends AbstractFlatDataItemDescriptor
     }
 
     @Override
-    public List<FlatDataItemDescriptor<?>> getChildDescriptors() {
+    public List<FlatDataItemDescriptor<?>> getChildren() {
         return Collections.singletonList(this.targetItemDescriptor);
     }
 
@@ -133,8 +223,32 @@ public final class OptionalItemDescriptor extends AbstractFlatDataItemDescriptor
     }
 
     private void assertCountFieldExistsWhenCountFieldIsReferenced() {
-        if (this.threadLocalFlagField != null && this.threadLocalFlagField.get() == null) {
+        if (this.flagFieldReference != null && this.flagFieldReference.getReferencedField() == null) {
             throw new IllegalStateException("Expected a flag field because flag field reference has been defined!");
         }
     }
+
+    private FlatDataItemEntity<?> readItemEntityByTrialAndErrorFrom(Reader source) {
+        if (source.markSupported()) {
+            try {
+                source.mark(this.targetItemDescriptor.getMinLength());
+            } catch (IOException e) {
+                throw new FlatDataReadException(MSG_Failed_to_mark_stream(this.getName()), e);
+            }
+
+            try {
+                return this.targetItemDescriptor.readItemEntityFrom(source);
+            } catch (Exception e) {
+                try {
+                    source.reset();
+                } catch (IOException ex) {
+                    throw new FlatDataReadException(MSG_Failed_to_reset_stream(this.getName()), ex);
+                }
+                return null;
+            }
+        } else {
+            throw new FlatDataReadException(MSG_Mark_not_supported(this.getName()));
+        }
+    }
+
 }

@@ -38,7 +38,7 @@ import java.util.Objects;
  *
  * @author Frank Timothy Hardy
  */
-public class TypedFieldDecorator<T> implements FlatDataMutableField<FlatDataFieldDescriptor<?>> {
+public final class TypedFieldDecorator<T> implements FlatDataMutableField<FlatDataFieldDescriptor<?>> {
 
     private final FlatDataMutableField<? extends FlatDataFieldDescriptor<?>> decoratedField;
     private final FieldValueConverter<T> typeConverter;

@@ -25,6 +25,8 @@ package de.fthardy.flatpony.core.structure;
 
 import de.fthardy.flatpony.core.AbstractFlatDataItemDescriptor;
 import de.fthardy.flatpony.core.FlatDataItemDescriptor;
+import de.fthardy.flatpony.core.util.AbstractItemDescriptorBuilder;
+import de.fthardy.flatpony.core.util.ObjectBuilder;
 
 import java.io.Reader;
 import java.util.*;
@@ -42,20 +44,115 @@ import java.util.stream.Collectors;
 public final class CompositeItemDescriptor extends AbstractFlatDataItemDescriptor<CompositeItemEntity>
         implements FlatDataStructureDescriptor<CompositeItemEntity> {
 
-    private final List<FlatDataItemDescriptor<?>> descriptors;
+    /**
+     * Demands the addition of at least one item descriptor.
+     * <p>
+     * There is no limitation on how many items can be added to the composite item but any item descriptor can only be
+     * added once. If it is added a second time a {@link IllegalArgumentException} is going to be thrown.
+     * </p>
+     * 
+     * @author Frank Timothy Hardy
+     */
+    public interface AddItemDescriptors extends ObjectBuilder<CompositeItemDescriptor> {
+
+        /**
+         * Add a single item descriptor to the composite item.
+         * 
+         * @param itemDescriptor the item descriptor to add.
+         *                       
+         * @return the builder instance for further configuration or instance creation.
+         */
+        AddItemDescriptors addItemDescriptor(FlatDataItemDescriptor<?> itemDescriptor);
+
+        /**
+         * Add a bunch of item descriptors to the composite item.
+         * 
+         * @param itemDescriptors the item descriptors to add.
+         *                        
+         * @return the builder instance for further configuration or instance creation.
+         */
+        AddItemDescriptors addItemDescriptors(FlatDataItemDescriptor<?>... itemDescriptors);
+
+        /**
+         * Add a bunch of item descriptors to the composite item provided by an iterable.
+         *
+         * @param itemDescriptors the iterable providing the item descriptors to add.
+         *
+         * @return the builder instance for further configuration or instance creation.
+         */
+        AddItemDescriptors addItemDescriptors(Iterable<FlatDataItemDescriptor<?>> itemDescriptors);
+    }
+    
+    private interface BuildParams {
+
+        String getDescriptorName();
+        List<FlatDataItemDescriptor<?>> getItemDescriptors();
+    }
+    
+    private static final class BuilderImpl extends AbstractItemDescriptorBuilder<CompositeItemDescriptor>
+            implements AddItemDescriptors, BuildParams {
+        
+        private final List<FlatDataItemDescriptor<?>> itemDescriptors = new ArrayList<>();
+        
+        BuilderImpl(String descriptorName) {
+            super(descriptorName);
+        }
+
+        @Override
+        public AddItemDescriptors addItemDescriptor(FlatDataItemDescriptor<?> itemDescriptor) {
+            if (this.itemDescriptors.contains(
+                    Objects.requireNonNull(itemDescriptor, "Undefined item descriptor!"))) {
+                throw new IllegalArgumentException("Cannot add the same item descriptor instance twice!");
+            }
+            this.itemDescriptors.add(itemDescriptor);
+            return this;
+        }
+
+        @Override
+        public AddItemDescriptors addItemDescriptors(FlatDataItemDescriptor<?>... itemDescriptors) {
+            for (FlatDataItemDescriptor<?> itemDescriptor : Objects.requireNonNull(
+                    itemDescriptors, "Undefined item descriptors!")) {
+                this.addItemDescriptor(itemDescriptor);
+            }
+            return this;
+        }
+
+        @Override
+        public AddItemDescriptors addItemDescriptors(Iterable<FlatDataItemDescriptor<?>> itemDescriptors) {
+            for (FlatDataItemDescriptor<?> itemDescriptor : Objects.requireNonNull(
+                    itemDescriptors, "Undefined item descriptors!")) {
+                this.addItemDescriptor(itemDescriptor);
+            }
+            return this;
+        }
+
+        @Override
+        public List<FlatDataItemDescriptor<?>> getItemDescriptors() {
+            return Collections.unmodifiableList(itemDescriptors);
+        }
+
+        @Override
+        protected CompositeItemDescriptor createItemDescriptorInstance() {
+            return new CompositeItemDescriptor(this);
+        }
+    }
 
     /**
-     * Create a new instance of this composite item descriptor.
-     *
-     * @param name the name of this composite item descriptor.
-     * @param descriptors the list of the descriptors which make up this composite descriptor.
+     * Create a builder to configure and create a new instance of this structure item descriptor.
+     * 
+     * @param name the name for the new item descriptor.
+     *             
+     * @return the builder instance to configure and create the new instance.
      */
-    public CompositeItemDescriptor(String name, List<FlatDataItemDescriptor<?>> descriptors) {
-        super(name);
-        if (Objects.requireNonNull(descriptors, "Undefined descriptors!").isEmpty()) {
-            throw new IllegalArgumentException("At least one descriptor has to be defined!");
-        }
-        this.descriptors = Collections.unmodifiableList(new ArrayList<>(descriptors));
+    public static AddItemDescriptors newInstance(String name) {
+        return new BuilderImpl(name);
+    }
+
+    private final List<FlatDataItemDescriptor<?>> descriptors;
+
+    private CompositeItemDescriptor(BuildParams params) {
+        super(params.getDescriptorName());
+        this.descriptors = params.getItemDescriptors();
     }
 
     @Override
@@ -64,19 +161,19 @@ public final class CompositeItemDescriptor extends AbstractFlatDataItemDescripto
     }
 
     @Override
-    public CompositeItemEntity createItem() {
+    public CompositeItemEntity createItemEntity() {
         return new CompositeItemEntity(this,
-                this.descriptors.stream().map(FlatDataItemDescriptor::createItem).collect(Collectors.toList()));
+                this.descriptors.stream().map(FlatDataItemDescriptor::createItemEntity).collect(Collectors.toList()));
     }
 
     @Override
-    public CompositeItemEntity readItemFrom(Reader source) {
+    public CompositeItemEntity readItemEntityFrom(Reader source) {
         return new CompositeItemEntity(this, this.descriptors.stream().map(descriptor ->
-                descriptor.readItemFrom(source)).collect(Collectors.toList()));
+                descriptor.readItemEntityFrom(source)).collect(Collectors.toList()));
     }
 
     @Override
-    public List<FlatDataItemDescriptor<?>> getChildDescriptors() {
+    public List<FlatDataItemDescriptor<?>> getChildren() {
         return this.descriptors;
     }
 

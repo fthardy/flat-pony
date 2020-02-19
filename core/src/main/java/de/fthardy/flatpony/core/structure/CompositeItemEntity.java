@@ -67,16 +67,16 @@ public final class CompositeItemEntity extends AbstractFlatDataItemEntity<Compos
     }
 
     @Override
-    public List<FlatDataItemEntity<?>> getChildItems() {
+    public List<FlatDataItemEntity<?>> getChildren() {
         return this.items;
     }
 
     @Override
     public void applyHandler(FlatDataItemEntity.Handler handler) {
         if (handler instanceof FlatDataStructure.Handler) {
-            ((FlatDataStructure.Handler) handler).handleCompositeItem(this);
+            ((FlatDataStructure.Handler) handler).handleCompositeItemEntity(this);
         } else {
-            handler.handleFlatDataItem(this);
+            handler.handleFlatDataItemEntity(this);
         }
     }
 }

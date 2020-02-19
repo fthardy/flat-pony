@@ -24,11 +24,9 @@ SOFTWARE.
 package de.fthardy.flatpony.core.structure;
 
 import de.fthardy.flatpony.core.*;
-import de.fthardy.flatpony.core.util.FieldReferenceConfig;
-import de.fthardy.flatpony.core.util.ItemEntityReadStrategy;
-import de.fthardy.flatpony.core.util.TypedFieldDecorator;
-import de.fthardy.flatpony.core.util.TrialAndErrorReadStrategy;
+import de.fthardy.flatpony.core.util.*;
 
+import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,7 +40,7 @@ import java.util.Objects;
  * can optionally be linked with a field that contains/represents the count of the elements. Such a field is expected to
  * be defined before (upstream) the sequence item. If no reference count field is defined then the read strategy is
  * trial and error which means the read algorithm tries to read an element item and if it fails it stops reading element
- * items. For further details see {@link TrialAndErrorReadStrategy}.
+ * items.
  * </p>
  * <p>
  * Additionally it is possible to define a multiplicity for the element items. If the number of the read element items
@@ -53,12 +51,127 @@ import java.util.Objects;
  *
  * @author Frank Timothy Hardy
  */
-public class SequenceItemDescriptor extends AbstractFlatDataItemDescriptor<SequenceItemEntity>
+public final class SequenceItemDescriptor extends AbstractFlatDataItemDescriptor<SequenceItemEntity>
         implements FlatDataStructureDescriptor<SequenceItemEntity> {
 
     /**
-     * A multiplicity for the elements of a sequence.
-     *
+     * Demands the definition of the element item descriptor for the sequence item.
+     * 
+     * @author Frank Timothy Hardy 
+     */
+    public interface DefineElementItemDescriptor {
+
+        /**
+         * Define the item descriptor for the sequence elements. 
+         * 
+         * @param elementItemDescriptor an item descriptor.
+         * 
+         * @return the builder instance for further configuration or instance creation.
+         */
+        DefineCountFieldReference withElementItemDescriptor(FlatDataItemDescriptor<?> elementItemDescriptor);
+    }
+
+    /**
+     * Allows to optionally define a count field reference for the sequence item.
+     * 
+     * @author Frank Timothy Hardy
+     */
+    public interface DefineCountFieldReference extends DefineMultiplicity {
+
+        /**
+         * Define the count field reference.
+         * 
+         * @param countFieldReference the count field reference instance.
+         * 
+         * @return the builder instance for further configuration or instance creation.
+         */
+        DefineMultiplicity withCountFieldReference(FieldReference<Integer> countFieldReference);
+    }
+
+    /**
+     * Allows to optionally define a multiplicity for the sequence items element item entities.
+     * 
+     * @author Frank Timothy Hardy
+     */
+    public interface DefineMultiplicity extends ObjectBuilder<SequenceItemDescriptor> {
+
+        /**
+         * Define a multiplicity for the sequence items element item entities.
+         * <p>
+         * The bound range is inclusive. Negative values and a multiplicity of 0 to 0 are not allowed.
+         * </p>
+         * 
+         * @param bound1 the upper or lower bound.
+         * @param bound2 the upper bound if {@code bound1} is the lower bound or vice versa.               
+         * 
+         * @return the builder instance for creating the new instance.
+         */
+        ObjectBuilder<SequenceItemDescriptor> withMultiplicity(int bound1, int bound2);
+    }
+    
+    private interface BuildParams {
+        
+        String getDescriptorName();
+        FlatDataItemDescriptor<?> getElementItemDescriptor();
+        FieldReference<Integer> getCountFieldReference();
+        Multiplicity getMultiplicity();
+    }
+    
+    private static final class BuilderImpl extends AbstractItemDescriptorBuilder<SequenceItemDescriptor> 
+            implements DefineElementItemDescriptor, DefineCountFieldReference, BuildParams {
+        
+        private FlatDataItemDescriptor<?> elementItemDescriptor;
+        private FieldReference<Integer> countFieldReference;
+        private Multiplicity multiplicity;
+        
+        BuilderImpl(String descriptorName) {
+            super(descriptorName);
+        }
+
+        @Override
+        public DefineCountFieldReference withElementItemDescriptor(FlatDataItemDescriptor<?> elementItemDescriptor) {
+            this.elementItemDescriptor = 
+                    Objects.requireNonNull(elementItemDescriptor, "Undefined element item descriptor!");
+            return this;
+        }
+
+        @Override
+        public DefineMultiplicity withCountFieldReference(FieldReference<Integer> countFieldReference) {
+            this.countFieldReference =
+                    Objects.requireNonNull(countFieldReference, "Undefined count field reference!");
+            return this;
+        }
+
+        @Override
+        public ObjectBuilder<SequenceItemDescriptor> withMultiplicity(int bound1, int bound2) {
+            this.multiplicity = new Multiplicity(bound1, bound2);
+            return this;
+        }
+
+        @Override
+        public FlatDataItemDescriptor<?> getElementItemDescriptor() {
+            return this.elementItemDescriptor;
+        }
+
+        @Override
+        public FieldReference<Integer> getCountFieldReference() {
+            return this.countFieldReference;
+        }
+
+        @Override
+        public Multiplicity getMultiplicity() {
+            return this.multiplicity;
+        }
+
+        @Override
+        protected SequenceItemDescriptor createItemDescriptorInstance() {
+            return new SequenceItemDescriptor(this);
+        }
+    }
+
+    /**
+     * A multiplicity definition.
+     * 
      * @author Frank Timothy Hardy
      */
     public static final class Multiplicity {
@@ -66,19 +179,7 @@ public class SequenceItemDescriptor extends AbstractFlatDataItemDescriptor<Seque
         private final int minOccurrences;
         private final int maxOccurrences;
 
-        /**
-         * Creates a new instance of this multiplicity.
-         * <p>
-         * The order of the bounds doesn't matter. Negative value are not allowed. The maximum is not allowed to be 0
-         * which makes a multiplicity of 0 to 0 impossible. A multiplicity of 0 to 1 is allowed but however usually
-         * doesn't make sense because then an {@link OptionalItemDescriptor optional item} is the one you are searching
-         * for.
-         * </p>
-         *
-         * @param bound1 the first bound.
-         * @param bound2 the second bound.
-         */
-        public Multiplicity(int bound1, int bound2) {
+        Multiplicity(int bound1, int bound2) {
             if (bound1 < 0 || bound2 < 0) {
                 throw new IllegalArgumentException("Negative values are not allowed!");
             }
@@ -94,7 +195,8 @@ public class SequenceItemDescriptor extends AbstractFlatDataItemDescriptor<Seque
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             Multiplicity that = (Multiplicity) o;
-            return this.minOccurrences == that.minOccurrences && this.maxOccurrences == that.maxOccurrences;
+            return minOccurrences == that.minOccurrences &&
+                    maxOccurrences == that.maxOccurrences;
         }
 
         @Override
@@ -104,7 +206,7 @@ public class SequenceItemDescriptor extends AbstractFlatDataItemDescriptor<Seque
 
         @Override
         public String toString() {
-            return String.format("%d to %d", this.minOccurrences, this.maxOccurrences);
+            return String.format("Multiplicity: %d to %d items", this.minOccurrences, this.maxOccurrences);
         }
 
         public int getMinOccurrences() {
@@ -130,40 +232,43 @@ public class SequenceItemDescriptor extends AbstractFlatDataItemDescriptor<Seque
                 sequenceName, multiplicity);
     }
 
-    private final FlatDataItemDescriptor<?> elementItemDescriptor;
-    private final ThreadLocal<TypedFieldDecorator<Integer>> threadLocalCountField;
-    private final Multiplicity multiplicity;
+    static String MSG_Failed_to_mark_stream(String itemName) {
+        return MSG_Read_failed(itemName) + " Failed to mark the input source stream.";
+    }
 
-    /**
-     * Creates a new instance of this sequence item descriptor without a reference field for the element count and no
-     * multiplicity.
-     *
-     * @param name the name of this sequence item.
-     * @param elementItemDescriptor the descriptor of the sequence elements.
-     */
-    public SequenceItemDescriptor(String name, FlatDataItemDescriptor<?> elementItemDescriptor) {
-        this(name, elementItemDescriptor, null, null);
+    static String MSG_Failed_to_reset_stream(String itemName) {
+        return MSG_Read_failed(itemName) + " Failed to reset the input source stream.";
+    }
+
+    static String MSG_Mark_not_supported(String itemName) {
+        return MSG_Read_failed(itemName) + " The input source stream doesn't support marking which is essential for " +
+                "this item to function.";
+    }
+
+    private static String MSG_Read_failed(String itemName) {
+        return String.format("Failed to read optional item '%s' from source stream!", itemName);
     }
 
     /**
-     * Creates a new instance of this sequence item descriptor.
-     *
-     * @param name the name of this sequence item.
-     * @param elementItemDescriptor the descriptor of the sequence element items.
-     * @param countFieldReferenceConfig the field reference config for the related count field. Can be {@code null}.
-     * @param multiplicity the multiplicity definition for the element item count. Can be {@code null}.
+     * Create a builder to construct a new instance of this item descriptor.
+     * 
+     * @param name the name for the new item descriptor.
+     * 
+     * @return the builder instance to configure and create the new item descriptor instance.
      */
-    public SequenceItemDescriptor(
-            String name,
-            FlatDataItemDescriptor<?> elementItemDescriptor,
-            FieldReferenceConfig<Integer> countFieldReferenceConfig,
-            Multiplicity multiplicity) {
-        super(name);
-        this.elementItemDescriptor = Objects.requireNonNull(
-                elementItemDescriptor, "Undefined sequence descriptor!");
-        this.threadLocalCountField =
-                countFieldReferenceConfig == null ? null : countFieldReferenceConfig.linkWithField();
-        this.multiplicity = multiplicity;
+    public static DefineElementItemDescriptor newInstance(String name) {
+        return new BuilderImpl(name);
+    }
+
+    private final FlatDataItemDescriptor<?> elementItemDescriptor;
+    private final FieldReference<Integer> countFieldReference;
+    private final Multiplicity multiplicity;
+    
+    private SequenceItemDescriptor(BuildParams params) {
+        super(params.getDescriptorName());
+        this.elementItemDescriptor = params.getElementItemDescriptor();
+        this.countFieldReference = params.getCountFieldReference();
+        this.multiplicity = params.getMultiplicity();
     }
 
     @Override
@@ -176,29 +281,29 @@ public class SequenceItemDescriptor extends AbstractFlatDataItemDescriptor<Seque
     }
 
     @Override
-    public List<FlatDataItemDescriptor<?>> getChildDescriptors() {
+    public List<FlatDataItemDescriptor<?>> getChildren() {
         return Collections.singletonList(this.elementItemDescriptor);
     }
 
     @Override
-    public SequenceItemEntity createItem() {
+    public SequenceItemEntity createItemEntity() {
 
-        this.assertCountFieldExistsWhenCountFieldIsReferenced();
+        assertCountFieldExistsWhenCountFieldIsReferenced();
 
         return new SequenceItemEntity(
-                this, this.threadLocalCountField == null ? null : this.threadLocalCountField.get());
+                this, this.countFieldReference == null ? null : this.countFieldReference.getReferencedField());
     }
 
     @Override
-    public SequenceItemEntity readItemFrom(Reader source) {
+    public SequenceItemEntity readItemEntityFrom(Reader source) {
 
-        this.assertCountFieldExistsWhenCountFieldIsReferenced();
+        assertCountFieldExistsWhenCountFieldIsReferenced();
 
-        TypedFieldDecorator<Integer> countField = this.threadLocalCountField == null ?
-                null : this.threadLocalCountField.get();
+        TypedFieldDecorator<Integer> countField =
+                this.countFieldReference == null ? null : this.countFieldReference.getReferencedField();
 
         List<FlatDataItemEntity<?>> elementItems = countField == null ?
-                this.readWithTrialAndErrorStrategy(source) : this.readWithCountField(source, countField);
+                this.readElementsByTrialAndErrorFrom(source) : this.readWithCountField(source, countField);
 
         if (multiplicity != null && multiplicity.isSizeNotWithinBounds(elementItems.size())) {
             throw new FlatDataReadException(MSG_Multiplicity_constraint_violated(this.getName(), this.multiplicity));
@@ -230,28 +335,50 @@ public class SequenceItemDescriptor extends AbstractFlatDataItemDescriptor<Seque
     }
 
     private void assertCountFieldExistsWhenCountFieldIsReferenced() {
-        if (this.threadLocalCountField != null && this.threadLocalCountField.get() == null) {
-            throw new IllegalStateException("Expected a count field because count field reference has been defined!");
+        if (this.countFieldReference != null && this.countFieldReference.getReferencedField() == null) {
+            throw new IllegalStateException("Expected a count field because a count field reference has been defined!");
         }
     }
 
-    private List<FlatDataItemEntity<?>> readWithTrialAndErrorStrategy(Reader source) {
+    private List<FlatDataItemEntity<?>> readElementsByTrialAndErrorFrom(Reader source) {
         List<FlatDataItemEntity<?>> elementItems = new ArrayList<>();
-        ItemEntityReadStrategy strategy = new TrialAndErrorReadStrategy(this.getName(), this.elementItemDescriptor);
         FlatDataItemEntity<?> itemEntity;
         do {
-            itemEntity = strategy.readItemFrom(source);
+            itemEntity = readItemEntityByTrialAndErrorFrom(source);
             if (itemEntity != null) {
                 elementItems.add(itemEntity);
             }
         } while(itemEntity != null);
         return elementItems;
     }
+    
+    private FlatDataItemEntity<?> readItemEntityByTrialAndErrorFrom(Reader source) {
+        if (source.markSupported()) {
+            try {
+                source.mark(this.elementItemDescriptor.getMinLength());
+            } catch (IOException e) {
+                throw new FlatDataReadException(MSG_Failed_to_mark_stream(getName()), e);
+            }
+
+            try {
+                return this.elementItemDescriptor.readItemEntityFrom(source);
+            } catch (Exception e) {
+                try {
+                    source.reset();
+                } catch (IOException ex) {
+                    throw new FlatDataReadException(MSG_Failed_to_reset_stream(getName()), ex);
+                }
+                return null;
+            }
+        } else {
+            throw new FlatDataReadException(MSG_Mark_not_supported(getName()));
+        }
+    }
 
     private List<FlatDataItemEntity<?>> readWithCountField(Reader source, TypedFieldDecorator<Integer> countField) {
         List<FlatDataItemEntity<?>> elementItems = new ArrayList<>();
         for (int i = 0; i < countField.getTypedValue(); i++) {
-            elementItems.add(this.elementItemDescriptor.readItemFrom(source));
+            elementItems.add(this.elementItemDescriptor.readItemEntityFrom(source));
         }
         return elementItems;
     }

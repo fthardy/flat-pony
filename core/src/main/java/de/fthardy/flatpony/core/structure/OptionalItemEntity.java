@@ -24,7 +24,6 @@ SOFTWARE.
 package de.fthardy.flatpony.core.structure;
 
 import de.fthardy.flatpony.core.AbstractFlatDataItemEntity;
-import de.fthardy.flatpony.core.FlatDataItemDescriptor;
 import de.fthardy.flatpony.core.FlatDataItemEntity;
 import de.fthardy.flatpony.core.util.TypedFieldDecorator;
 
@@ -75,14 +74,14 @@ public final class OptionalItemEntity extends AbstractFlatDataItemEntity<Optiona
     @Override
     public void applyHandler(FlatDataItemEntity.Handler handler) {
         if (handler instanceof FlatDataStructure.Handler) {
-            ((FlatDataStructure.Handler) handler).handleOptionalItem(this);
+            ((FlatDataStructure.Handler) handler).handleOptionalItemEntity(this);
         } else {
-            handler.handleFlatDataItem(this);
+            handler.handleFlatDataItemEntity(this);
         }
     }
 
     @Override
-    public List<FlatDataItemEntity<?>> getChildItems() {
+    public List<FlatDataItemEntity<?>> getChildren() {
         return this.targetItem == null ? Collections.emptyList() : Collections.singletonList(this.targetItem);
     }
 
@@ -127,7 +126,7 @@ public final class OptionalItemEntity extends AbstractFlatDataItemEntity<Optiona
      * @throws IllegalArgumentException when this optional item entity already has a target item entity.
      */
     public FlatDataItemEntity<?> newTargetItem() {
-        this.setTargetItem(this.getDescriptor().getTargetItemDescriptor().createItem());
+        this.setTargetItem(this.getDescriptor().getTargetItemDescriptor().createItemEntity());
         return this.targetItem;
     }
 

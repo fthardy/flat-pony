@@ -71,7 +71,7 @@ public final class FixedSizeField extends AbstractFlatDataMutableField<FixedSize
         if (handler instanceof FlatDataField.Handler) {
             ((FlatDataField.Handler) handler).handleFixedSizeField(this);
         } else {
-            handler.handleFlatDataItem(this);
+            handler.handleFlatDataItemEntity(this);
         }
     }
 

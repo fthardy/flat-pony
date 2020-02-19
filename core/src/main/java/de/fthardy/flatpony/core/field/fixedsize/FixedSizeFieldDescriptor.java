@@ -27,6 +27,8 @@ import de.fthardy.flatpony.core.FlatDataItemDescriptor;
 import de.fthardy.flatpony.core.FlatDataReadException;
 import de.fthardy.flatpony.core.field.AbstractFlatDataFieldDescriptor;
 import de.fthardy.flatpony.core.field.FlatDataFieldDescriptor;
+import de.fthardy.flatpony.core.util.AbstractItemDescriptorBuilder;
+import de.fthardy.flatpony.core.util.ObjectBuilder;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -40,42 +42,151 @@ import java.util.Objects;
 public final class FixedSizeFieldDescriptor extends AbstractFlatDataFieldDescriptor<FixedSizeField>
         implements FlatDataFieldDescriptor<FixedSizeField> {
 
+    /**
+     * Allows to define a field size.
+     * <p>
+     * By default the field size is 1.
+     * </p>
+     * 
+     * @author Frank Timothy Hardy
+     */
+    public interface DefineFieldSize extends DefineDefaultValue {
+
+        /**
+         * Define a field size.
+         * 
+         * @param size the size. Must be 1 or greater.
+         *             
+         * @return the builder for further configuration or instance creation.
+         */
+        DefineDefaultValue withFieldSize(int size);
+    }
+
+    /**
+     * Allows to define a default value.
+     * <p>
+     * By default the default value is an empty string.
+     * </p>
+     * 
+     * @author Frank Timothy Hardy
+     */
+    public interface DefineDefaultValue extends DefineContentValueTransformer {
+
+        /**
+         * Define a default value.
+         * 
+         * @param defaultValue the default value.
+         *
+         * @return the builder for further configuration or instance creation.
+         */
+        DefineContentValueTransformer withDefaultValue(String defaultValue);
+    }
+
+    /**
+     * Allows to define a content value transformer.
+     * <p>
+     * By default a content value transformer with a blank as fill character and left padding is used.
+     * </p>
+     * 
+     * @author Frank Timothy Hardy
+     */
+    public interface DefineContentValueTransformer extends ObjectBuilder<FixedSizeFieldDescriptor> {
+
+        /**
+         * Define a content value transformer to be used by the descriptor.
+         * 
+         * @param contentValueTransformer the content value transformer.
+         *
+         * @return the builder for further configuration or instance creation.
+         */
+        ObjectBuilder<FixedSizeFieldDescriptor> useContentValueTransformer(
+                ContentValueTransformer contentValueTransformer);
+    }
+    
+    private interface BuildParams {
+        String getDescriptorName();
+        int getFieldSize();
+        String getDefaultValue();
+        ContentValueTransformer getContentValueTransformer();
+    }
+    
+    private static final class BuilderImpl extends AbstractItemDescriptorBuilder<FixedSizeFieldDescriptor>
+            implements DefineFieldSize, DefineDefaultValue, BuildParams {
+        
+        private int fieldSize = 1;
+        private String defaultValue = "";
+        private ContentValueTransformer contentValueTransformer;
+        
+        BuilderImpl(String descriptorName) {
+            super(descriptorName);
+        }
+
+        @Override
+        public DefineDefaultValue withFieldSize(int size) {
+            if (size < 1) {
+                throw new IllegalArgumentException("Field size must be at least 1!");
+            }
+            this.fieldSize = size;
+            return this;
+        }
+
+        @Override
+        public DefineContentValueTransformer withDefaultValue(String defaultValue) {
+            this.defaultValue = Objects.requireNonNull(defaultValue);
+            return this;
+        }
+
+        @Override
+        public ObjectBuilder<FixedSizeFieldDescriptor> useContentValueTransformer(
+                ContentValueTransformer contentValueTransformer) {
+            this.contentValueTransformer = Objects.requireNonNull(contentValueTransformer);
+            return this;
+        }
+
+        @Override
+        public int getFieldSize() {
+            return this.fieldSize;
+        }
+
+        @Override
+        public String getDefaultValue() {
+            return this.defaultValue;
+        }
+
+        @Override
+        public ContentValueTransformer getContentValueTransformer() {
+            return this.contentValueTransformer == null ? 
+                    new DefaultFieldContentValueTransformer(' ', true) : this.contentValueTransformer;
+        }
+
+        @Override
+        protected FixedSizeFieldDescriptor createItemDescriptorInstance() {
+            return new FixedSizeFieldDescriptor(this);
+        }
+    }
+
+    /**
+     * Create a builder to configure and create a new instance of this field descriptor.
+     * 
+     * @param name the name for the new field descriptor instance. 
+     * 
+     * @return the builder instance.
+     */
+    public static DefineFieldSize newInstance(String name) {
+        return new BuilderImpl(name);
+    }
+
     static String MSG_Read_failed(String fieldName) {
         return String.format("Failed to read value of fixed size field '%s' from source stream!", fieldName);
     }
 
     private final int fieldSize;
     private final ContentValueTransformer contentValueTransformer;
-
-    /**
-     * Create a new instance of this descriptor.
-     *
-     * @param name the name for this field.
-     * @param fieldSize the length for this field.
-     */
-    public FixedSizeFieldDescriptor(String name, int fieldSize) {
-        this(name, fieldSize, "", new DefaultFieldContentValueTransformer(' ', true));
-    }
-
-    /**
-     * Create a new instance of this descriptor.
-     *
-     * @param name the name for this field.
-     * @param fieldSize the size for this field.
-     * @param defaultValue the default value for this field.
-     * @param contentValueTransformer the content value transformer.
-     */
-    public FixedSizeFieldDescriptor(
-            String name, int fieldSize, String defaultValue, ContentValueTransformer contentValueTransformer) {
-
-        super(name, defaultValue);
-
-        if (fieldSize < 1) {
-            throw new IllegalArgumentException("Field size must be at least 1!");
-        }
-        this.fieldSize = fieldSize;
-
-        this.contentValueTransformer = Objects.requireNonNull(contentValueTransformer);
+    
+    private FixedSizeFieldDescriptor(BuildParams params) {
+        super(params.getDescriptorName(), params.getDefaultValue());
+        this.fieldSize = params.getFieldSize();
+        this.contentValueTransformer = params.getContentValueTransformer();
     }
 
     @Override
@@ -84,18 +195,18 @@ public final class FixedSizeFieldDescriptor extends AbstractFlatDataFieldDescrip
     }
 
     @Override
-    public FixedSizeField createItem() {
+    public FixedSizeField createItemEntity() {
         return new FixedSizeField(this);
     }
 
     @Override
-    public FixedSizeField readItemFrom(Reader source) {
+    public FixedSizeField readItemEntityFrom(Reader source) {
         try {
             char[] chars = new char[fieldSize];
             int len = source.read(chars);
             assert len == fieldSize;
 
-            FixedSizeField field = this.createItem();
+            FixedSizeField field = this.createItemEntity();
 
             field.setValue(contentValueTransformer.extractValueFromContent(new String(chars)));
 

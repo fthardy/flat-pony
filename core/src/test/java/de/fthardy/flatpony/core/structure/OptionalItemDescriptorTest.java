@@ -28,8 +28,7 @@ import de.fthardy.flatpony.core.field.ConstantFieldDescriptor;
 import de.fthardy.flatpony.core.field.FlatDataMutableField;
 import de.fthardy.flatpony.core.field.converter.FieldValueConverter;
 import de.fthardy.flatpony.core.field.fixedsize.FixedSizeFieldDescriptor;
-import de.fthardy.flatpony.core.util.FieldReferenceConfig;
-import de.fthardy.flatpony.core.util.ObservableFieldDescriptorDecorator;
+import de.fthardy.flatpony.core.util.FieldReference;
 import org.junit.jupiter.api.Test;
 
 import java.io.StringReader;
@@ -41,111 +40,25 @@ import static org.mockito.Mockito.*;
 class OptionalItemDescriptorTest {
 
     @Test
-    void Cannot_create_without_target_item_descriptor() {
-        assertThrows(NullPointerException.class, () -> new OptionalItemDescriptor("Test", null));
+    void Cannot_set_target_item_descriptor_to_null() {
+        assertThrows(NullPointerException.class, () -> 
+                OptionalItemDescriptor.newInstance("Optional").withTargetItemDescriptor(null));
     }
 
     @Test
-    void Read_with_trial_and_error_No_success() {
-        ConstantFieldDescriptor itemDescriptor = new ConstantFieldDescriptor("Foo", "BAR");
-        OptionalItemDescriptor descriptor = new OptionalItemDescriptor(
-                "Test", itemDescriptor);
-
-        List<FlatDataItemDescriptor<?>> childDescriptors = descriptor.getChildDescriptors();
-        assertEquals(1, childDescriptors.size());
-        assertSame(itemDescriptor, childDescriptors.get(0));
-        assertSame(itemDescriptor, descriptor.getTargetItemDescriptor());
-
-        StringReader reader = new StringReader("BAZ");
-
-        OptionalItemEntity optionalItemEntity = descriptor.readItemFrom(reader);
-        assertFalse(optionalItemEntity.isTargetItemPresent());
-    }
-
-    @Test
-    void Read_with_trial_and_error_Success() {
-        OptionalItemDescriptor descriptor = new OptionalItemDescriptor(
-                "Test", new ConstantFieldDescriptor("Foo", "BAR"));
-
-        StringReader reader = new StringReader("BAROMETER");
-
-        OptionalItemEntity optionalItemEntity = descriptor.readItemFrom(reader);
-        assertTrue(optionalItemEntity.isTargetItemPresent());
-    }
-
-    @Test
-    void Read_with_reference_flag_field_No_success() {
-        FixedSizeFieldDescriptor flagFieldDescriptor = new FixedSizeFieldDescriptor("Test", 1);
-
-        FieldValueConverter<Boolean> flagConverter = new FieldValueConverter<Boolean>() {
-            @Override
-            public Boolean convertFromFieldValue(String fieldValue) {
-                return fieldValue.equals("X");
-            }
-
-            @Override
-            public String convertToFieldValue(Boolean value) {
-                return value ? "X" : " ";
-            }
-        };
-
-        FieldReferenceConfig<Boolean> fieldReferenceConfig =
-                new FieldReferenceConfig<>(flagFieldDescriptor, flagConverter);
-
-        OptionalItemDescriptor descriptor = new OptionalItemDescriptor(
-                "Test", new ConstantFieldDescriptor("Foo", "BAR"), fieldReferenceConfig);
-
-        StringReader reader = new StringReader(" BAR");
-
-        FlatDataMutableField<?> flagField = fieldReferenceConfig.getObservableFieldDescriptor().readItemFrom(reader);
-        assertEquals("", flagField.getValue());
-        OptionalItemEntity optionalItemEntity = descriptor.readItemFrom(reader);
-        assertFalse(optionalItemEntity.isTargetItemPresent());
-        assertFalse(optionalItemEntity.getTargetItem().isPresent());
-        assertEquals(0, optionalItemEntity.getLength());
-        assertEquals(0, optionalItemEntity.getChildItems().size());
-
-        // Test if flag field is updated
-        optionalItemEntity.newTargetItem();
-        assertEquals("X", flagField.getValue());
-    }
-
-    @Test
-    void Read_with_reference_flag_field_Success() {
-        FixedSizeFieldDescriptor flagFieldDescriptor = new FixedSizeFieldDescriptor("Test", 1);
-
-        FieldValueConverter<Boolean> flagConverter = new FieldValueConverter<Boolean>() {
-            @Override
-            public Boolean convertFromFieldValue(String fieldValue) {
-                return fieldValue.equals("X");
-            }
-
-            @Override
-            public String convertToFieldValue(Boolean value) {
-                return value ? "X" : " ";
-            }
-        };
-
-        FieldReferenceConfig<Boolean> fieldReferenceConfig =
-                new FieldReferenceConfig<>(flagFieldDescriptor, flagConverter);
-
-        OptionalItemDescriptor descriptor = new OptionalItemDescriptor(
-                "Test", new ConstantFieldDescriptor("Foo", "BAR"), fieldReferenceConfig);
-
-        StringReader reader = new StringReader("XBAR");
-
-        fieldReferenceConfig.getObservableFieldDescriptor().readItemFrom(reader);
-        OptionalItemEntity optionalItemEntity = descriptor.readItemFrom(reader);
-        assertTrue(optionalItemEntity.isTargetItemPresent());
-        assertTrue(optionalItemEntity.getTargetItem().isPresent());
-        assertEquals(3, optionalItemEntity.getLength());
-        assertEquals(1, optionalItemEntity.getChildItems().size());
+    void Cannot_set_FlagFieldReference_to_null() {
+        assertThrows(NullPointerException.class, () -> OptionalItemDescriptor.newInstance("Optional")
+                .withTargetItemDescriptor(
+                        ConstantFieldDescriptor.newInstance("Constant").withConstant("TEST").build())
+                .withFlagFieldReference(null));
     }
 
     @Test
     void Calls_correct_handler_method() {
-        OptionalItemDescriptor descriptor = new OptionalItemDescriptor(
-                "Record", new ConstantFieldDescriptor("ID", "Foo"));
+        ConstantFieldDescriptor itemDescriptor = ConstantFieldDescriptor.newInstance("Constant")
+                .withConstant("TEST").build();
+        OptionalItemDescriptor descriptor =
+                OptionalItemDescriptor.newInstance("Optional").withTargetItemDescriptor(itemDescriptor).build();
 
         FlatDataItemDescriptor.Handler handlerMock = mock(FlatDataItemDescriptor.Handler.class);
         FlatDataStructureDescriptor.Handler descriptorHandlerMock = mock(FlatDataStructureDescriptor.Handler.class);
@@ -157,5 +70,116 @@ class OptionalItemDescriptorTest {
         verifyNoMoreInteractions(handlerMock);
         verify(descriptorHandlerMock).handleOptionalItemDescriptor(descriptor);
         verifyNoMoreInteractions(descriptorHandlerMock);
+    }
+
+    @Test
+    void Read_with_trial_and_error_No_success() {
+        ConstantFieldDescriptor itemDescriptor = ConstantFieldDescriptor.newInstance("Constant")
+                .withConstant("TEST").build();
+        OptionalItemDescriptor descriptor = 
+                OptionalItemDescriptor.newInstance("Optional").withTargetItemDescriptor(itemDescriptor).build();
+
+        List<FlatDataItemDescriptor<?>> childDescriptors = descriptor.getChildren();
+        assertEquals(1, childDescriptors.size());
+        assertSame(itemDescriptor, childDescriptors.get(0));
+        assertSame(itemDescriptor, descriptor.getTargetItemDescriptor());
+
+        StringReader reader = new StringReader("BAZ");
+
+        OptionalItemEntity optionalItemEntity = descriptor.readItemEntityFrom(reader);
+        assertFalse(optionalItemEntity.isTargetItemPresent());
+    }
+
+    @Test
+    void Read_with_trial_and_error_Success() {
+        ConstantFieldDescriptor itemDescriptor = ConstantFieldDescriptor.newInstance("Constant")
+                .withConstant("TEST").build();
+        OptionalItemDescriptor descriptor =
+                OptionalItemDescriptor.newInstance("Optional").withTargetItemDescriptor(itemDescriptor).build();
+
+        StringReader reader = new StringReader("TESTOMETER");
+
+        OptionalItemEntity optionalItemEntity = descriptor.readItemEntityFrom(reader);
+        assertTrue(optionalItemEntity.isTargetItemPresent());
+    }
+
+    @Test
+    void Read_with_reference_flag_field_No_success() {
+        FixedSizeFieldDescriptor flagFieldDescriptor = FixedSizeFieldDescriptor.newInstance("Flag Field").build();
+
+        FieldValueConverter<Boolean> flagConverter = new FieldValueConverter<Boolean>() {
+            @Override
+            public Boolean convertFromFieldValue(String fieldValue) {
+                return fieldValue.equals("X");
+            }
+
+            @Override
+            public String convertToFieldValue(Boolean value) {
+                return value ? "X" : " ";
+            }
+        };
+
+        FieldReference<Boolean> flagFieldReference = 
+                FieldReference.<Boolean>newInstance(flagFieldDescriptor).usingValueConverter(flagConverter).build();
+
+        ConstantFieldDescriptor itemDescriptor = ConstantFieldDescriptor.newInstance("Constant")
+                .withConstant("TEST").build();
+        OptionalItemDescriptor descriptor = OptionalItemDescriptor.newInstance("Optional")
+                .withTargetItemDescriptor(itemDescriptor)
+                .withFlagFieldReference(flagFieldReference)
+                .build();
+
+        StringReader reader = new StringReader(" TEST");
+
+        FlatDataMutableField<?> flagField = flagFieldReference.getFieldDescriptorDecorator().readItemEntityFrom(reader);
+        assertEquals("", flagField.getValue());
+        
+        OptionalItemEntity optionalItemEntity = descriptor.readItemEntityFrom(reader);
+        assertFalse(optionalItemEntity.isTargetItemPresent());
+        assertFalse(optionalItemEntity.getTargetItem().isPresent());
+        assertEquals(0, optionalItemEntity.getLength());
+        assertEquals(0, optionalItemEntity.getChildren().size());
+
+        // Test if flag field is updated
+        optionalItemEntity.newTargetItem();
+        assertEquals("X", flagField.getValue());
+    }
+
+    @Test
+    void Read_with_reference_flag_field_Success() {
+        FixedSizeFieldDescriptor flagFieldDescriptor = FixedSizeFieldDescriptor.newInstance("Flag Field").build();
+
+        FieldValueConverter<Boolean> flagConverter = new FieldValueConverter<Boolean>() {
+            @Override
+            public Boolean convertFromFieldValue(String fieldValue) {
+                return fieldValue.equals("J");
+            }
+
+            @Override
+            public String convertToFieldValue(Boolean value) {
+                return value ? "J" : "N";
+            }
+        };
+
+        FieldReference<Boolean> flagFieldReference =
+                FieldReference.<Boolean>newInstance(flagFieldDescriptor).usingValueConverter(flagConverter).build();
+
+        ConstantFieldDescriptor itemDescriptor = ConstantFieldDescriptor.newInstance("Constant")
+                .withConstant("TEST").build();
+        OptionalItemDescriptor descriptor = OptionalItemDescriptor.newInstance("Optional")
+                .withTargetItemDescriptor(itemDescriptor)
+                .withFlagFieldReference(flagFieldReference)
+                .build();
+
+        StringReader reader = new StringReader("JTEST");
+
+        FlatDataMutableField<?> flagField = flagFieldReference.getFieldDescriptorDecorator().readItemEntityFrom(reader);
+        assertEquals("J", flagField.getValue());
+        
+        OptionalItemEntity optionalItemEntity = descriptor.readItemEntityFrom(reader);
+        assertTrue(optionalItemEntity.isTargetItemPresent());
+        assertTrue(optionalItemEntity.getTargetItem().isPresent());
+        assertEquals(4, optionalItemEntity.getLength());
+        assertEquals(1, optionalItemEntity.getChildren().size());
     }
 }

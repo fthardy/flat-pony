@@ -27,6 +27,8 @@ import de.fthardy.flatpony.core.AbstractFlatDataItemDescriptor;
 import de.fthardy.flatpony.core.FlatDataItemEntity;
 import de.fthardy.flatpony.core.FlatDataItemDescriptor;
 import de.fthardy.flatpony.core.FlatDataReadException;
+import de.fthardy.flatpony.core.util.AbstractItemDescriptorBuilder;
+import de.fthardy.flatpony.core.util.ObjectBuilder;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -45,6 +47,88 @@ import java.util.Objects;
 public final class DelimitedItemDescriptor extends AbstractFlatDataItemDescriptor<DelimitedItemEntity>
         implements FlatDataStructureDescriptor<DelimitedItemEntity> {
 
+    /**
+     * Demands the definition of the descriptor for the item to delimit.
+     * 
+     * @author Frank Timothy Hardy
+     */
+    public interface DefineItemDescriptor {
+
+        /**
+         * Define the descriptor of the item to delimit.
+         * 
+         * @param itemDescriptor the item descriptor.
+         *                       
+         * @return the builder instance for further configuration or instance creation.
+         */
+        DefineDelimiter withItemDescriptor(FlatDataItemDescriptor<?> itemDescriptor);
+    }
+
+    /**
+     * Allows to define a different delimiter character.
+     * <p>
+     * By default the delimiter is {@link DelimitedItemDescriptor#DEFAULT_DELIMITER}
+     * </p>
+     * 
+     * @author Frank Timothy Hardy
+     */
+    public interface DefineDelimiter extends ObjectBuilder<DelimitedItemDescriptor> {
+
+        /**
+         * Define a different delimiter character.
+         * 
+         * @param delimiter the delimiter character to use.
+         *                  
+         * @return the builder instance to create the new item descriptor instance.
+         */
+        ObjectBuilder<DelimitedItemDescriptor> withDelimiter(char delimiter);
+    }
+    
+    private interface BuildParams {
+        
+        String getDescriptorName();
+        FlatDataItemDescriptor<?> getItemDescriptor();
+        int getDelimiter();
+    }
+    
+    private static final class BuilderImpl extends AbstractItemDescriptorBuilder<DelimitedItemDescriptor> 
+            implements DefineItemDescriptor, DefineDelimiter, BuildParams {
+        
+        private FlatDataItemDescriptor<?> itemDescriptor;
+        private int delimiter = DEFAULT_DELIMITER;
+        
+        BuilderImpl(String descriptorName) {
+            super(descriptorName);
+        }
+
+        @Override
+        public DefineDelimiter withItemDescriptor(FlatDataItemDescriptor<?> itemDescriptor) {
+            this.itemDescriptor = Objects.requireNonNull(itemDescriptor, "Undefined item descriptor!");
+            return this;
+        }
+
+        @Override
+        public ObjectBuilder<DelimitedItemDescriptor> withDelimiter(char delimiter) {
+            this.delimiter = delimiter;
+            return this;
+        }
+
+        @Override
+        public FlatDataItemDescriptor<?> getItemDescriptor() {
+            return this.itemDescriptor;
+        }
+
+        @Override
+        public int getDelimiter() {
+            return this.delimiter;
+        }
+
+        @Override
+        protected DelimitedItemDescriptor createItemDescriptorInstance() {
+            return new DelimitedItemDescriptor(this);
+        }
+    }
+    
     /** The definition of the default delimiter character. */
     public static final char DEFAULT_DELIMITER = '\n';
 
@@ -56,30 +140,24 @@ public final class DelimitedItemDescriptor extends AbstractFlatDataItemDescripto
         return MSG_Read_failed(itemName) + String.format(" No delimiter after inner item '%s'.", innerItemName);
     }
 
+    /**
+     * Create a builder instance to configure and create a new {@link DelimitedItemDescriptor} instance.
+     * 
+     * @param name the name for the new item descriptor.
+     *             
+     * @return the builder instance.
+     */
+    public static DefineItemDescriptor newInstance(String name) {
+        return new BuilderImpl(name);
+    }
+
     private final int delimiter;
     private final FlatDataItemDescriptor<?> itemDescriptor;
 
-    /**
-     * Creates a new instance of this descriptor using the {@link #DEFAULT_DELIMITER}.
-     *
-     * @param name the name for the item.
-     * @param itemDescriptor the descriptor of the delimited item.
-     */
-    public DelimitedItemDescriptor(String name, FlatDataItemDescriptor<?> itemDescriptor) {
-        this(name, DEFAULT_DELIMITER, itemDescriptor);
-    }
-
-    /**
-     * Create a new instance of this descriptor.
-     *
-     * @param name the name of the item.
-     * @param delimiter the delimiter character to use.
-     * @param itemDescriptor the item descriptor.
-     */
-    public DelimitedItemDescriptor(String name, char delimiter, FlatDataItemDescriptor<?> itemDescriptor) {
-        super(name);
-        this.delimiter = delimiter;
-        this.itemDescriptor = Objects.requireNonNull(itemDescriptor, "Undefined item!");
+    private DelimitedItemDescriptor(BuildParams params) {
+        super(params.getDescriptorName());
+        this.delimiter = params.getDelimiter();
+        this.itemDescriptor = params.getItemDescriptor();
     }
 
     @Override
@@ -88,14 +166,14 @@ public final class DelimitedItemDescriptor extends AbstractFlatDataItemDescripto
     }
 
     @Override
-    public DelimitedItemEntity createItem() {
-        return new DelimitedItemEntity(this, this.itemDescriptor.createItem());
+    public DelimitedItemEntity createItemEntity() {
+        return new DelimitedItemEntity(this, this.itemDescriptor.createItemEntity());
     }
 
     @Override
-    public DelimitedItemEntity readItemFrom(Reader source) {
+    public DelimitedItemEntity readItemEntityFrom(Reader source) {
         try {
-            FlatDataItemEntity<?> item = this.itemDescriptor.readItemFrom(source);
+            FlatDataItemEntity<?> item = this.itemDescriptor.readItemEntityFrom(source);
 
             int i = source.read();
             if (i != -1 && i != this.delimiter) {
@@ -118,7 +196,7 @@ public final class DelimitedItemDescriptor extends AbstractFlatDataItemDescripto
     }
 
     @Override
-    public List<FlatDataItemDescriptor<?>> getChildDescriptors() {
+    public List<FlatDataItemDescriptor<?>> getChildren() {
         return Collections.singletonList(this.itemDescriptor);
     }
 

@@ -73,7 +73,7 @@ public final class DelimitedField extends AbstractFlatDataMutableField<Delimited
         if (handler instanceof FlatDataField.Handler) {
             ((FlatDataField.Handler) handler).handleDelimitedField(this);
         } else {
-            handler.handleFlatDataItem(this);
+            handler.handleFlatDataItemEntity(this);
         }
     }
 }

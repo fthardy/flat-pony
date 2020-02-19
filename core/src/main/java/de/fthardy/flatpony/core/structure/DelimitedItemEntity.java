@@ -78,14 +78,14 @@ public final class DelimitedItemEntity extends AbstractFlatDataItemEntity<Delimi
     @Override
     public void applyHandler(FlatDataItemEntity.Handler handler) {
         if (handler instanceof FlatDataStructure.Handler) {
-            ((FlatDataStructure.Handler) handler).handleDelimitedItem(this);
+            ((FlatDataStructure.Handler) handler).handleDelimitedItemEntity(this);
         } else {
-            handler.handleFlatDataItem(this);
+            handler.handleFlatDataItemEntity(this);
         }
     }
 
     @Override
-    public List<FlatDataItemEntity<?>> getChildItems() {
+    public List<FlatDataItemEntity<?>> getChildren() {
         return Collections.singletonList(this.item);
     }
 }

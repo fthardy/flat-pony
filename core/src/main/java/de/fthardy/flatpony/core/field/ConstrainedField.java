@@ -31,7 +31,7 @@ import java.io.Writer;
 /**
  * The implementation of the constrained field.
  * <p>
- * A constrained field is wrapping a target field that is to be constrained.
+ * A constrained field is decorating a field entity that is constrained.
  * </p>
  *
  * @author Frank Timothy Hardy
@@ -67,7 +67,7 @@ public final class ConstrainedField extends AbstractFlatDataItemEntity<Constrain
         if (handler instanceof FlatDataField.Handler) {
             ((FlatDataField.Handler) handler).handleConstrainedField(this);
         } else {
-            handler.handleFlatDataItem(this);
+            handler.handleFlatDataItemEntity(this);
         }
     }
 

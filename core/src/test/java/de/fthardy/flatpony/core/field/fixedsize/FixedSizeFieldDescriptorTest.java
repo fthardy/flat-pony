@@ -1,3 +1,26 @@
+/*
+MIT License
+
+Copyright (c) 2019 Frank Hardy
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+ */
 package de.fthardy.flatpony.core.field.fixedsize;
 
 import de.fthardy.flatpony.core.FlatDataItemDescriptor;
@@ -17,35 +40,39 @@ class FixedSizeFieldDescriptorTest {
 
     @Test
     void Cannot_create_with_a_field_size_smaller_than_1() {
-        assertThrows(IllegalArgumentException.class, () -> new FixedSizeFieldDescriptor("Foo", 0));
+        assertThrows(IllegalArgumentException.class, () -> FixedSizeFieldDescriptor.newInstance("Foo")
+                .withFieldSize(0));
     }
 
     @Test
     void Cannot_create_with_null_ContentValueTransformer() {
         assertThrows(NullPointerException.class, () ->
-                new FixedSizeFieldDescriptor("Foo", 1, "J", null));
+                FixedSizeFieldDescriptor.newInstance("Foo")
+                        .withDefaultValue("J")
+                        .useContentValueTransformer(null));
     }
 
     @Test
     void New_field_has_default_value() {
-        FixedSizeField field = new FixedSizeFieldDescriptor("Foo", 10).createItem();
+        FixedSizeField field = FixedSizeFieldDescriptor.newInstance("Foo").withFieldSize(10).build().createItemEntity();
         assertThat(field.getValue()).isEmpty();
     }
 
     @Test
     void Min_Lenght_is_size() {
-        FixedSizeFieldDescriptor descriptor = new FixedSizeFieldDescriptor("Foo", 10);
+        FixedSizeFieldDescriptor descriptor = FixedSizeFieldDescriptor.newInstance("Foo")
+                .withFieldSize(10)
+                .build();
         assertThat(descriptor.getMinLength()).isEqualTo(descriptor.getFieldSize());
     }
 
     @Test
     void Field_is_read_from_source_stream() {
         Reader reader = new StringReader("FooBar    ");
-        FixedSizeField field = new FixedSizeFieldDescriptor(
-                "Foo",
-                10,
-                "",
-                new DefaultFieldContentValueTransformer(' ', true)).readItemFrom(reader);
+        FixedSizeField field = FixedSizeFieldDescriptor.newInstance("Foo")
+                .withFieldSize(10)
+                .build()
+                .readItemEntityFrom(reader);
         assertThat(field.getValue()).isEqualTo("FooBar");
     }
 
@@ -57,7 +84,7 @@ class FixedSizeFieldDescriptorTest {
         when(readerMock.read(any(char[].class))).thenThrow(ioException);
 
         FlatDataReadException exception = assertThrows(FlatDataReadException.class, () ->
-                new FixedSizeFieldDescriptor("Foo", 10).readItemFrom(readerMock));
+                FixedSizeFieldDescriptor.newInstance("Foo").withFieldSize(10).build().readItemEntityFrom(readerMock));
         assertThat(exception.getMessage()).isEqualTo(FixedSizeFieldDescriptor.MSG_Read_failed("Foo"));
         assertThat(exception.getCause()).isSameAs(ioException);
 
@@ -66,7 +93,8 @@ class FixedSizeFieldDescriptorTest {
 
     @Test
     void Calls_correct_handler_method() {
-        FixedSizeFieldDescriptor descriptor = new FixedSizeFieldDescriptor("Foo", 10);
+        FixedSizeFieldDescriptor descriptor = FixedSizeFieldDescriptor.newInstance("Foo")
+                .withFieldSize(10).build();
 
         FlatDataItemDescriptor.Handler handlerMock = mock(FlatDataItemDescriptor.Handler.class);
         FlatDataFieldDescriptor.Handler fieldDescriptorHandlerMock = mock(FlatDataFieldDescriptor.Handler.class);
