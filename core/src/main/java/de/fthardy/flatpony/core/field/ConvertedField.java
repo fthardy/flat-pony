@@ -29,15 +29,17 @@ import de.fthardy.flatpony.core.FlatDataItemEntity;
 import java.io.Writer;
 
 /**
- * The implementation of the constrained field.
+ * The implementation of the converted field.
  * <p>
- * A constrained field is decorating a field entity that is constrained.
+ * A converted field provides the raw field value in a particular converted type. 
  * </p>
- *
+ * 
+ * @param <T> the target type for the field value.
+ *           
  * @author Frank Timothy Hardy
  */
-public final class ConstrainedField extends AbstractFlatDataItemEntity<ConstrainedFieldDescriptor>
-        implements FlatDataMutableField<ConstrainedFieldDescriptor> {
+public final class ConvertedField<T> extends AbstractFlatDataItemEntity<ConvertedFieldDescriptor<T>>
+        implements FlatDataMutableField<ConvertedFieldDescriptor<T>> {
 
     private final FlatDataField<?> decoratedField;
 
@@ -47,9 +49,24 @@ public final class ConstrainedField extends AbstractFlatDataItemEntity<Constrain
      * @param descriptor the descriptor which is creating this field instance.
      * @param decoratedField the decorated field entity instance.
      */
-    ConstrainedField(ConstrainedFieldDescriptor descriptor, FlatDataField<?> decoratedField) {
+    ConvertedField(ConvertedFieldDescriptor<T> descriptor, FlatDataField<?> decoratedField) {
         super(descriptor);
         this.decoratedField = decoratedField;
+    }
+
+    @Override
+    public String getValue() {
+        return this.decoratedField.getValue();
+    }
+
+    @Override
+    public void setValue(String value) {
+        this.decoratedField.asMutableField().setValue(value); 
+    }
+    
+    @Override
+    public FlatDataMutableField<ConvertedFieldDescriptor<T>> asMutableField() {
+        return this;
     }
 
     @Override
@@ -65,34 +82,32 @@ public final class ConstrainedField extends AbstractFlatDataItemEntity<Constrain
     @Override
     public void applyHandler(FlatDataItemEntity.Handler handler) {
         if (handler instanceof FlatDataField.Handler) {
-            ((FlatDataField.Handler) handler).handleConstrainedField(this);
+            ((FlatDataField.Handler) handler).handleConvertedField(this);
         } else {
             handler.handleFlatDataItemEntity(this);
         }
     }
 
-    @Override
-    public String getValue() {
-        return this.decoratedField.getValue();
-    }
-
-    @Override
-    public void setValue(String value) {
-        this.getDescriptor().checkForConstraintViolation(value);
-        this.decoratedField.asMutableField().setValue(value);
-    }
-
-    @Override
-    public FlatDataMutableField<ConstrainedFieldDescriptor> asMutableField() {
-        return this;
+    public FlatDataField<?> getDecoratedField() {
+        return decoratedField;
     }
 
     /**
-     * Get the decorated field instance.
-     *
-     * @return the decorated field instance.
+     * Get the field value as the converted target type.
+     * 
+     * @return the field value.
      */
-    public FlatDataField<?> getDecoratedField() {
-        return this.decoratedField;
+    public T getConvertedValue() {
+        return this.getDescriptor().getFieldValueConverter().convertFromFieldValue(this.decoratedField.getValue());
+    }
+
+    /**
+     * Set the field value as the converted target type which is then converted back into the raw field value.
+     * 
+     * @param convertedValue the field value to set.
+     */
+    public void setConvertedValue(T convertedValue) {
+        this.decoratedField.asMutableField().setValue(
+                this.getDescriptor().getFieldValueConverter().convertToFieldValue(convertedValue));
     }
 }

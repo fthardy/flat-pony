@@ -74,6 +74,13 @@ public interface FlatDataField<T extends FlatDataFieldDescriptor<?>> extends Fla
          * @param field the field to be handled.
          */
         void handleConstrainedField(ConstrainedField field);
+
+        /**
+         * Handle a converted field.
+         *
+         * @param field the field to be handled.
+         */
+        void handleConvertedField(ConvertedField<?> field);
     }
 
     /**

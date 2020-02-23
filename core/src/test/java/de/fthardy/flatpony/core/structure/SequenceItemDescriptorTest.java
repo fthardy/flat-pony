@@ -28,6 +28,7 @@ import de.fthardy.flatpony.core.FlatDataReadException;
 import de.fthardy.flatpony.core.field.ConstantFieldDescriptor;
 import de.fthardy.flatpony.core.field.FlatDataMutableField;
 import de.fthardy.flatpony.core.field.converter.FieldValueConverter;
+import de.fthardy.flatpony.core.field.converter.IntegerFieldValueConverter;
 import de.fthardy.flatpony.core.field.fixedsize.FixedSizeFieldDescriptor;
 import de.fthardy.flatpony.core.util.FieldReference;
 import org.junit.jupiter.api.Test;
@@ -227,17 +228,7 @@ class SequenceItemDescriptorTest {
 
         FixedSizeFieldDescriptor countFieldDescriptor = FixedSizeFieldDescriptor.newInstance("Count")
                 .withFieldSize(1).build();
-        FieldValueConverter<Integer> converter = new FieldValueConverter<Integer>() {
-            @Override
-            public Integer convertFromFieldValue(String fieldValue) {
-                return Integer.valueOf(fieldValue);
-            }
-
-            @Override
-            public String convertToFieldValue(Integer value) {
-                return value.toString();
-            }
-        };
+        FieldValueConverter<Integer> converter = new IntegerFieldValueConverter();
 
         FieldReference<Integer> fieldReference = 
                 FieldReference.<Integer>newInstance(countFieldDescriptor).usingValueConverter(converter).build();

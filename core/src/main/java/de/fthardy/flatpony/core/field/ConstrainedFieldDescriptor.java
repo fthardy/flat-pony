@@ -34,7 +34,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * The implementation of a descriptor for a field which should have value constraints.
+ * The implementation of a descriptor for a field which has value constraints.
  * <p>
  * This descriptor is used as a decorator for any field descriptor. It allows to add {@link ValueConstraint}s. The given
  * constraints are used to validate the value of any field entity created by that decorated descriptor. Any field entity
@@ -76,7 +76,6 @@ public final class ConstrainedFieldDescriptor implements FlatDataFieldDescriptor
     }
     
     private interface BuildParams {
-
         FlatDataFieldDescriptor<?> getFieldDescriptor();
         Set<ValueConstraint> getConstraints();
     }
@@ -88,7 +87,7 @@ public final class ConstrainedFieldDescriptor implements FlatDataFieldDescriptor
         private final Map<String, ValueConstraint> constraintsByName = new LinkedHashMap<>();
 
         BuilderImpl(FlatDataFieldDescriptor<?> fieldDescriptor) {
-            super("none");
+            super(fieldDescriptor.getName());
             this.fieldDescriptor = Objects.requireNonNull(fieldDescriptor, "Undefined field descriptor!");
         }
 
@@ -129,38 +128,38 @@ public final class ConstrainedFieldDescriptor implements FlatDataFieldDescriptor
         return new BuilderImpl(fieldDescriptor);
     }
 
-    private final FlatDataFieldDescriptor<?> fieldDescriptor;
+    private final FlatDataFieldDescriptor<?> decoratedFieldDescriptor;
     private final Set<ValueConstraint> constraints;
 
     private ConstrainedFieldDescriptor(BuildParams params) {
-        this.fieldDescriptor = params.getFieldDescriptor();
+        this.decoratedFieldDescriptor = params.getFieldDescriptor();
         this.constraints = params.getConstraints();
-        this.checkForConstraintViolation(fieldDescriptor.getDefaultValue());
+        this.checkForConstraintViolation(decoratedFieldDescriptor.getDefaultValue());
     }
 
     @Override
     public String getName() {
-        return this.fieldDescriptor.getName();
+        return this.decoratedFieldDescriptor.getName();
     }
 
     @Override
     public String getDefaultValue() {
-        return this.fieldDescriptor.getDefaultValue();
+        return this.decoratedFieldDescriptor.getDefaultValue();
     }
 
     @Override
     public int getMinLength() {
-        return this.fieldDescriptor.getMinLength();
+        return this.decoratedFieldDescriptor.getMinLength();
     }
 
     @Override
     public ConstrainedField createItemEntity() {
-        return new ConstrainedField(this, this.fieldDescriptor.createItemEntity().asMutableField());
+        return new ConstrainedField(this, this.decoratedFieldDescriptor.createItemEntity());
     }
 
     @Override
     public ConstrainedField readItemEntityFrom(Reader source) {
-        return new ConstrainedField(this, this.fieldDescriptor.readItemEntityFrom(source).asMutableField());
+        return new ConstrainedField(this, this.decoratedFieldDescriptor.readItemEntityFrom(source));
     }
 
     @Override
@@ -177,8 +176,8 @@ public final class ConstrainedFieldDescriptor implements FlatDataFieldDescriptor
      *
      * @return the decorated field descriptor.
      */
-    public FlatDataFieldDescriptor<?> getFieldDescriptor() {
-        return this.fieldDescriptor;
+    public FlatDataFieldDescriptor<?> getDecoratedFieldDescriptor() {
+        return this.decoratedFieldDescriptor;
     }
 
     /**

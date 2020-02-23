@@ -105,7 +105,7 @@ class ConstrainedFieldDescriptorTest {
                         return false;
                     }
                 }).build();
-        assertEquals(descriptor.getFieldDescriptor().getMinLength(), descriptor.getMinLength());
+        assertEquals(descriptor.getDecoratedFieldDescriptor().getMinLength(), descriptor.getMinLength());
     }
 
     @Test
