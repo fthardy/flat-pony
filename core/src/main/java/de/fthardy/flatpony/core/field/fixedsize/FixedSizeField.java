@@ -54,7 +54,7 @@ public final class FixedSizeField extends AbstractFlatDataMutableField<FixedSize
 
     @Override
     public int getLength() {
-        return this.getDescriptor().getFieldSize();
+        return this.getDescriptor().getMinLength();
     }
 
     @Override

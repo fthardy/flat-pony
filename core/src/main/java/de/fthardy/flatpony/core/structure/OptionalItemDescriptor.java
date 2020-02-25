@@ -23,16 +23,16 @@ SOFTWARE.
  */
 package de.fthardy.flatpony.core.structure;
 
-import de.fthardy.flatpony.core.AbstractFlatDataItemDescriptor;
 import de.fthardy.flatpony.core.FlatDataItemDescriptor;
 import de.fthardy.flatpony.core.FlatDataItemEntity;
 import de.fthardy.flatpony.core.FlatDataReadException;
-import de.fthardy.flatpony.core.util.*;
+import de.fthardy.flatpony.core.util.AbstractItemDescriptorBuilder;
+import de.fthardy.flatpony.core.util.FieldReference;
+import de.fthardy.flatpony.core.util.ObjectBuilder;
+import de.fthardy.flatpony.core.util.TypedFieldDecorator;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -47,25 +47,7 @@ import java.util.Objects;
  *
  * @author Frank Timothy Hardy
  */
-public final class OptionalItemDescriptor extends AbstractFlatDataItemDescriptor<OptionalItemEntity>
-        implements FlatDataStructureDescriptor<OptionalItemEntity> {
-
-    /**
-     * Demands the definition of a target item descriptor.
-     * 
-     * @author Frank Timothy Hardy
-     */
-    public interface DefineTargetItemDescriptor {
-
-        /**
-         * Define the descriptor for the target item which might be present or absent.
-         * 
-         * @param targetItemDescriptor the target item descriptor.
-         *                             
-         * @return the builder instance for further configuration or instance creation.
-         */
-        DefineFlagFieldReference withTargetItemDescriptor(FlatDataItemDescriptor<?> targetItemDescriptor);
-    }
+public final class OptionalItemDescriptor implements FlatDataStructureDescriptor<OptionalItemEntity> {
 
     /**
      * Allows to optionally define a reference to a flag field.
@@ -85,20 +67,20 @@ public final class OptionalItemDescriptor extends AbstractFlatDataItemDescriptor
     }
 
     private interface BuildParams {
-
-        String getDescriptorName();
         FlatDataItemDescriptor<?> getTargetItemDescriptor();
         FieldReference<Boolean> getFieldReference();
     }
     
     private static final class BuilderImpl extends AbstractItemDescriptorBuilder<OptionalItemDescriptor>
-            implements DefineTargetItemDescriptor, DefineFlagFieldReference, BuildParams {
+            implements DefineFlagFieldReference, BuildParams {
         
-        private FlatDataItemDescriptor<?> targetItemDescriptor;
+        private final FlatDataItemDescriptor<?> targetItemDescriptor;
         private FieldReference<Boolean> fieldReference;
         
-        BuilderImpl(String descriptorName) {
-            super(descriptorName);
+        BuilderImpl(FlatDataItemDescriptor<?> targetItemDescriptor) {
+            super(targetItemDescriptor.getName());
+            this.targetItemDescriptor = Objects.requireNonNull(
+                    targetItemDescriptor, "Undefined target item descriptor!");
         }
 
         @Override
@@ -109,13 +91,6 @@ public final class OptionalItemDescriptor extends AbstractFlatDataItemDescriptor
         @Override
         public FieldReference<Boolean> getFieldReference() {
             return this.fieldReference;
-        }
-
-        @Override
-        public DefineFlagFieldReference withTargetItemDescriptor(FlatDataItemDescriptor<?> targetItemDescriptor) {
-            this.targetItemDescriptor = Objects.requireNonNull(
-                    targetItemDescriptor, "Undefined target item descriptor!");
-            return this;
         }
 
         @Override
@@ -138,12 +113,12 @@ public final class OptionalItemDescriptor extends AbstractFlatDataItemDescriptor
     /**
      * Create a new instance of this item descriptor.
      * 
-     * @param name the name of the item descriptor.
+     * @param targetItemDescriptor the target item descriptor.
      *             
      * @return a builder instance to configure and create a new item descriptor instance. 
      */
-    public static DefineTargetItemDescriptor newInstance(String name) {
-        return new BuilderImpl(name);
+    public static DefineFlagFieldReference newInstance(FlatDataItemDescriptor<?> targetItemDescriptor) {
+        return new BuilderImpl(targetItemDescriptor);
     }
 
     static String MSG_Failed_to_mark_stream(String itemName) {
@@ -159,7 +134,7 @@ public final class OptionalItemDescriptor extends AbstractFlatDataItemDescriptor
                 "this item to function.";
     }
 
-    private static String MSG_Read_failed(String itemName) {
+    static String MSG_Read_failed(String itemName) {
         return String.format("Failed to read optional item '%s' from source stream!", itemName);
     }
 
@@ -167,9 +142,18 @@ public final class OptionalItemDescriptor extends AbstractFlatDataItemDescriptor
     private final FieldReference<Boolean> flagFieldReference;
 
     private OptionalItemDescriptor(BuildParams params) {
-        super(params.getDescriptorName());
         this.targetItemDescriptor = params.getTargetItemDescriptor();
         this.flagFieldReference = params.getFieldReference();
+    }
+
+    @Override
+    public String getName() {
+        return this.targetItemDescriptor.getName();
+    }
+
+    @Override
+    public int getMinLength() {
+        return this.targetItemDescriptor.getMinLength();
     }
 
     @Override
@@ -210,11 +194,6 @@ public final class OptionalItemDescriptor extends AbstractFlatDataItemDescriptor
         }
     }
 
-    @Override
-    public List<FlatDataItemDescriptor<?>> getChildren() {
-        return Collections.singletonList(this.targetItemDescriptor);
-    }
-
     /**
      * @return the descriptor of the target item.
      */
@@ -250,5 +229,4 @@ public final class OptionalItemDescriptor extends AbstractFlatDataItemDescriptor
             throw new FlatDataReadException(MSG_Mark_not_supported(this.getName()));
         }
     }
-
 }

@@ -24,12 +24,14 @@ SOFTWARE.
 package de.fthardy.flatpony.core.structure;
 
 import de.fthardy.flatpony.core.*;
-import de.fthardy.flatpony.core.util.*;
+import de.fthardy.flatpony.core.util.AbstractItemDescriptorBuilder;
+import de.fthardy.flatpony.core.util.FieldReference;
+import de.fthardy.flatpony.core.util.ObjectBuilder;
+import de.fthardy.flatpony.core.util.TypedFieldDecorator;
 
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -160,7 +162,7 @@ public final class SequenceItemDescriptor extends AbstractFlatDataItemDescriptor
 
         @Override
         public Multiplicity getMultiplicity() {
-            return this.multiplicity;
+            return this.multiplicity == null ? new Multiplicity() : this.multiplicity;
         }
 
         @Override
@@ -178,6 +180,10 @@ public final class SequenceItemDescriptor extends AbstractFlatDataItemDescriptor
 
         private final int minOccurrences;
         private final int maxOccurrences;
+        
+        Multiplicity() {
+            this(0, Integer.MAX_VALUE);
+        }
 
         Multiplicity(int bound1, int bound2) {
             if (bound1 < 0 || bound2 < 0) {
@@ -245,8 +251,8 @@ public final class SequenceItemDescriptor extends AbstractFlatDataItemDescriptor
                 "this item to function.";
     }
 
-    private static String MSG_Read_failed(String itemName) {
-        return String.format("Failed to read optional item '%s' from source stream!", itemName);
+    static String MSG_Read_failed(String itemName) {
+        return String.format("Failed to read sequence item '%s' from source stream!", itemName);
     }
 
     /**
@@ -281,17 +287,12 @@ public final class SequenceItemDescriptor extends AbstractFlatDataItemDescriptor
     }
 
     @Override
-    public List<FlatDataItemDescriptor<?>> getChildren() {
-        return Collections.singletonList(this.elementItemDescriptor);
-    }
-
-    @Override
     public SequenceItemEntity createItemEntity() {
 
         assertCountFieldExistsWhenCountFieldIsReferenced();
 
-        return new SequenceItemEntity(
-                this, this.countFieldReference == null ? null : this.countFieldReference.getReferencedField());
+        return new SequenceItemEntity(this, this.countFieldReference == null ?
+                null : this.countFieldReference.getReferencedField());
     }
 
     @Override

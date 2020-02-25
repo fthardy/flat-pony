@@ -39,10 +39,8 @@ class OptionalItemEntityTest {
 
     @Test
     void Calls_correct_handler_method() {
-        OptionalItemDescriptor descriptor = OptionalItemDescriptor.newInstance("Optional")
-                .withTargetItemDescriptor(
-                        ConstantFieldDescriptor.newInstance("Constant").withConstant("TEST").build())
-                .build();
+        OptionalItemDescriptor descriptor = OptionalItemDescriptor.newInstance(
+                ConstantFieldDescriptor.newInstance("Constant").withConstant("TEST").build()).build();
 
         StringReader reader = new StringReader("TESTOMETER");
 
@@ -62,10 +60,8 @@ class OptionalItemEntityTest {
 
     @Test
     void Set_invalid_target_item() {
-        OptionalItemDescriptor descriptor = OptionalItemDescriptor.newInstance("Optional")
-                .withTargetItemDescriptor(
-                        ConstantFieldDescriptor.newInstance("Constant").withConstant("TEST").build())
-                .build();
+        OptionalItemDescriptor descriptor = OptionalItemDescriptor.newInstance(
+                ConstantFieldDescriptor.newInstance("Constant").withConstant("TEST").build()).build();
 
         OptionalItemEntity optionalItemEntity = descriptor.createItemEntity();
         assertFalse(optionalItemEntity.isTargetItemPresent());
@@ -75,19 +71,16 @@ class OptionalItemEntityTest {
 
     @Test
     void Discard_and_set_same_target_item() {
-        OptionalItemDescriptor descriptor = OptionalItemDescriptor.newInstance("Optional")
-                .withTargetItemDescriptor(
-                        ConstantFieldDescriptor.newInstance("Constant").withConstant("TEST").build())
-                .build();
+        OptionalItemDescriptor descriptor = OptionalItemDescriptor.newInstance(
+                ConstantFieldDescriptor.newInstance("Constant").withConstant("TEST").build()).build();
 
         StringReader reader = new StringReader("TESTOMETER");
 
         OptionalItemEntity optionalItemEntity = descriptor.readItemEntityFrom(reader);
 
-        ConstantField itemEntity = (ConstantField) optionalItemEntity.getChildren().get(0);
-        assertEquals("TEST", itemEntity.getValue());
         assertTrue(optionalItemEntity.getTargetItem().isPresent());
-        assertSame(itemEntity, optionalItemEntity.getTargetItem().get());
+        ConstantField itemEntity = (ConstantField) optionalItemEntity.getTargetItem().get();
+        assertEquals("TEST", itemEntity.getValue());
 
         optionalItemEntity.setTargetItem(null);
 
@@ -101,10 +94,8 @@ class OptionalItemEntityTest {
 
     @Test
     void Discard_and_set_new_target_item() {
-        OptionalItemDescriptor descriptor = OptionalItemDescriptor.newInstance("Optional")
-                .withTargetItemDescriptor(
-                        ConstantFieldDescriptor.newInstance("Constant").withConstant("TEST").build())
-                .build();
+        OptionalItemDescriptor descriptor = OptionalItemDescriptor.newInstance(
+                ConstantFieldDescriptor.newInstance("Constant").withConstant("TEST").build()).build();
 
         StringReader reader = new StringReader("TESTOMETER");
 
@@ -120,10 +111,8 @@ class OptionalItemEntityTest {
     
     @Test
     void Write_when_a_target_is_present() {
-        OptionalItemDescriptor descriptor = OptionalItemDescriptor.newInstance("Optional")
-                .withTargetItemDescriptor(
-                        ConstantFieldDescriptor.newInstance("Constant").withConstant("TEST").build())
-                .build();
+        OptionalItemDescriptor descriptor = OptionalItemDescriptor.newInstance(
+                ConstantFieldDescriptor.newInstance("Constant").withConstant("TEST").build()).build();
 
         OptionalItemEntity optionalItemEntity = descriptor.createItemEntity();
         
@@ -137,10 +126,8 @@ class OptionalItemEntityTest {
     
     @Test
     void Write_when_a_target_is_absent() {
-        OptionalItemDescriptor descriptor = OptionalItemDescriptor.newInstance("Optional")
-                .withTargetItemDescriptor(
-                        ConstantFieldDescriptor.newInstance("Constant").withConstant("TEST").build())
-                .build();
+        OptionalItemDescriptor descriptor = OptionalItemDescriptor.newInstance(
+                ConstantFieldDescriptor.newInstance("Constant").withConstant("TEST").build()).build();
 
         OptionalItemEntity optionalItemEntity = descriptor.createItemEntity();
         

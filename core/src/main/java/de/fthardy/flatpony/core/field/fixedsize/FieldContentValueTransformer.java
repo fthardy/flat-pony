@@ -24,8 +24,8 @@ SOFTWARE.
 package de.fthardy.flatpony.core.field.fixedsize;
 
 /**
- * A content value transformer has the task to make a field content from a given value and vice versa to extract a value
- * from a given field content.
+ * A field content value transformer has the task to make a field content from a given value and vice versa to extract a
+ * value from a given field content.
  * <p>
  * There are two terms which have different meanings in the context of fixed size fields: value and content. The term
  * content describes the whole content of a fixed size field. The length of the content is always equal to the size of
@@ -44,7 +44,7 @@ package de.fthardy.flatpony.core.field.fixedsize;
  *
  * @author Frank Timothy Hardy
  */
-public interface ContentValueTransformer {
+public interface FieldContentValueTransformer {
 
     /**
      * Make the content string for a fixed length field from a given value string.

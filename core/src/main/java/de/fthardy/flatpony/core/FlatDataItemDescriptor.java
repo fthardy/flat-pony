@@ -82,9 +82,9 @@ public interface FlatDataItemDescriptor<T extends FlatDataItemEntity<?>> {
     int getMinLength();
 
     /**
-     * Create a new item entity.
+     * Create a new item entity instance.
      *
-     * @return the new item entity instance.
+     * @return the new item entity instance which represents the root of an item entity model (IEM).
      */
     T createItemEntity();
 
@@ -93,7 +93,7 @@ public interface FlatDataItemDescriptor<T extends FlatDataItemEntity<?>> {
      *
      * @param source the reader providing the data from the source stream.
      *
-     * @return a new item entity instance with the read data.
+     * @return a new item entity instance which represents the root of an item entity model (IEM).
      */
     T readItemEntityFrom(Reader source);
 

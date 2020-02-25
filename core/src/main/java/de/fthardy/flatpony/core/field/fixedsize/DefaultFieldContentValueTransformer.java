@@ -36,7 +36,7 @@ import java.util.Arrays;
  *
  * @author Frank Timothy Hardy
  */
-public final class DefaultFieldContentValueTransformer implements ContentValueTransformer {
+public final class DefaultFieldContentValueTransformer implements FieldContentValueTransformer {
 
     private final char fillChar;
     private final boolean padToLeft;

@@ -42,14 +42,13 @@ class OptionalItemDescriptorTest {
     @Test
     void Cannot_set_target_item_descriptor_to_null() {
         assertThrows(NullPointerException.class, () -> 
-                OptionalItemDescriptor.newInstance("Optional").withTargetItemDescriptor(null));
+                OptionalItemDescriptor.newInstance(null));
     }
 
     @Test
     void Cannot_set_FlagFieldReference_to_null() {
-        assertThrows(NullPointerException.class, () -> OptionalItemDescriptor.newInstance("Optional")
-                .withTargetItemDescriptor(
-                        ConstantFieldDescriptor.newInstance("Constant").withConstant("TEST").build())
+        assertThrows(NullPointerException.class, () -> OptionalItemDescriptor.newInstance(
+                ConstantFieldDescriptor.newInstance("Constant").withConstant("TEST").build())
                 .withFlagFieldReference(null));
     }
 
@@ -57,8 +56,7 @@ class OptionalItemDescriptorTest {
     void Calls_correct_handler_method() {
         ConstantFieldDescriptor itemDescriptor = ConstantFieldDescriptor.newInstance("Constant")
                 .withConstant("TEST").build();
-        OptionalItemDescriptor descriptor =
-                OptionalItemDescriptor.newInstance("Optional").withTargetItemDescriptor(itemDescriptor).build();
+        OptionalItemDescriptor descriptor = OptionalItemDescriptor.newInstance(itemDescriptor).build();
 
         FlatDataItemDescriptor.Handler handlerMock = mock(FlatDataItemDescriptor.Handler.class);
         FlatDataStructureDescriptor.Handler descriptorHandlerMock = mock(FlatDataStructureDescriptor.Handler.class);
@@ -76,14 +74,8 @@ class OptionalItemDescriptorTest {
     void Read_with_trial_and_error_No_success() {
         ConstantFieldDescriptor itemDescriptor = ConstantFieldDescriptor.newInstance("Constant")
                 .withConstant("TEST").build();
-        OptionalItemDescriptor descriptor = 
-                OptionalItemDescriptor.newInstance("Optional").withTargetItemDescriptor(itemDescriptor).build();
-
-        List<FlatDataItemDescriptor<?>> childDescriptors = descriptor.getChildren();
-        assertEquals(1, childDescriptors.size());
-        assertSame(itemDescriptor, childDescriptors.get(0));
-        assertSame(itemDescriptor, descriptor.getTargetItemDescriptor());
-
+        OptionalItemDescriptor descriptor = OptionalItemDescriptor.newInstance(itemDescriptor).build();
+        
         StringReader reader = new StringReader("BAZ");
 
         OptionalItemEntity optionalItemEntity = descriptor.readItemEntityFrom(reader);
@@ -94,8 +86,7 @@ class OptionalItemDescriptorTest {
     void Read_with_trial_and_error_Success() {
         ConstantFieldDescriptor itemDescriptor = ConstantFieldDescriptor.newInstance("Constant")
                 .withConstant("TEST").build();
-        OptionalItemDescriptor descriptor =
-                OptionalItemDescriptor.newInstance("Optional").withTargetItemDescriptor(itemDescriptor).build();
+        OptionalItemDescriptor descriptor = OptionalItemDescriptor.newInstance(itemDescriptor).build();
 
         StringReader reader = new StringReader("TESTOMETER");
 
@@ -124,8 +115,7 @@ class OptionalItemDescriptorTest {
 
         ConstantFieldDescriptor itemDescriptor = ConstantFieldDescriptor.newInstance("Constant")
                 .withConstant("TEST").build();
-        OptionalItemDescriptor descriptor = OptionalItemDescriptor.newInstance("Optional")
-                .withTargetItemDescriptor(itemDescriptor)
+        OptionalItemDescriptor descriptor = OptionalItemDescriptor.newInstance(itemDescriptor)
                 .withFlagFieldReference(flagFieldReference)
                 .build();
 
@@ -138,7 +128,6 @@ class OptionalItemDescriptorTest {
         assertFalse(optionalItemEntity.isTargetItemPresent());
         assertFalse(optionalItemEntity.getTargetItem().isPresent());
         assertEquals(0, optionalItemEntity.getLength());
-        assertEquals(0, optionalItemEntity.getChildren().size());
 
         // Test if flag field is updated
         optionalItemEntity.newTargetItem();
@@ -166,8 +155,7 @@ class OptionalItemDescriptorTest {
 
         ConstantFieldDescriptor itemDescriptor = ConstantFieldDescriptor.newInstance("Constant")
                 .withConstant("TEST").build();
-        OptionalItemDescriptor descriptor = OptionalItemDescriptor.newInstance("Optional")
-                .withTargetItemDescriptor(itemDescriptor)
+        OptionalItemDescriptor descriptor = OptionalItemDescriptor.newInstance(itemDescriptor)
                 .withFlagFieldReference(flagFieldReference)
                 .build();
 
@@ -180,6 +168,5 @@ class OptionalItemDescriptorTest {
         assertTrue(optionalItemEntity.isTargetItemPresent());
         assertTrue(optionalItemEntity.getTargetItem().isPresent());
         assertEquals(4, optionalItemEntity.getLength());
-        assertEquals(1, optionalItemEntity.getChildren().size());
     }
 }

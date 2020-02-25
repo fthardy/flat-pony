@@ -28,8 +28,6 @@ import de.fthardy.flatpony.core.FlatDataItemEntity;
 import de.fthardy.flatpony.core.util.TypedFieldDecorator;
 
 import java.io.Writer;
-import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -78,11 +76,6 @@ public final class OptionalItemEntity extends AbstractFlatDataItemEntity<Optiona
         } else {
             handler.handleFlatDataItemEntity(this);
         }
-    }
-
-    @Override
-    public List<FlatDataItemEntity<?>> getChildren() {
-        return this.targetItem == null ? Collections.emptyList() : Collections.singletonList(this.targetItem);
     }
 
     /**

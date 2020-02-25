@@ -36,7 +36,8 @@ import java.util.stream.Collectors;
  * The implementation of a composite item descriptor.
  * <p>
  * A composite item is a composition of several other flat data items. Because composite items can contain other
- * composite items it is possible to build complex, nested, tree structures with this kind of item.
+ * composite items it is possible to build complex, nested, tree structures with this kind of item. However, the
+ * composition of a composite item is not dynamic i.e. cannot be changed once it has been defined.
  * </p>
  *
  * @author Frank Timothy Hardy
@@ -45,15 +46,18 @@ public final class CompositeItemDescriptor extends AbstractFlatDataItemDescripto
         implements FlatDataStructureDescriptor<CompositeItemEntity> {
 
     /**
-     * Demands the addition of at least one item descriptor.
+     * Demands the addition of at least one item descriptor for the composition.
      * <p>
-     * There is no limitation on how many items can be added to the composite item but any item descriptor can only be
-     * added once. If it is added a second time a {@link IllegalArgumentException} is going to be thrown.
+     * There is no limitation on how many items can be added to the composite item but any item descriptor instance can
+     * only be added once and the names of the items have to be unique. If a particular item descriptor instance is
+     * added a second time or another item descriptor with the same name has already been added then an
+     * {@link IllegalArgumentException} is going to be thrown. The order in which the item descriptors are added is the
+     * order in which the items are expected when reading from a source stream and written to a target stream. 
      * </p>
      * 
      * @author Frank Timothy Hardy
      */
-    public interface AddItemDescriptors extends ObjectBuilder<CompositeItemDescriptor> {
+    public interface AddItemDescriptors {
 
         /**
          * Add a single item descriptor to the composite item.
@@ -62,7 +66,7 @@ public final class CompositeItemDescriptor extends AbstractFlatDataItemDescripto
          *                       
          * @return the builder instance for further configuration or instance creation.
          */
-        AddItemDescriptors addItemDescriptor(FlatDataItemDescriptor<?> itemDescriptor);
+        AddFurtherItemDescriptors addItemDescriptor(FlatDataItemDescriptor<?> itemDescriptor);
 
         /**
          * Add a bunch of item descriptors to the composite item.
@@ -71,7 +75,7 @@ public final class CompositeItemDescriptor extends AbstractFlatDataItemDescripto
          *                        
          * @return the builder instance for further configuration or instance creation.
          */
-        AddItemDescriptors addItemDescriptors(FlatDataItemDescriptor<?>... itemDescriptors);
+        AddFurtherItemDescriptors addItemDescriptors(FlatDataItemDescriptor<?>... itemDescriptors);
 
         /**
          * Add a bunch of item descriptors to the composite item provided by an iterable.
@@ -80,7 +84,16 @@ public final class CompositeItemDescriptor extends AbstractFlatDataItemDescripto
          *
          * @return the builder instance for further configuration or instance creation.
          */
-        AddItemDescriptors addItemDescriptors(Iterable<FlatDataItemDescriptor<?>> itemDescriptors);
+        AddFurtherItemDescriptors addItemDescriptors(Iterable<FlatDataItemDescriptor<?>> itemDescriptors);
+    }
+
+    /**
+     * Allows to add further item descriptors.
+     * 
+     * @author Frank Timothy Hardy
+     */
+    public interface AddFurtherItemDescriptors extends AddItemDescriptors, ObjectBuilder<CompositeItemDescriptor> {
+        // Aggregate interface with no further method definitions 
     }
     
     private interface BuildParams {
@@ -90,7 +103,7 @@ public final class CompositeItemDescriptor extends AbstractFlatDataItemDescripto
     }
     
     private static final class BuilderImpl extends AbstractItemDescriptorBuilder<CompositeItemDescriptor>
-            implements AddItemDescriptors, BuildParams {
+            implements AddFurtherItemDescriptors, BuildParams {
         
         private final List<FlatDataItemDescriptor<?>> itemDescriptors = new ArrayList<>();
         
@@ -99,7 +112,7 @@ public final class CompositeItemDescriptor extends AbstractFlatDataItemDescripto
         }
 
         @Override
-        public AddItemDescriptors addItemDescriptor(FlatDataItemDescriptor<?> itemDescriptor) {
+        public AddFurtherItemDescriptors addItemDescriptor(FlatDataItemDescriptor<?> itemDescriptor) {
             if (this.itemDescriptors.contains(
                     Objects.requireNonNull(itemDescriptor, "Undefined item descriptor!"))) {
                 throw new IllegalArgumentException("Cannot add the same item descriptor instance twice!");
@@ -109,20 +122,15 @@ public final class CompositeItemDescriptor extends AbstractFlatDataItemDescripto
         }
 
         @Override
-        public AddItemDescriptors addItemDescriptors(FlatDataItemDescriptor<?>... itemDescriptors) {
-            for (FlatDataItemDescriptor<?> itemDescriptor : Objects.requireNonNull(
-                    itemDescriptors, "Undefined item descriptors!")) {
-                this.addItemDescriptor(itemDescriptor);
-            }
+        public AddFurtherItemDescriptors addItemDescriptors(FlatDataItemDescriptor<?>... itemDescriptors) {
+            this.addItemDescriptors(Arrays.asList(itemDescriptors));
             return this;
         }
 
         @Override
-        public AddItemDescriptors addItemDescriptors(Iterable<FlatDataItemDescriptor<?>> itemDescriptors) {
-            for (FlatDataItemDescriptor<?> itemDescriptor : Objects.requireNonNull(
-                    itemDescriptors, "Undefined item descriptors!")) {
-                this.addItemDescriptor(itemDescriptor);
-            }
+        public AddFurtherItemDescriptors addItemDescriptors(Iterable<FlatDataItemDescriptor<?>> itemDescriptors) {
+            Objects.requireNonNull(itemDescriptors, "Undefined item descriptors!").forEach(
+                    this::addItemDescriptor);
             return this;
         }
 
@@ -148,6 +156,7 @@ public final class CompositeItemDescriptor extends AbstractFlatDataItemDescripto
         return new BuilderImpl(name);
     }
 
+    // TODO Make a name-mapping 
     private final List<FlatDataItemDescriptor<?>> descriptors;
 
     private CompositeItemDescriptor(BuildParams params) {
@@ -173,11 +182,6 @@ public final class CompositeItemDescriptor extends AbstractFlatDataItemDescripto
     }
 
     @Override
-    public List<FlatDataItemDescriptor<?>> getChildren() {
-        return this.descriptors;
-    }
-
-    @Override
     public void applyHandler(FlatDataItemDescriptor.Handler handler) {
         if (handler instanceof FlatDataStructureDescriptor.Handler) {
             ((FlatDataStructureDescriptor.Handler) handler).handleCompositeItemDescriptor(this);
@@ -185,4 +189,6 @@ public final class CompositeItemDescriptor extends AbstractFlatDataItemDescripto
             handler.handleFlatDataItemDescriptor(this);
         }
     }
+    
+    // TODO add methods to get the descriptors
 }

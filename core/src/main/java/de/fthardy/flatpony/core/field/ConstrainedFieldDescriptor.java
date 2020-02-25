@@ -36,9 +36,10 @@ import java.util.stream.Collectors;
 /**
  * The implementation of a descriptor for a field which has value constraints.
  * <p>
- * This descriptor is used as a decorator for any field descriptor. It allows to add {@link ValueConstraint}s. The given
- * constraints are used to validate the value of any field entity created by that decorated descriptor. Any field entity
- * provided by the decorated descriptor is decorated by an instance of {@link ConstrainedField}. 
+ * A constrained field has {@link ValueConstraint value constraints} which are used to validate the field value if it is
+ * read, set or modified. A constrained field is not an independent field but a decorator which wraps around any type of
+ * field. Be aware that the default value of a field is also validated by the constraints so it must conform to these
+ * constraints.
  * </p>
  *
  * @author Frank Timothy Hardy
@@ -46,32 +47,58 @@ import java.util.stream.Collectors;
 public final class ConstrainedFieldDescriptor implements FlatDataFieldDescriptor<ConstrainedField> {
 
     /**
-     * Demands the definition of a value constraint.
+     * Demands the addition of at least one value constraint.
+     * <p>
+     * There is no limitation on how many value constraints can be added but any value constraint instance can only be
+     * added once and the names of the value constraints are unique. If a particular value constraint instance is added
+     * a second time or another value constraint with the same name has already been added then an
+     * {@link IllegalArgumentException} is going to be thrown. The order in which the constraints are added is the order
+     * in which a field value is passed to the value constraint instances during a validation.
+     * </p>
+     * 
+     * @see ConstrainedFieldDescriptor
      * 
      * @author Frank Timothy Hardy
      */
-    public interface AddConstraint {
+    public interface AddConstraints {
 
         /**
          * Add a new value constraint.
-         * <p>
-         * The constraint must have a unique name.
-         * </p>
          * 
          * @param constraint the constraint to add.
          *                   
          * @return the builder instance for adding further constraints or instance creation.
          */
         AddFurtherConstraints addConstraint(ValueConstraint constraint);
+
+        /**
+         * Add several value constraints.
+         * 
+         * @param constraints the constraints to add.
+         *
+         * @return the builder instance for adding further constraints or instance creation.
+         */
+        AddFurtherConstraints addConstraints(ValueConstraint... constraints);
+
+        /**
+         * Add several value constraints.
+         *
+         * @param constraints the constraints to add.
+         *
+         * @return the builder instance for adding further constraints or instance creation.
+         */
+        AddFurtherConstraints addConstraints(Iterable<ValueConstraint> constraints);
     }
 
     /**
      * Allows to add further value constraints.
+     *
+     * @see AddConstraints
+     * @see ConstrainedFieldDescriptor
      * 
      * @author Frank Timothy Hardy
      */
-    public interface AddFurtherConstraints 
-            extends AddConstraint, ObjectBuilder<ConstrainedFieldDescriptor> {
+    public interface AddFurtherConstraints extends AddConstraints, ObjectBuilder<ConstrainedFieldDescriptor> {
         // Aggregator interface with no further method definitions
     }
     
@@ -102,6 +129,18 @@ public final class ConstrainedFieldDescriptor implements FlatDataFieldDescriptor
         }
 
         @Override
+        public AddFurtherConstraints addConstraints(ValueConstraint... constraints) {
+            this.addConstraints(Arrays.asList(constraints));
+            return this;
+        }
+
+        @Override
+        public AddFurtherConstraints addConstraints(Iterable<ValueConstraint> constraints) {
+            Objects.requireNonNull(constraints, "Undefined value constraints!").forEach(this::addConstraint);
+            return this;
+        }
+
+        @Override
         public FlatDataFieldDescriptor<?> getFieldDescriptor() {
             return this.fieldDescriptor;
         }
@@ -118,48 +157,48 @@ public final class ConstrainedFieldDescriptor implements FlatDataFieldDescriptor
     }
 
     /**
-     * Creates a builder for configuration and creation of an instance of this descriptor decorator.
+     * Creates a builder for configuration and creation of an instance of this descriptor implementation.
      * 
-     * @param fieldDescriptor the field descriptor to decorate.
+     * @param fieldDescriptor the field descriptor to be constrained.
      *                        
      * @return the builder instance.
      */
-    public static AddConstraint newInstance(FlatDataFieldDescriptor<?> fieldDescriptor) {
+    public static AddConstraints newInstance(FlatDataFieldDescriptor<?> fieldDescriptor) {
         return new BuilderImpl(fieldDescriptor);
     }
 
-    private final FlatDataFieldDescriptor<?> decoratedFieldDescriptor;
+    private final FlatDataFieldDescriptor<?> fieldDescriptor;
     private final Set<ValueConstraint> constraints;
 
     private ConstrainedFieldDescriptor(BuildParams params) {
-        this.decoratedFieldDescriptor = params.getFieldDescriptor();
+        this.fieldDescriptor = params.getFieldDescriptor();
         this.constraints = params.getConstraints();
-        this.checkForConstraintViolation(decoratedFieldDescriptor.getDefaultValue());
+        this.checkForConstraintViolation(fieldDescriptor.getDefaultValue());
     }
 
     @Override
     public String getName() {
-        return this.decoratedFieldDescriptor.getName();
+        return this.fieldDescriptor.getName();
     }
 
     @Override
     public String getDefaultValue() {
-        return this.decoratedFieldDescriptor.getDefaultValue();
+        return this.fieldDescriptor.getDefaultValue();
     }
 
     @Override
     public int getMinLength() {
-        return this.decoratedFieldDescriptor.getMinLength();
+        return this.fieldDescriptor.getMinLength();
     }
 
     @Override
     public ConstrainedField createItemEntity() {
-        return new ConstrainedField(this, this.decoratedFieldDescriptor.createItemEntity());
+        return new ConstrainedField(this, this.fieldDescriptor.createItemEntity());
     }
 
     @Override
     public ConstrainedField readItemEntityFrom(Reader source) {
-        return new ConstrainedField(this, this.decoratedFieldDescriptor.readItemEntityFrom(source));
+        return new ConstrainedField(this, this.fieldDescriptor.readItemEntityFrom(source));
     }
 
     @Override
@@ -172,12 +211,12 @@ public final class ConstrainedFieldDescriptor implements FlatDataFieldDescriptor
     }
 
     /**
-     * Get the decorated field descriptor.
+     * Get the field descriptor decorated by this descriptor.
      *
      * @return the decorated field descriptor.
      */
-    public FlatDataFieldDescriptor<?> getDecoratedFieldDescriptor() {
-        return this.decoratedFieldDescriptor;
+    public FlatDataFieldDescriptor<?> getFieldDescriptor() {
+        return this.fieldDescriptor;
     }
 
     /**

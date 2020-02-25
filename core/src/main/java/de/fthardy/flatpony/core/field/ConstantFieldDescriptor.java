@@ -30,10 +30,20 @@ import de.fthardy.flatpony.core.util.ObjectBuilder;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.util.Arrays;
 import java.util.Objects;
+import java.util.UUID;
 
 /**
- * The implementation of a descriptor for a field which represents an immutable constant value.
+ * The implementation of a descriptor for a constant field.
+ * <p>
+ * A constant field represents an immutable constant content. Constants are used very often in flat data formats to
+ * represent an identifier for particular parts of a record. Such constants are important markers for identifying
+ * structures within the flat data stream. And, especially in fixed length formats it is usual that parts in a record
+ * are kept as reserve for later use. For this purpose this class provides the dedicated factory methods
+ * {@link #reservedSpace(int)} and {@link #reservedSpace(int, char)} which allow to create constant field definitions
+ * for this purpose.
+ * </p>
  *
  * @author Frank Timothy Hardy
  */
@@ -41,16 +51,18 @@ public final class ConstantFieldDescriptor extends AbstractFlatDataFieldDescript
         implements FlatDataFieldDescriptor<ConstantField> {
 
     /**
-     * Demand the definition of the constant value for the item.
+     * Demand the definition of the constant content.
+     * 
+     * @see ConstantFieldDescriptor
      * 
      * @author Frank Timothy Hardy
      */
     public interface DefineConstant {
 
         /**
-         * Define the constant for this item.
+         * Define the constant content.
          * 
-         * @param constant the constant value.
+         * @param constant the constant content.
          *                 
          * @return the builder instance to create the new instance.
          */
@@ -58,7 +70,6 @@ public final class ConstantFieldDescriptor extends AbstractFlatDataFieldDescript
     }
     
     private interface BuildParams {
-        
         String getDescriptorName();
         String getConstant();
     }
@@ -106,7 +117,7 @@ public final class ConstantFieldDescriptor extends AbstractFlatDataFieldDescript
     }
 
     /**
-     * Create a builder for configuration and creation of a new instance of this item descriptor.
+     * Create a builder for configuration and creation of a new instance of this field.
      * 
      * @param name the name of the descriptor.
      *             
@@ -114,6 +125,37 @@ public final class ConstantFieldDescriptor extends AbstractFlatDataFieldDescript
      */
     public static DefineConstant newInstance(String name) {
         return new BuilderImpl(name);
+    }
+
+    /**
+     * Create an instance of a reserved space with a given size using the space character as fill character.
+     * <p>
+     * Every reserved space instance gets its own unique name which starts with 'reserved-' followed by a random UUID.
+     * </p>
+     * 
+     * @param size the size of the reserved space.
+     *             
+     * @return the descriptor for the reserved space.
+     */
+    public static ConstantFieldDescriptor reservedSpace(int size) {
+        return reservedSpace(size, ' ');
+    }
+
+    /**
+     * Create an instance of a reserved space with a given size a given fill character.
+     * <p>
+     * Every reserved space instance gets its own unique name which starts with 'reserved-' followed by a random UUID.
+     * </p>
+     * 
+     * @param size the size of the reserved space.
+     * @param fillChar the character to be used to fill the reserved space.
+     *                 
+     * @return the descriptor for the reserved space.
+     */
+    public static ConstantFieldDescriptor reservedSpace(int size, char fillChar) {
+        char[] reservedSpace = new char[size];
+        Arrays.fill(reservedSpace, fillChar);
+        return newInstance("reserve-" + UUID.randomUUID()).withConstant(new String(reservedSpace)).build();
     }
 
     private final ConstantField fieldInstance;
@@ -130,7 +172,7 @@ public final class ConstantFieldDescriptor extends AbstractFlatDataFieldDescript
 
     @Override
     public ConstantField createItemEntity() {
-        return fieldInstance;
+        return this.fieldInstance;
     }
 
     @Override
@@ -147,7 +189,7 @@ public final class ConstantFieldDescriptor extends AbstractFlatDataFieldDescript
 
         String value = new String(charsToRead);
         if (this.getDefaultValue().equals(value)) {
-            return fieldInstance;
+            return this.fieldInstance;
         } else {
             throw new FlatDataReadException(MSG_Invalid_value(this.getName(), value, this.getDefaultValue()));
         }

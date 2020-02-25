@@ -41,8 +41,7 @@ class DelimitedItemDescriptorTest {
 
     @Test
     void Cannot_create_with_no_item() {
-        assertThrows(NullPointerException.class, () -> DelimitedItemDescriptor.newInstance("Foo")
-                .withItemDescriptor(null));
+        assertThrows(NullPointerException.class, () -> DelimitedItemDescriptor.newInstance(null));
     }
 
     @Test
@@ -50,20 +49,20 @@ class DelimitedItemDescriptorTest {
         Reader reader = new StringReader("Test123");
 
         FlatDataReadException exception = 
-                assertThrows(FlatDataReadException.class, () -> DelimitedItemDescriptor.newInstance("Foo")
-                        .withItemDescriptor(ConstantFieldDescriptor.newInstance("ID").withConstant("Test").build())
+                assertThrows(FlatDataReadException.class, () -> DelimitedItemDescriptor.newInstance(
+                        ConstantFieldDescriptor.newInstance("ID").withConstant("Test").build())
                         .build()
                         .readItemEntityFrom(reader));
         assertThat(exception.getMessage()).isEqualTo(
-                DelimitedItemDescriptor.MSG_No_delimiter_found("Foo", "ID"));
+                DelimitedItemDescriptor.MSG_No_delimiter_found("ID"));
     }
 
     @Test
     void Normal_read_with_delimiter() {
         Reader reader = new StringReader("Test\n123");
 
-        DelimitedItemEntity item = DelimitedItemDescriptor.newInstance("Foo")
-                .withItemDescriptor(ConstantFieldDescriptor.newInstance("ID").withConstant("Test").build())
+        DelimitedItemEntity item = DelimitedItemDescriptor.newInstance(
+                ConstantFieldDescriptor.newInstance("ID").withConstant("Test").build())
                 .build()
                 .readItemEntityFrom(reader);
         assertNotNull(item);
@@ -71,8 +70,8 @@ class DelimitedItemDescriptorTest {
 
     @Test
     void Min_length_is_min_length_of_inner_item() {
-        DelimitedItemDescriptor descriptor = DelimitedItemDescriptor.newInstance("Foo")
-                .withItemDescriptor(ConstantFieldDescriptor.newInstance("ID").withConstant("Test").build())
+        DelimitedItemDescriptor descriptor = DelimitedItemDescriptor.newInstance(
+                ConstantFieldDescriptor.newInstance("ID").withConstant("Test").build())
                 .build();
         assertThat(descriptor.getMinLength()).isEqualTo(4);
     }
@@ -81,8 +80,8 @@ class DelimitedItemDescriptorTest {
     void Read_without_delimiter_but_end_of_stream() {
         Reader reader = new StringReader("Test");
 
-        DelimitedItemEntity item = DelimitedItemDescriptor.newInstance("Foo")
-                .withItemDescriptor(ConstantFieldDescriptor.newInstance("ID").withConstant("Test").build())
+        DelimitedItemEntity item = DelimitedItemDescriptor.newInstance(
+                ConstantFieldDescriptor.newInstance("ID").withConstant("Test").build())
                 .build()
                 .readItemEntityFrom(reader);
         assertNotNull(item);
@@ -96,11 +95,11 @@ class DelimitedItemDescriptorTest {
         when(readerMock.read()).thenThrow(ioException);
 
         FlatDataItemDescriptor<?> itemDescriptorMock = mock(FlatDataItemDescriptor.class);
+        when(itemDescriptorMock.getName()).thenReturn("Foo");
         when(itemDescriptorMock.readItemEntityFrom(readerMock)).thenReturn(null); // Returning null doesn't matter here
 
         FlatDataReadException exception = 
-                assertThrows(FlatDataReadException.class, () -> DelimitedItemDescriptor.newInstance("Foo")
-                        .withItemDescriptor(itemDescriptorMock)
+                assertThrows(FlatDataReadException.class, () -> DelimitedItemDescriptor.newInstance(itemDescriptorMock)
                         .build()
                         .readItemEntityFrom(readerMock));
         assertThat(exception.getMessage()).isEqualTo(DelimitedItemDescriptor.MSG_Read_failed("Foo"));
@@ -109,15 +108,15 @@ class DelimitedItemDescriptorTest {
         verify(readerMock).read();
         verifyNoMoreInteractions(readerMock);
 
+        verify(itemDescriptorMock, times(2)).getName();
         verify(itemDescriptorMock).readItemEntityFrom(readerMock);
         verifyNoMoreInteractions(itemDescriptorMock);
     }
 
     @Test
     void Calls_correct_handler_method() {
-        DelimitedItemDescriptor descriptor = DelimitedItemDescriptor.newInstance("Record")
-                .withItemDescriptor(ConstantFieldDescriptor.newInstance("ID").withConstant("Test").build())
-                .build();
+        DelimitedItemDescriptor descriptor = DelimitedItemDescriptor.newInstance(
+                ConstantFieldDescriptor.newInstance("ID").withConstant("Test").build()).build();
 
         FlatDataItemDescriptor.Handler handlerMock = mock(FlatDataItemDescriptor.Handler.class);
         FlatDataStructureDescriptor.Handler descriptorHandlerMock = mock(FlatDataStructureDescriptor.Handler.class);

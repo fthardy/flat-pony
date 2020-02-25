@@ -29,8 +29,6 @@ import de.fthardy.flatpony.core.FlatDataWriteException;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * The implementation of the delimited item entity type.
@@ -53,7 +51,7 @@ public final class DelimitedItemEntity extends AbstractFlatDataItemEntity<Delimi
      * Creates a new instance of this item.
      *
      * @param descriptor the descriptor which is creating this item.
-     * @param item the inner item.
+     * @param item the (delimited) item.
      */
     DelimitedItemEntity(DelimitedItemDescriptor descriptor, FlatDataItemEntity<?> item) {
         super(descriptor);
@@ -84,8 +82,10 @@ public final class DelimitedItemEntity extends AbstractFlatDataItemEntity<Delimi
         }
     }
 
-    @Override
-    public List<FlatDataItemEntity<?>> getChildren() {
-        return Collections.singletonList(this.item);
+    /**
+     * @return the inner (delimited) item entity.
+     */
+    public FlatDataItemEntity<?> getItem() {
+        return this.item;
     }
 }

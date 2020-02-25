@@ -40,8 +40,8 @@ class DelimitedItemTest {
 
     @Test
     void Write_to_target_stream() {
-        DelimitedItemEntity item = DelimitedItemDescriptor.newInstance("Foo")
-                .withItemDescriptor(ConstantFieldDescriptor.newInstance("ID").withConstant("Test").build())
+        DelimitedItemEntity item = DelimitedItemDescriptor.newInstance(
+                ConstantFieldDescriptor.newInstance("ID").withConstant("Test").build())
                 .build()
                 .createItemEntity();
 
@@ -62,14 +62,14 @@ class DelimitedItemTest {
 
         FlatDataItemEntity<?> innerItemMock = mock(FlatDataItemEntity.class);
 
-        DelimitedItemEntity item = new DelimitedItemEntity(DelimitedItemDescriptor.newInstance("Foo")
-                .withItemDescriptor(ConstantFieldDescriptor.newInstance("ID").withConstant("Test").build())
+        DelimitedItemEntity item = new DelimitedItemEntity(DelimitedItemDescriptor.newInstance(
+                ConstantFieldDescriptor.newInstance("ID").withConstant("Test").build())
                 .build(), 
                 innerItemMock);
 
         FlatDataWriteException exception = assertThrows(FlatDataWriteException.class, () -> item.writeTo(writerMock));
 
-        assertThat(exception.getMessage()).isEqualTo(DelimitedItemEntity.MSG_Write_failed("Foo"));
+        assertThat(exception.getMessage()).isEqualTo(DelimitedItemEntity.MSG_Write_failed("ID"));
         assertThat(exception.getCause()).isSameAs(ioException);
 
         verify(innerItemMock).writeTo(writerMock);
@@ -81,8 +81,8 @@ class DelimitedItemTest {
 
     @Test
     void Calls_correct_handler_method() {
-        DelimitedItemEntity item = DelimitedItemDescriptor.newInstance("Foo")
-                .withItemDescriptor(ConstantFieldDescriptor.newInstance("ID").withConstant("Test").build())
+        DelimitedItemEntity item = DelimitedItemDescriptor.newInstance(
+                ConstantFieldDescriptor.newInstance("ID").withConstant("Test").build())
                 .build()
                 .createItemEntity();
 

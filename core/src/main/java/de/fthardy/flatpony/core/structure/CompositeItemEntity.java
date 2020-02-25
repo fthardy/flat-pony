@@ -27,9 +27,7 @@ import de.fthardy.flatpony.core.AbstractFlatDataItemEntity;
 import de.fthardy.flatpony.core.FlatDataItemEntity;
 
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * The implementation of the composite item entity type.
@@ -42,8 +40,16 @@ import java.util.List;
  */
 public final class CompositeItemEntity extends AbstractFlatDataItemEntity<CompositeItemDescriptor>
         implements FlatDataStructure<CompositeItemDescriptor> {
+    
+    private static Map<String, FlatDataItemEntity<?>> mapByName(List<FlatDataItemEntity<?>> items) {
+        Map<String, FlatDataItemEntity<?>> map = new LinkedHashMap<>();
+        for (FlatDataItemEntity<?> entity : items) {
+            map.put(entity.getDescriptor().getName(), entity);
+        }
+        return Collections.unmodifiableMap(map);
+    }
 
-    private final List<FlatDataItemEntity<?>> items;
+    private final Map<String, FlatDataItemEntity<?>> itemEntityMap;
 
     /**
      * Creates a new instance of this composite item.
@@ -53,22 +59,17 @@ public final class CompositeItemEntity extends AbstractFlatDataItemEntity<Compos
      */
     CompositeItemEntity(CompositeItemDescriptor descriptor, List<FlatDataItemEntity<?>> items) {
         super(descriptor);
-        this.items = Collections.unmodifiableList(new ArrayList<>(items));
+        this.itemEntityMap = mapByName(items);
     }
 
     @Override
     public int getLength() {
-        return items.stream().mapToInt(FlatDataItemEntity::getLength).sum();
+        return itemEntityMap.values().stream().mapToInt(FlatDataItemEntity::getLength).sum();
     }
 
     @Override
     public void writeTo(Writer target) {
-        items.forEach(dataItem -> dataItem.writeTo(target));
-    }
-
-    @Override
-    public List<FlatDataItemEntity<?>> getChildren() {
-        return this.items;
+        itemEntityMap.values().forEach(dataItem -> dataItem.writeTo(target));
     }
 
     @Override
@@ -77,6 +78,23 @@ public final class CompositeItemEntity extends AbstractFlatDataItemEntity<Compos
             ((FlatDataStructure.Handler) handler).handleCompositeItemEntity(this);
         } else {
             handler.handleFlatDataItemEntity(this);
+        }
+    }
+
+    /**
+     * Get a particular item entity by its name.
+     * 
+     * @param name the name of the item entity to get.
+     *             
+     * @return the item entity.
+     * 
+     * @throws NoSuchElementException when there is no item entity for the given name.
+     */
+    public FlatDataItemEntity<?> getItemEntityByName(String name) {
+        if (this.itemEntityMap.containsKey(name)) {
+            return this.itemEntityMap.get(name);
+        } else {
+            throw new NoSuchElementException(name);
         }
     }
 }

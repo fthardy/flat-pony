@@ -31,7 +31,6 @@ import de.fthardy.flatpony.core.util.TypedFieldDecorator;
 
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -44,63 +43,62 @@ public final class SequenceItemEntity extends AbstractFlatDataItemEntity<Sequenc
         implements FlatDataStructure<SequenceItemDescriptor> {
 
     private static List<FlatDataItemEntity<?>> createElementList(
-            FlatDataItemDescriptor<? extends FlatDataItemEntity<?>> descriptor, int size) {
+            SequenceItemDescriptor descriptor, TypedFieldDecorator<Integer> countField) {
+        int size = countField == null ? 
+                descriptor.getMultiplicity().getMinOccurrences() :
+                countField.getTypedValue();
         List<FlatDataItemEntity<?>> elements = new ArrayList<>();
         for (int i = 0; i < size; i++) {
-            elements.add(descriptor.createItemEntity());
+            elements.add(descriptor.getElementItemDescriptor().createItemEntity());
         }
         return elements;
     }
 
-    private final List<FlatDataItemEntity<?>> elementItems;
+    private final List<FlatDataItemEntity<?>> elements;
     private final TypedFieldDecorator<Integer> countField;
 
     /**
      * Creates a new instance of this item entity.
+     * <p>
+     * This constructor is called by the descriptor when a new item entity instance is created. 
+     * </p>
      *
      * @param descriptor the descriptor which created this instance.
      * @param countField the count field entity instance or {@code null}.
      */
     SequenceItemEntity(SequenceItemDescriptor descriptor, TypedFieldDecorator<Integer> countField) {
-        this(
-                descriptor,
-                createElementList(
-                        descriptor.getElementItemDescriptor(),
-                        countField == null ? 0 : countField.getTypedValue()),
-                countField);
+        this(descriptor, createElementList(descriptor, countField), countField);
     }
 
     /**
      * Creates a new instance of this item entity.
+     * <p>
+     * This constructor is called by the descriptor when a item entity instance is read from a source stream. 
+     * </p>
      *
      * @param descriptor the descriptor which created this instance.
+     * @param elements the list of the read element item entities.
      * @param countField the count field entity instance or {@code null}.
-     * @param elementItems the list of the element items.
      */
     SequenceItemEntity(
             SequenceItemDescriptor descriptor,
-            List<FlatDataItemEntity<?>> elementItems,
+            List<FlatDataItemEntity<?>> elements,
             TypedFieldDecorator<Integer> countField) {
         super(descriptor);
-        this.elementItems = new ArrayList<>(elementItems);
+        this.elements = new ArrayList<>(elements);
         this.countField = countField;
     }
 
     @Override
-    public List<FlatDataItemEntity<?>> getChildren() {
-        return Collections.unmodifiableList(this.elementItems);
-    }
-
-    @Override
     public int getLength() {
-        return this.elementItems.stream().mapToInt(FlatDataItemEntity::getLength).sum();
+        return this.elements.stream().mapToInt(FlatDataItemEntity::getLength).sum();
     }
 
     @Override
     public void writeTo(Writer target) {
         SequenceItemDescriptor.Multiplicity multiplicity = this.getDescriptor().getMultiplicity();
-        if (multiplicity == null || multiplicity.isSizeWithinBounds(this.elementItems.size())) {
-            this.elementItems.forEach(e -> e.writeTo(target));
+        if (multiplicity == null || multiplicity.isSizeWithinBounds(this.elements.size())) {
+            this.elements.forEach(e -> e.writeTo(target));
         } else {
             throw new FlatDataWriteException(SequenceItemDescriptor.MSG_Multiplicity_constraint_violated(
                     this.getDescriptor().getName(), this.getDescriptor().getMultiplicity()));
@@ -117,56 +115,64 @@ public final class SequenceItemEntity extends AbstractFlatDataItemEntity<Sequenc
     }
 
     /**
-     * Discard a particular element item from the list.
-     *
-     * @param elementItem the element item to discard.
+     * @return a new list with the element item entities.
      */
-    public void discardElement(FlatDataItemEntity<?> elementItem) {
-        if (!this.elementItems.remove(elementItem)) {
-            throw new IllegalArgumentException("Invalid element item!");
-        }
-        this.updateCountField();
+    public List<FlatDataItemEntity<?>> getElements() {
+        return new ArrayList<>(this.elements);
     }
 
     /**
-     * Discard all element items.
+     * Create and add a new element item to the list.
+     * 
+     * @return the newly created element item entity.
      */
-    public void discardAllElementItems() {
-        this.elementItems.clear();
-        this.updateCountField();
+    public FlatDataItemEntity<?> createAndAddNewElement() {
+        FlatDataItemEntity<?> element = this.getDescriptor().getElementItemDescriptor().createItemEntity();
+        this.addElement(element);
+        return element;
     }
 
     /**
-     * Add an element item.
+     * Add an element item entity.
      *
-     * @param elementItem the element item to add. Must have the same descriptor as all other element items.
+     * @param elementItem the element item entity to add. Must have the same descriptor as all other element item 
+     *                    entities.
      *
      * @throws IllegalArgumentException when the given element item entity already exists or doesn't have the element
      *                                  item descriptor from this optional items descriptor.
      */
-    public void addElementItem(FlatDataItemEntity<?> elementItem) {
-        if (!this.elementItems.contains(Objects.requireNonNull(elementItem, "Undefined element item entity!"))
+    public void addElement(FlatDataItemEntity<?> elementItem) {
+        if (!this.elements.contains(Objects.requireNonNull(elementItem, "Undefined element item entity!"))
                 || elementItem.getDescriptor() != this.getDescriptor().getElementItemDescriptor()) {
-            throw new IllegalArgumentException("Invalid element item!");
+            throw new IllegalArgumentException("Invalid element item entity!");
         }
-        this.elementItems.add(elementItem);
+        this.elements.add(elementItem);
         this.updateCountField();
     }
 
     /**
-     * Create and add a new element item to the list and return it.
+     * Discard a particular element item entity from the list.
      *
-     * @return the new element item.
+     * @param elementItem the element item to discard.
      */
-    public FlatDataItemEntity<?> addNewElementItem() {
-        FlatDataItemEntity<?> newElementItem = this.getDescriptor().getElementItemDescriptor().createItemEntity();
-        this.addElementItem(newElementItem);
-        return newElementItem;
+    public void discardElement(FlatDataItemEntity<?> elementItem) {
+        if (!this.elements.remove(elementItem)) {
+            throw new IllegalArgumentException("Invalid element item entity!");
+        }
+        this.updateCountField();
+    }
+
+    /**
+     * Discard all element item entities.
+     */
+    public void discardAllElements() {
+        this.elements.clear();
+        this.updateCountField();
     }
 
     private void updateCountField() {
         if (this.countField != null) {
-            this.countField.setTypedValue(this.elementItems.size());
+            this.countField.setTypedValue(this.elements.size());
         }
     }
 }

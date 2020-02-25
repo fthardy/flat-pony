@@ -72,10 +72,5 @@ public interface FlatDataStructureDescriptor<T extends FlatDataStructure<?>> ext
          */
         void handleSequenceItemDescriptor(SequenceItemDescriptor descriptor);
     }
-
-    /**
-     * @return the list of the children.
-     */
-    List<FlatDataItemDescriptor<?>> getChildren();
 }
 

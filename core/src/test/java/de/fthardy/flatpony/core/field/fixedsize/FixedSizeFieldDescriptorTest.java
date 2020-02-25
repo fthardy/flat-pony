@@ -63,7 +63,7 @@ class FixedSizeFieldDescriptorTest {
         FixedSizeFieldDescriptor descriptor = FixedSizeFieldDescriptor.newInstance("Foo")
                 .withFieldSize(10)
                 .build();
-        assertThat(descriptor.getMinLength()).isEqualTo(descriptor.getFieldSize());
+        assertThat(descriptor.getMinLength()).isEqualTo(descriptor.getMinLength());
     }
 
     @Test

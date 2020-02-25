@@ -81,9 +81,9 @@ public interface FlatDataItemEntity<T extends FlatDataItemDescriptor<?>> {
     int getLength();
 
     /**
-     * Write the data of the item to an output target.
+     * Write the data of the receiving item entity instance to target stream.
      *
-     * @param target the writer providing write access to the output target for writing the data of the receiving item
+     * @param target the writer providing write access to the target stream for writing the data of the receiving item
      *               instance to it.
      */
     void writeTo(Writer target);

@@ -72,7 +72,7 @@ class SequenceItemEntityTest {
         StringReader reader = new StringReader("TESTTESTTESTBLA");
 
         SequenceItemEntity sequenceItemEntity = descriptor.readItemEntityFrom(reader);
-        assertThat(sequenceItemEntity.getChildren()).hasSize(3);
+        assertThat(sequenceItemEntity.getElements()).hasSize(3);
         assertThat(sequenceItemEntity.getLength()).isEqualTo(12);
     }
 
@@ -122,7 +122,7 @@ class SequenceItemEntityTest {
         StringReader reader = new StringReader("TESTTESTTESTBLA");
 
         SequenceItemEntity sequenceItemEntity = descriptor.readItemEntityFrom(reader);
-        sequenceItemEntity.discardAllElementItems();
+        sequenceItemEntity.discardAllElements();
 
         StringWriter writer = new StringWriter();
 
@@ -163,13 +163,13 @@ class SequenceItemEntityTest {
 
         SequenceItemEntity sequenceItemEntity = descriptor.readItemEntityFrom(reader);
 
-        FlatDataItemEntity<?> element = sequenceItemEntity.getChildren().get(0);
+        FlatDataItemEntity<?> element = sequenceItemEntity.getElements().get(0);
         sequenceItemEntity.discardElement(element);
-        assertThat(sequenceItemEntity.getChildren()).hasSize(2);
+        assertThat(sequenceItemEntity.getElements()).hasSize(2);
         assertThat(countField.getValue()).isEqualTo("2");
 
-        sequenceItemEntity.discardAllElementItems();
-        assertThat(sequenceItemEntity.getChildren()).hasSize(0);
+        sequenceItemEntity.discardAllElements();
+        assertThat(sequenceItemEntity.getElements()).hasSize(0);
         assertThat(countField.getValue()).isEqualTo("0");
 
         assertThrows(IllegalArgumentException.class, () -> sequenceItemEntity.discardElement(element));
@@ -209,17 +209,17 @@ class SequenceItemEntityTest {
 
         SequenceItemEntity sequenceItemEntity = descriptor.readItemEntityFrom(reader);
 
-        FlatDataItemEntity<?> element = sequenceItemEntity.getChildren().get(0);
+        FlatDataItemEntity<?> element = sequenceItemEntity.getElements().get(0);
         sequenceItemEntity.discardElement(element);
-        assertThat(sequenceItemEntity.getChildren()).hasSize(2);
+        assertThat(sequenceItemEntity.getElements()).hasSize(2);
         assertThat(countField.getValue()).isEqualTo("2");
 
-        sequenceItemEntity.addNewElementItem();
-        assertThat(sequenceItemEntity.getChildren()).hasSize(3);
+        sequenceItemEntity.createAndAddNewElement();
+        assertThat(sequenceItemEntity.getElements()).hasSize(3);
         assertThat(countField.getValue()).isEqualTo("3");
 
         assertThrows(IllegalArgumentException.class, () ->
-                sequenceItemEntity.addElementItem(ConstantFieldDescriptor.newInstance("Bar")
+                sequenceItemEntity.addElement(ConstantFieldDescriptor.newInstance("Bar")
                         .withConstant("FOO").build()
                         .createItemEntity()));
     }

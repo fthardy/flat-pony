@@ -36,6 +36,25 @@ import java.util.Objects;
 
 /**
  * The implementation of a descriptor for a fixed size field.
+ * <p>
+ * A fixed size field has - as its name implies - a defined, fixed size and hence a limited space to store its content.
+ * Fixed size fields are the basis for any fixed length formats. Each fixed size field provides space which has to be
+ * filled but not every value has the size of the field content. Here we make a crucial distinction between
+ * <strong>value</strong> and <strong>content</strong>.
+ * The entire space available for the field represents its content and a value can be placed within this content. A
+ * value can be larger or smaller in size compared to the field size. When the value is larger it is going to be cut and
+ * if it is smaller the remaining space of the content is filled up with a special fill character. Where the value is
+ * cut or at which side of the value the content is filled up as well as the fill character is handled by a
+ * {@link FieldContentValueTransformer}. The {@link DefaultFieldContentValueTransformer} is used if none is defined
+ * during construction. By default the used fill character is a blank and the value is pad to the left which results to
+ * a cut at the right if the value is too large. For each field a default value can be defined. If none is defined the
+ * default value is the empty string which means "nothing". The value is never allowed to be set to {@code null}. In
+ * case of "nothing" the field content is going to be completely filled up with fill characters. When reading a field
+ * from a source stream which has only fill characters in its content, than the empty string is set as its value. This
+ * means also that a fixed size field is per se not mandatory. If a fixed size field has to be mandatory (never empty)
+ * then it has to be wrapped by a {@link de.fthardy.flatpony.core.field.ConstrainedFieldDescriptor} which has some
+ * proper value constraints.
+ * </p>
  *
  * @author Frank Timothy Hardy
  */
@@ -47,6 +66,8 @@ public final class FixedSizeFieldDescriptor extends AbstractFlatDataFieldDescrip
      * <p>
      * By default the field size is 1.
      * </p>
+     * 
+     * @see FixedSizeFieldDescriptor
      * 
      * @author Frank Timothy Hardy
      */
@@ -65,8 +86,10 @@ public final class FixedSizeFieldDescriptor extends AbstractFlatDataFieldDescrip
     /**
      * Allows to define a default value.
      * <p>
-     * By default the default value is an empty string.
+     * By default the default value is an empty string (i.e. nothing).
      * </p>
+     *
+     * @see FixedSizeFieldDescriptor
      * 
      * @author Frank Timothy Hardy
      */
@@ -85,8 +108,10 @@ public final class FixedSizeFieldDescriptor extends AbstractFlatDataFieldDescrip
     /**
      * Allows to define a content value transformer.
      * <p>
-     * By default a content value transformer with a blank as fill character and left padding is used.
+     * By default a {@link DefaultFieldContentValueTransformer} with a blank as fill character and left padding is used.
      * </p>
+     *
+     * @see FixedSizeFieldDescriptor
      * 
      * @author Frank Timothy Hardy
      */
@@ -100,14 +125,14 @@ public final class FixedSizeFieldDescriptor extends AbstractFlatDataFieldDescrip
          * @return the builder for further configuration or instance creation.
          */
         ObjectBuilder<FixedSizeFieldDescriptor> useContentValueTransformer(
-                ContentValueTransformer contentValueTransformer);
+                FieldContentValueTransformer contentValueTransformer);
     }
     
     private interface BuildParams {
         String getDescriptorName();
         int getFieldSize();
         String getDefaultValue();
-        ContentValueTransformer getContentValueTransformer();
+        FieldContentValueTransformer getContentValueTransformer();
     }
     
     private static final class BuilderImpl extends AbstractItemDescriptorBuilder<FixedSizeFieldDescriptor>
@@ -115,7 +140,7 @@ public final class FixedSizeFieldDescriptor extends AbstractFlatDataFieldDescrip
         
         private int fieldSize = 1;
         private String defaultValue = "";
-        private ContentValueTransformer contentValueTransformer;
+        private FieldContentValueTransformer contentValueTransformer;
         
         BuilderImpl(String descriptorName) {
             super(descriptorName);
@@ -138,7 +163,7 @@ public final class FixedSizeFieldDescriptor extends AbstractFlatDataFieldDescrip
 
         @Override
         public ObjectBuilder<FixedSizeFieldDescriptor> useContentValueTransformer(
-                ContentValueTransformer contentValueTransformer) {
+                FieldContentValueTransformer contentValueTransformer) {
             this.contentValueTransformer = Objects.requireNonNull(contentValueTransformer);
             return this;
         }
@@ -154,7 +179,7 @@ public final class FixedSizeFieldDescriptor extends AbstractFlatDataFieldDescrip
         }
 
         @Override
-        public ContentValueTransformer getContentValueTransformer() {
+        public FieldContentValueTransformer getContentValueTransformer() {
             return this.contentValueTransformer == null ? 
                     new DefaultFieldContentValueTransformer(' ', true) : this.contentValueTransformer;
         }
@@ -181,7 +206,7 @@ public final class FixedSizeFieldDescriptor extends AbstractFlatDataFieldDescrip
     }
 
     private final int fieldSize;
-    private final ContentValueTransformer contentValueTransformer;
+    private final FieldContentValueTransformer contentValueTransformer;
     
     private FixedSizeFieldDescriptor(BuildParams params) {
         super(params.getDescriptorName(), params.getDefaultValue());
@@ -223,10 +248,6 @@ public final class FixedSizeFieldDescriptor extends AbstractFlatDataFieldDescrip
         } else {
             handler.handleFlatDataItemDescriptor(this);
         }
-    }
-
-    int getFieldSize() {
-        return fieldSize;
     }
 
     String makeContentFromValue(String value) {

@@ -106,13 +106,13 @@ class SequenceItemDescriptorTest {
                 .withElementItemDescriptor(constantFieldDescriptor)
                 .build();
 
-        assertThat(descriptor.getMultiplicity()).isNull();
+        assertThat(descriptor.getMultiplicity().getMinOccurrences()).isEqualTo(0);
+        assertThat(descriptor.getMultiplicity().getMaxOccurrences()).isEqualTo(Integer.MAX_VALUE);
         assertThat(descriptor.getMinLength()).isEqualTo(0);
-        assertThat(descriptor.getChildren()).containsExactly(constantFieldDescriptor);
         assertThat(descriptor.getElementItemDescriptor()).isSameAs(constantFieldDescriptor);
 
         SequenceItemEntity sequenceItemEntity = descriptor.createItemEntity();
-        assertThat(sequenceItemEntity.getChildren()).isEmpty();
+        assertThat(sequenceItemEntity.getElements()).isEmpty();
     }
 
     @Test
@@ -142,16 +142,16 @@ class SequenceItemDescriptorTest {
                 .withCountFieldReference(fieldReference)
                 .build();
 
-        assertThat(descriptor.getMultiplicity()).isNull();
+        assertThat(descriptor.getMultiplicity().getMinOccurrences()).isEqualTo(0);
+        assertThat(descriptor.getMultiplicity().getMaxOccurrences()).isEqualTo(Integer.MAX_VALUE);
         assertThat(descriptor.getMinLength()).isEqualTo(0);
-        assertThat(descriptor.getChildren()).containsExactly(constantFieldDescriptor);
         assertThat(descriptor.getElementItemDescriptor()).isSameAs(constantFieldDescriptor);
 
         FlatDataMutableField<?> countField = fieldReference.getFieldDescriptorDecorator().createItemEntity();
         countField.setValue("3");
 
         SequenceItemEntity sequenceItemEntity = descriptor.createItemEntity();
-        assertThat(sequenceItemEntity.getChildren()).hasSize(3);
+        assertThat(sequenceItemEntity.getElements()).hasSize(3);
     }
     
     @Test
@@ -163,7 +163,7 @@ class SequenceItemDescriptorTest {
                 .build();
 
         SequenceItemEntity sequenceItemEntity = descriptor.createItemEntity();
-        assertThat(sequenceItemEntity.getChildren()).isEmpty();
+        assertThat(sequenceItemEntity.getElements()).isEmpty();
     }
 
     @Test
@@ -178,9 +178,9 @@ class SequenceItemDescriptorTest {
         StringReader reader2 = new StringReader("TESTTEST");
 
         SequenceItemEntity sequenceItemEntity1 = descriptor.readItemEntityFrom(reader1);
-        assertThat(sequenceItemEntity1.getChildren()).hasSize(3);
+        assertThat(sequenceItemEntity1.getElements()).hasSize(3);
         SequenceItemEntity sequenceItemEntity2 = descriptor.readItemEntityFrom(reader2);
-        assertThat(sequenceItemEntity2.getChildren()).hasSize(2);
+        assertThat(sequenceItemEntity2.getElements()).hasSize(2);
     }
 
     @Test
@@ -199,9 +199,9 @@ class SequenceItemDescriptorTest {
         StringReader reader2 = new StringReader("TESTTEST");
 
         SequenceItemEntity sequenceItemEntity1 = descriptor.readItemEntityFrom(reader1);
-        assertThat(sequenceItemEntity1.getChildren()).hasSize(3);
+        assertThat(sequenceItemEntity1.getElements()).hasSize(3);
         SequenceItemEntity sequenceItemEntity2 = descriptor.readItemEntityFrom(reader2);
-        assertThat(sequenceItemEntity2.getChildren()).hasSize(2);
+        assertThat(sequenceItemEntity2.getElements()).hasSize(2);
     }
 
     @Test
@@ -238,9 +238,9 @@ class SequenceItemDescriptorTest {
                 .withCountFieldReference(fieldReference)
                 .build();
 
-        assertThat(descriptor.getMultiplicity()).isNull();
+        assertThat(descriptor.getMultiplicity().getMinOccurrences()).isEqualTo(0);
+        assertThat(descriptor.getMultiplicity().getMaxOccurrences()).isEqualTo(Integer.MAX_VALUE);
         assertThat(descriptor.getMinLength()).isEqualTo(0);
-        assertThat(descriptor.getChildren()).containsExactly(constantFieldDescriptor);
         assertThat(descriptor.getElementItemDescriptor()).isSameAs(constantFieldDescriptor);
 
         StringReader reader1 = new StringReader("3TESTTESTTESTbla");
@@ -248,10 +248,10 @@ class SequenceItemDescriptorTest {
 
         fieldReference.getFieldDescriptorDecorator().readItemEntityFrom(reader1);
         SequenceItemEntity sequenceItemEntity1 = descriptor.readItemEntityFrom(reader1);
-        assertThat(sequenceItemEntity1.getChildren()).hasSize(3);
+        assertThat(sequenceItemEntity1.getElements()).hasSize(3);
 
         fieldReference.getFieldDescriptorDecorator().readItemEntityFrom(reader2);
         SequenceItemEntity sequenceItemEntity2 = descriptor.readItemEntityFrom(reader2);
-        assertThat(sequenceItemEntity2.getChildren()).hasSize(2);
+        assertThat(sequenceItemEntity2.getElements()).hasSize(2);
     }
 }
