@@ -39,16 +39,15 @@ import java.util.Objects;
  * The implementation of a descriptor for a sequence item.
  * <p>
  * A sequence item represents a sequence of element items where each element item is of the same item type. A sequence
- * can optionally be linked with a field that contains/represents the count of the elements. Such a field is expected to
- * be defined before (upstream) the sequence item. If no reference count field is defined then the read strategy is
- * trial and error which means the read algorithm tries to read an element item and if it fails it stops reading element
- * items.
+ * can optionally be linked with a field that contains the count of the elements. Such a field is expected to be located
+ * before the sequence item. If no reference count field is defined then the read strategy is "trial and error" which
+ * means the read algorithm tries to read an element item until it fails.
  * </p>
  * <p>
  * Additionally it is possible to define a multiplicity for the element items. If the number of the read element items
- * is not withing the bounds of the defined multiplicity the a {@link FlatDataReadException} is thrown. Conversely if
- * the sequence is going to be written to a target stream and the number of element items to write is not withing the
- * bounds of the defined multiplicity then a {@link FlatDataWriteException} is thrown.
+ * is not within the bounds of the defined multiplicity a {@link FlatDataReadException} is thrown. Conversely if the
+ * sequence is going to be written to a target stream and the number of element items to write is not within the bounds
+ * of the defined multiplicity then a {@link FlatDataWriteException} is thrown.
  * </p>
  *
  * @author Frank Timothy Hardy

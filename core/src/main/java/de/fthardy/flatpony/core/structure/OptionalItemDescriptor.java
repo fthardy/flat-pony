@@ -38,11 +38,12 @@ import java.util.Objects;
 /**
  * The descriptor implementation for an optional item.
  * <p>
- * An optional item represents some target item which might be present or absent. This descriptor can be optionally
- * linked with a field which is before (upstream) the optional item. Such a field might represent a flag indicating the
- * presence or absence of the target item represented by this descriptor. If no linked to a flag field is defined then
- * the read strategy is "trial and error" which means the read algorithm tries to read the target item and if it fails
- * it stops reading, resets to the position where the item read started assuming that there is no target item.
+ * An optional item is a wrapper item that encapsulates a target item which might be present or absent within the data.
+ * This descriptor can be optionally linked with a field which has to be located before this item in the data. Such a
+ * field should represent an indicator indicating the presence or absence of the target item. If no link to a field is
+ * defined then the read strategy is "trial and error" which means the read algorithm tries to read the target item and
+ * when it fails it assumes the target item to be absent and resets the read pointer to the position where the read of
+ * the item started.
  * </p>
  *
  * @author Frank Timothy Hardy

@@ -34,7 +34,9 @@ import java.util.Objects;
 /**
  * The implementation of a descriptor for a field which can provide its value in a particular target type.
  * <p>
- * This field implementation is a decorator which can extend any kind of {@link FlatDataField}.  
+ * A converted field is a wrapper for other field types. It allows to get and set the value of the wrapped field in a
+ * particular data type. For this purpose this field wrapper needs a {@link FieldValueConverter converter}
+ * implementation that converts the field value into the target type and vice versa. 
  * </p>
  *     
  * @param <T> the target type for the field value. 

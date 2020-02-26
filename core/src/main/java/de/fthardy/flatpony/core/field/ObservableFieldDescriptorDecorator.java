@@ -51,6 +51,7 @@ public final class ObservableFieldDescriptorDecorator implements FlatDataFieldDe
          *
          * @param field the new field entity instance.
          */
+        // TODO Does the field has to be mutabel - don't think so
         void onFieldEntityCreated(FlatDataMutableField<? extends FlatDataFieldDescriptor<?>> field);
 
         /**
@@ -58,6 +59,7 @@ public final class ObservableFieldDescriptorDecorator implements FlatDataFieldDe
          *
          * @param field the field entity instance read from a source stream.
          */
+        // TODO Does the field has to be mutabel - don't think so
         void onFieldEntityRead(FlatDataMutableField<? extends FlatDataFieldDescriptor<?>> field);
     }
 

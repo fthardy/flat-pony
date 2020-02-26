@@ -34,9 +34,12 @@ import java.io.Reader;
 import java.util.Objects;
 
 /**
- * The implementation of delimited item descriptor.
+ * The implementation of a delimited item descriptor.
  * <p>
- * A delimited item is a decorator for an item which has to end with a delimiter.
+ * A delimited item is a wrapper item which that encapsulates a target item. Just like a delimited field a delimited
+ * item has a delimiter character which marks its end. This type of item is a special one which is mainly intended for
+ * modeling entire record sets in fixed length format where each record is usually separated by a delimiter (which is
+ * mostly the new line character).
  * </p>
  *
  * @author Frank Timothy Hardy
@@ -64,19 +67,20 @@ public final class DelimitedItemDescriptor implements FlatDataStructureDescripto
     }
     
     private interface BuildParams {
-        FlatDataItemDescriptor<?> getItemDescriptor();
+        FlatDataItemDescriptor<?> getTargetItemDescriptor();
         int getDelimiter();
     }
     
     private static final class BuilderImpl extends AbstractItemDescriptorBuilder<DelimitedItemDescriptor> 
             implements DefineDelimiter, BuildParams {
         
-        private FlatDataItemDescriptor<?> itemDescriptor;
+        private FlatDataItemDescriptor<?> targetItemDescriptor;
         private int delimiter = DEFAULT_DELIMITER;
         
-        BuilderImpl(FlatDataItemDescriptor<?> itemDescriptor) {
-            super(itemDescriptor.getName());
-            this.itemDescriptor = Objects.requireNonNull(itemDescriptor, "Undefined item descriptor!");
+        BuilderImpl(FlatDataItemDescriptor<?> targetItemDescriptor) {
+            super(targetItemDescriptor.getName());
+            this.targetItemDescriptor = 
+                    Objects.requireNonNull(targetItemDescriptor, "Undefined target item descriptor!");
         }
 
         @Override
@@ -86,8 +90,8 @@ public final class DelimitedItemDescriptor implements FlatDataStructureDescripto
         }
 
         @Override
-        public FlatDataItemDescriptor<?> getItemDescriptor() {
-            return this.itemDescriptor;
+        public FlatDataItemDescriptor<?> getTargetItemDescriptor() {
+            return this.targetItemDescriptor;
         }
 
         @Override
@@ -115,45 +119,45 @@ public final class DelimitedItemDescriptor implements FlatDataStructureDescripto
     /**
      * Create a builder instance to configure and create a new {@link DelimitedItemDescriptor} instance.
      * 
-     * @param itemDescriptor the item descriptor.
+     * @param targetItemDescriptor the target item descriptor.
      *             
      * @return the builder instance.
      */
-    public static DefineDelimiter newInstance(FlatDataItemDescriptor<?> itemDescriptor) {
-        return new BuilderImpl(itemDescriptor);
+    public static DefineDelimiter newInstance(FlatDataItemDescriptor<?> targetItemDescriptor) {
+        return new BuilderImpl(targetItemDescriptor);
     }
 
     private final int delimiter;
-    private final FlatDataItemDescriptor<?> itemDescriptor;
+    private final FlatDataItemDescriptor<?> targetItemDescriptor;
 
     private DelimitedItemDescriptor(BuildParams params) {
         this.delimiter = params.getDelimiter();
-        this.itemDescriptor = params.getItemDescriptor();
+        this.targetItemDescriptor = params.getTargetItemDescriptor();
     }
 
     @Override
     public String getName() {
-        return this.itemDescriptor.getName();
+        return this.targetItemDescriptor.getName();
     }
 
     @Override
     public int getMinLength() {
-        return this.itemDescriptor.getMinLength();
+        return this.targetItemDescriptor.getMinLength();
     }
 
     @Override
     public DelimitedItemEntity createItemEntity() {
-        return new DelimitedItemEntity(this, this.itemDescriptor.createItemEntity());
+        return new DelimitedItemEntity(this, this.targetItemDescriptor.createItemEntity());
     }
 
     @Override
     public DelimitedItemEntity readItemEntityFrom(Reader source) {
         try {
-            FlatDataItemEntity<?> item = this.itemDescriptor.readItemEntityFrom(source);
+            FlatDataItemEntity<?> item = this.targetItemDescriptor.readItemEntityFrom(source);
 
             int i = source.read();
             if (i != -1 && i != this.delimiter) {
-                throw new FlatDataReadException(MSG_No_delimiter_found(this.itemDescriptor.getName()));
+                throw new FlatDataReadException(MSG_No_delimiter_found(this.targetItemDescriptor.getName()));
             }
 
             return new DelimitedItemEntity(this, item);
@@ -181,7 +185,7 @@ public final class DelimitedItemDescriptor implements FlatDataStructureDescripto
     /**
      * @return the descriptor of the (delimited) item. 
      */
-    public FlatDataItemDescriptor<?> getItemDescriptor() {
-        return itemDescriptor;
+    public FlatDataItemDescriptor<?> getTargetItemDescriptor() {
+        return targetItemDescriptor;
     }
 }
