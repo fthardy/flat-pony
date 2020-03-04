@@ -154,7 +154,7 @@ public final class OptionalItemDescriptor implements FlatDataStructureDescriptor
 
     @Override
     public int getMinLength() {
-        return this.targetItemDescriptor.getMinLength();
+        return 0; // an optional element may be absent so the minimum length is 0
     }
 
     @Override
