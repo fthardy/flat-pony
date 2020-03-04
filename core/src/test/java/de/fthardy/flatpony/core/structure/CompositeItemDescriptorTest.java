@@ -41,7 +41,7 @@ class CompositeItemDescriptorTest {
     @Test
     void Cannot_add_null() {
         assertThrows(NullPointerException.class, () -> CompositeItemDescriptor.newInstance("Foo")
-                .addItemDescriptor(null));
+                .addElementItemDescriptor(null));
     }
 
     @Test
@@ -54,7 +54,7 @@ class CompositeItemDescriptorTest {
                 .withFieldSize(9).build();
 
         CompositeItemDescriptor descriptor = CompositeItemDescriptor.newInstance("Record")
-                .addItemDescriptors(constantFieldDescriptor, field1Descriptor, field2Descriptor)
+                .addElementItemDescriptors(constantFieldDescriptor, field1Descriptor, field2Descriptor)
                 .build();
 
         Reader reader = new StringReader("FOOTest1123456789");
@@ -72,7 +72,7 @@ class CompositeItemDescriptorTest {
                 .withFieldSize(9).build();
 
         CompositeItemDescriptor descriptor = CompositeItemDescriptor.newInstance("Record")
-                .addItemDescriptors(Arrays.asList(constantFieldDescriptor, field1Descriptor, field2Descriptor))
+                .addElementItemDescriptors(Arrays.asList(constantFieldDescriptor, field1Descriptor, field2Descriptor))
                 .build();
 
         assertThat(descriptor.getMinLength()).isEqualTo(17);
@@ -88,9 +88,9 @@ class CompositeItemDescriptorTest {
                 .withFieldSize(9).build();
 
         CompositeItemDescriptor descriptor = CompositeItemDescriptor.newInstance("Record")
-                .addItemDescriptor(constantFieldDescriptor)
-                .addItemDescriptor(field1Descriptor)
-                .addItemDescriptor(field2Descriptor)
+                .addElementItemDescriptor(constantFieldDescriptor)
+                .addElementItemDescriptor(field1Descriptor)
+                .addElementItemDescriptor(field2Descriptor)
                 .build();
 
         CompositeItemEntity compositeItem = descriptor.createItemEntity();
@@ -100,7 +100,7 @@ class CompositeItemDescriptorTest {
     @Test
     void Calls_correct_handler_method() {
         CompositeItemDescriptor descriptor = CompositeItemDescriptor.newInstance("Record")
-                .addItemDescriptor(ConstantFieldDescriptor.newInstance("ID").withConstant("Foo").build())
+                .addElementItemDescriptor(ConstantFieldDescriptor.newInstance("ID").withConstant("Foo").build())
                 .build();
 
         FlatDataItemDescriptor.Handler handlerMock = mock(FlatDataItemDescriptor.Handler.class);

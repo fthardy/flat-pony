@@ -49,7 +49,7 @@ public final class CompositeItemEntity extends AbstractFlatDataItemEntity<Compos
         return Collections.unmodifiableMap(map);
     }
 
-    private final Map<String, FlatDataItemEntity<?>> itemEntityMap;
+    private final Map<String, FlatDataItemEntity<?>> elementItemEntityMap;
 
     /**
      * Creates a new instance of this composite item.
@@ -59,17 +59,17 @@ public final class CompositeItemEntity extends AbstractFlatDataItemEntity<Compos
      */
     CompositeItemEntity(CompositeItemDescriptor descriptor, List<FlatDataItemEntity<?>> items) {
         super(descriptor);
-        this.itemEntityMap = mapByName(items);
+        this.elementItemEntityMap = mapByName(items);
     }
 
     @Override
     public int getLength() {
-        return itemEntityMap.values().stream().mapToInt(FlatDataItemEntity::getLength).sum();
+        return this.elementItemEntityMap.values().stream().mapToInt(FlatDataItemEntity::getLength).sum();
     }
 
     @Override
     public void writeTo(Writer target) {
-        itemEntityMap.values().forEach(dataItem -> dataItem.writeTo(target));
+        this.elementItemEntityMap.values().forEach(dataItem -> dataItem.writeTo(target));
     }
 
     @Override
@@ -82,17 +82,17 @@ public final class CompositeItemEntity extends AbstractFlatDataItemEntity<Compos
     }
 
     /**
-     * Get a particular item entity by its name.
+     * Get a particular element item entity by its name.
      * 
-     * @param name the name of the item entity to get.
+     * @param name the name of the element item entity to get.
      *             
      * @return the item entity.
      * 
-     * @throws NoSuchElementException when there is no item entity for the given name.
+     * @throws NoSuchElementException when there is no element item entity for the given name.
      */
-    public FlatDataItemEntity<?> getItemEntityByName(String name) {
-        if (this.itemEntityMap.containsKey(name)) {
-            return this.itemEntityMap.get(name);
+    public FlatDataItemEntity<?> getElementItemEntityByName(String name) {
+        if (this.elementItemEntityMap.containsKey(name)) {
+            return this.elementItemEntityMap.get(name);
         } else {
             throw new NoSuchElementException(name);
         }

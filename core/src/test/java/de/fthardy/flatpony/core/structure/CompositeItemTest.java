@@ -40,7 +40,7 @@ class CompositeItemTest {
 
     @Test
     void Calls_correct_handler_method() {
-        CompositeItemEntity item = CompositeItemDescriptor.newInstance("Record").addItemDescriptor(
+        CompositeItemEntity item = CompositeItemDescriptor.newInstance("Record").addElementItemDescriptor(
                 (ConstantFieldDescriptor.newInstance("ID").withConstant("Foo").build())).build().createItemEntity();
 
         FlatDataItemEntity.Handler handlerMock = mock(FlatDataItemEntity.Handler.class);
@@ -65,7 +65,7 @@ class CompositeItemTest {
                 .withFieldSize(9).build();
 
         CompositeItemDescriptor descriptor = CompositeItemDescriptor.newInstance("Record")
-                .addItemDescriptors(Arrays.asList(constantFieldDescriptor, field1Descriptor, field2Descriptor))
+                .addElementItemDescriptors(Arrays.asList(constantFieldDescriptor, field1Descriptor, field2Descriptor))
                 .build();
 
         Reader reader = new StringReader("FOOTest1123456789");
@@ -84,7 +84,7 @@ class CompositeItemTest {
                 .withFieldSize(9).build();
 
         CompositeItemDescriptor descriptor = CompositeItemDescriptor.newInstance("Record")
-                .addItemDescriptors(Arrays.asList(constantFieldDescriptor, field1Descriptor, field2Descriptor))
+                .addElementItemDescriptors(Arrays.asList(constantFieldDescriptor, field1Descriptor, field2Descriptor))
                 .build();
 
         String data = "FOOTest1123456789";
