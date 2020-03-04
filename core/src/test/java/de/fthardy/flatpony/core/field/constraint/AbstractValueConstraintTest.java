@@ -23,28 +23,23 @@ SOFTWARE.
  */
 package de.fthardy.flatpony.core.field.constraint;
 
-import java.util.Objects;
+import org.junit.jupiter.api.Test;
 
-/**
- * An abstract base implementation which returns the full qualified class name as its name.
- *
- * @author Frank Timothy Hardy
- */
-public abstract class AbstractValueConstraint implements ValueConstraint {
+import static org.junit.jupiter.api.Assertions.*;
 
-    private final String name;
+abstract class AbstractValueConstraintTest {
 
-    /**
-     * Initialise this new value constraint.
-     * 
-     * @param name the name of the constraint.
-     */
-    protected AbstractValueConstraint(String name) {
-        this.name = Objects.requireNonNull(name, "Undefined name!");
+    @Test
+    void Cannot_create_with_null_name() {
+        assertThrows(NullPointerException.class, () -> createInstance(null));
     }
     
-    @Override
-    public String getName() {
-        return this.name;
+    @Test
+    void Create_with_empty_name_is_allowed() {
+        AbstractValueConstraint constraint = createInstance("");
+        
+        assertEquals("", constraint.getName());
     }
+    
+    protected abstract AbstractValueConstraint createInstance(String name);
 }

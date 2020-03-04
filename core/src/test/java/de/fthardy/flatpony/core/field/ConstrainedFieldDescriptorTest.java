@@ -24,7 +24,7 @@ SOFTWARE.
 package de.fthardy.flatpony.core.field;
 
 import de.fthardy.flatpony.core.FlatDataItemDescriptor;
-import de.fthardy.flatpony.core.field.constraint.AbstractValueConstraint;
+import de.fthardy.flatpony.core.field.constraint.PredicateAdaptingValueConstraint;
 import de.fthardy.flatpony.core.field.constraint.ValueConstraint;
 import de.fthardy.flatpony.core.field.constraint.ValueConstraintViolationException;
 import org.junit.jupiter.api.Test;
@@ -49,7 +49,7 @@ class ConstrainedFieldDescriptorTest {
             }
 
             @Override
-            public boolean test(String s) {
+            public boolean acceptValue(String s) {
                 return false;
             }
         };
@@ -61,7 +61,7 @@ class ConstrainedFieldDescriptorTest {
             }
 
             @Override
-            public boolean test(String s) {
+            public boolean acceptValue(String s) {
                 return false;
             }
         };
@@ -75,36 +75,21 @@ class ConstrainedFieldDescriptorTest {
     void default_value_violates_constraint() {
         assertThrows(ValueConstraintViolationException.class, () -> ConstrainedFieldDescriptor.newInstance(
                 DelimitedFieldDescriptor.newInstance("Foo").build())
-                .addConstraint(new AbstractValueConstraint() {
-                    @Override
-                    public boolean test(String s) {
-                        return true;
-                    }
-                }).build());
+                .addConstraint(new PredicateAdaptingValueConstraint("constraint", value -> false)).build());
     }
 
     @Test
     void create_without_constraint_violations() {
         ConstrainedFieldDescriptor.newInstance(
                 DelimitedFieldDescriptor.newInstance("Foo").build())
-                .addConstraint(new AbstractValueConstraint() {
-                    @Override
-                    public boolean test(String s) {
-                        return false;
-                    }
-                });
+                .addConstraint(new PredicateAdaptingValueConstraint("constraint", value -> true));
     }
 
     @Test
     void Min_length_is_min_length_of_field() {
         ConstrainedFieldDescriptor descriptor = ConstrainedFieldDescriptor.newInstance(
                 DelimitedFieldDescriptor.newInstance("Foo").build())
-                .addConstraint(new AbstractValueConstraint() {
-                    @Override
-                    public boolean test(String s) {
-                        return false;
-                    }
-                }).build();
+                .addConstraint(new PredicateAdaptingValueConstraint("constraint", value -> true)).build();
         assertEquals(descriptor.getFieldDescriptor().getMinLength(), descriptor.getMinLength());
     }
 
@@ -112,12 +97,7 @@ class ConstrainedFieldDescriptorTest {
     void Calls_correct_handler_method() {
         ConstrainedFieldDescriptor descriptor = ConstrainedFieldDescriptor.newInstance(
                 DelimitedFieldDescriptor.newInstance("Foo").build())
-                .addConstraint(new AbstractValueConstraint() {
-                    @Override
-                    public boolean test(String s) {
-                        return false;
-                    }
-                }).build();
+                .addConstraint(new PredicateAdaptingValueConstraint("constraint", value -> true)).build();
 
         FlatDataItemDescriptor.Handler handlerMock = mock(FlatDataItemDescriptor.Handler.class);
         FlatDataFieldDescriptor.Handler fieldDescriptorHandlerMock = mock(FlatDataFieldDescriptor.Handler.class);

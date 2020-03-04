@@ -24,27 +24,31 @@ SOFTWARE.
 package de.fthardy.flatpony.core.field.constraint;
 
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 /**
- * An abstract base implementation which returns the full qualified class name as its name.
- *
- * @author Frank Timothy Hardy
+ * A value constraint implementation which uses a regular expression for validating a value.
+ * 
+ * @author Frank Timothy Hardy.
  */
-public abstract class AbstractValueConstraint implements ValueConstraint {
+public final class RegExValueConstraint extends AbstractValueConstraint {
 
-    private final String name;
-
-    /**
-     * Initialise this new value constraint.
-     * 
-     * @param name the name of the constraint.
-     */
-    protected AbstractValueConstraint(String name) {
-        this.name = Objects.requireNonNull(name, "Undefined name!");
-    }
+    private final Pattern regExPattern;
     
+    /**
+     * Create a new instance of this value constraint implementation.
+     *
+     * @param name the name of the constraint.
+     * @param expression the regular expression to use.
+     */
+    public RegExValueConstraint(String name, String expression) {
+        super(name);
+        this.regExPattern = Pattern.compile(
+                Objects.requireNonNull(expression, "Undefined regular expression!"));
+    }
+
     @Override
-    public String getName() {
-        return this.name;
+    public boolean acceptValue(String value) {
+        return this.regExPattern.matcher(value).matches();
     }
 }

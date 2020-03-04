@@ -242,7 +242,7 @@ public final class ConstrainedFieldDescriptor implements FlatDataFieldDescriptor
      * @return the list of the violated constraint names.
      */
     private Set<String> determineConstraintViolationsFor(String value) {
-        return constraints.stream().filter(c -> c.test(value)).map(ValueConstraint::getName).collect(
+        return constraints.stream().filter(c -> !c.acceptValue(value)).map(ValueConstraint::getName).collect(
                 Collectors.toCollection(LinkedHashSet::new));
     }
 }

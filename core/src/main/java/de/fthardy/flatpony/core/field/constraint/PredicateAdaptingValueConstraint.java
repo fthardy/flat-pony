@@ -24,27 +24,31 @@ SOFTWARE.
 package de.fthardy.flatpony.core.field.constraint;
 
 import java.util.Objects;
+import java.util.function.Predicate;
+
 
 /**
- * An abstract base implementation which returns the full qualified class name as its name.
- *
+ * An adapter implementation for a value constraint to adapt a {@link Predicate}.
+ * 
  * @author Frank Timothy Hardy
  */
-public abstract class AbstractValueConstraint implements ValueConstraint {
-
-    private final String name;
+public final class PredicateAdaptingValueConstraint extends AbstractValueConstraint {
+    
+    private final Predicate<String> predicate;
 
     /**
-     * Initialise this new value constraint.
-     * 
-     * @param name the name of the constraint.
+     * Creates a new instance of this value constraint implementation.
+     *
+     * @param name the name of this constraint.  
+     * @param predicate the predicate to be adapted.
      */
-    protected AbstractValueConstraint(String name) {
-        this.name = Objects.requireNonNull(name, "Undefined name!");
+    public PredicateAdaptingValueConstraint(String name, Predicate<String> predicate) {
+        super(name);
+        this.predicate = Objects.requireNonNull(predicate, "Undefined predicate!");
     }
-    
+
     @Override
-    public String getName() {
-        return this.name;
+    public boolean acceptValue(String value) {
+        return this.predicate.test(value);
     }
 }

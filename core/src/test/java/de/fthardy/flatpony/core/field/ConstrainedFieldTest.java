@@ -24,7 +24,7 @@ SOFTWARE.
 package de.fthardy.flatpony.core.field;
 
 import de.fthardy.flatpony.core.FlatDataItemEntity;
-import de.fthardy.flatpony.core.field.constraint.AbstractValueConstraint;
+import de.fthardy.flatpony.core.field.constraint.PredicateAdaptingValueConstraint;
 import de.fthardy.flatpony.core.field.constraint.ValueConstraintViolationException;
 import org.junit.jupiter.api.Test;
 
@@ -37,12 +37,7 @@ class ConstrainedFieldTest {
     void new_value_violates_constraint() {
         ConstrainedFieldDescriptor descriptor = ConstrainedFieldDescriptor.newInstance(
                 DelimitedFieldDescriptor.newInstance("Foo").build())
-                .addConstraint(new AbstractValueConstraint() {
-                    @Override
-                    public boolean test(String s) {
-                        return s.equals("FOO");
-                    }
-                }).build();
+                .addConstraint(new PredicateAdaptingValueConstraint("constraint", v -> !v.equals("FOO"))).build();
 
         ConstrainedField field = descriptor.createItemEntity();
 
@@ -53,12 +48,7 @@ class ConstrainedFieldTest {
     void new_value_does_not_violate_constraint() {
         ConstrainedFieldDescriptor descriptor = ConstrainedFieldDescriptor.newInstance(
                 DelimitedFieldDescriptor.newInstance("Foo").build())
-                .addConstraint(new AbstractValueConstraint() {
-            @Override
-            public boolean test(String s) {
-                return s.equals("FOO");
-            }
-        }).build();
+                .addConstraint(new PredicateAdaptingValueConstraint("constraint", v -> !v.equals("FOO"))).build();
 
         ConstrainedField field = descriptor.createItemEntity();
 
@@ -69,12 +59,7 @@ class ConstrainedFieldTest {
     void Calls_correct_handler_method() {
         ConstrainedFieldDescriptor descriptor = ConstrainedFieldDescriptor.newInstance(
                 DelimitedFieldDescriptor.newInstance("Foo").build())
-                .addConstraint(new AbstractValueConstraint() {
-            @Override
-            public boolean test(String s) {
-                return s.equals("FOO");
-            }
-        }).build();
+                .addConstraint(new PredicateAdaptingValueConstraint("constraint", v -> !v.equals("FOO"))).build();
         
         ConstrainedField field = descriptor.createItemEntity();
 

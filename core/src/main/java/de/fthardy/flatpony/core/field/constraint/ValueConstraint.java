@@ -23,19 +23,12 @@ SOFTWARE.
  */
 package de.fthardy.flatpony.core.field.constraint;
 
-import java.util.function.Predicate;
-
 /**
- * An extended predicate which represents a field value constraint.
- * <p>
- * The semantics of this predicate is that it checks if a given value is violating the constraint represented by the
- * receiving implementation instance. If so {@link #test(Object)} must return {@code true}. Otherwise, if the value
- * is valid {@code false} must be returned.
- * </p>
+ * The interface definition for a value constraint.
  *
  * @author Frank Timothy Hardy
  */
-public interface ValueConstraint extends Predicate<String> {
+public interface ValueConstraint {
 
     /**
      * Get the name of the value constraint.
@@ -47,4 +40,13 @@ public interface ValueConstraint extends Predicate<String> {
      * @return the name of the constraint.
      */
     String getName();
+
+    /**
+     * Check a given value if it is accepted by the receiving constraint instance.
+     * 
+     * @param value the value to be checked.
+     *              
+     * @return {@code true} if the value is not violating the constraint. {@code false} otherwise.
+     */
+    boolean acceptValue(String value);
 }
