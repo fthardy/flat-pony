@@ -57,7 +57,10 @@ public final class DefaultFieldContentValueTransformer implements FieldContentVa
         String content;
         int valueLength = value.length();;
         if (valueLength < fieldLength) {
-            content = padValue(value, fieldLength);
+            char[] fillChars = new char[fieldLength - value.length()];
+            Arrays.fill(fillChars, fillChar);
+            String fillString = String.valueOf(fillChars);
+            content = padToLeft ? value + fillString : fillString + value;
         } else if (valueLength > fieldLength) {
             content = padToLeft ? value.substring(0, fieldLength) : value.substring(value.length() - fieldLength);
         } else {
@@ -73,27 +76,5 @@ public final class DefaultFieldContentValueTransformer implements FieldContentVa
             index += padToLeft ? -1 : 1;
         }
         return padToLeft ? content.substring(0, index + 1) : content.substring(index);
-    }
-
-    /**
-     * Pad a given string to the left or right side.
-     *
-     * @param string the string to be padded.
-     * @param length the total length of the resulting string. Must be greater then the length of the string.
-     *
-     * @return the padded string value which has the given length.
-     */
-    private String padValue(String string, int length) {
-        if (string.length() > length) {
-            throw new IllegalArgumentException("Value string length must be shorter than or equal the field length!");
-        }
-        if (string.length() < length) {
-            char[] fillChars = new char[length - string.length()];
-            Arrays.fill(fillChars, fillChar);
-            String fillString = String.valueOf(fillChars);
-            return padToLeft ? string + fillString : fillString + string;
-        } else {
-            return string;
-        }
     }
 }

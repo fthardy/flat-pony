@@ -25,7 +25,6 @@ package de.fthardy.flatpony.core.field;
 
 import de.fthardy.flatpony.core.FlatDataItemDescriptor;
 import de.fthardy.flatpony.core.FlatDataReadException;
-import de.fthardy.flatpony.core.field.constraint.ValueConstraintViolationException;
 import de.fthardy.flatpony.core.structure.DelimitedItemDescriptor;
 import de.fthardy.flatpony.core.util.AbstractItemDescriptorBuilder;
 import de.fthardy.flatpony.core.util.ObjectBuilder;
@@ -67,7 +66,7 @@ public final class DelimitedFieldDescriptor extends AbstractFlatDataFieldDescrip
      * 
      * @author Frank Timothy Hardy
      */
-    public interface DefineDefaultValue extends Builder {
+    public interface DefineDefaultValue extends DefineDelimiter {
 
         /**
          * Define a different default value.
@@ -178,21 +177,18 @@ public final class DelimitedFieldDescriptor extends AbstractFlatDataFieldDescrip
     public DelimitedField readItemEntityFrom(Reader source) {
         StringBuilder valueBuilder = new StringBuilder();
         try {
-            int i = source.read();
-            while (i != -1 && i != delimiter) {
-                valueBuilder.append((char) i);
-                i = source.read();
+            int charValue = source.read();
+            while (charValue != -1 && charValue != delimiter) {
+                valueBuilder.append((char) charValue);
+                charValue = source.read();
             }
         } catch (IOException e) {
             throw new FlatDataReadException(MSG_Read_failed(this.getName()), e);
         }
 
         DelimitedField field = this.createItemEntity();
-        try {
-            field.setValue(valueBuilder.toString());
-        } catch (ValueConstraintViolationException e) {
-            throw new FlatDataReadException(MSG_Read_failed(this.getName()), e);
-        }
+        field.setValue(valueBuilder.toString());
+        
         return field;
     }
 
@@ -205,7 +201,12 @@ public final class DelimitedFieldDescriptor extends AbstractFlatDataFieldDescrip
         }
     }
 
-    int getDelimiter() {
-        return delimiter;
+    /**
+     * Get the delimiter character used by this descriptor.
+     * 
+     * @return the delimiter character.
+     */
+    public char getDelimiter() {
+        return (char) this.delimiter;
     }
 }

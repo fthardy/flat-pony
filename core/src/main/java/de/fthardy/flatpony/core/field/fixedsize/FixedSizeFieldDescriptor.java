@@ -205,6 +205,13 @@ public final class FixedSizeFieldDescriptor extends AbstractFlatDataFieldDescrip
         return String.format("Failed to read value of fixed size field '%s' from source stream!", fieldName);
     }
 
+    static String MSG_Input_stream_too_short(String name, int fieldSize, int readLength) {
+        return MSG_Read_failed(name) + String.format(
+                " The source stream was not long enough! " +
+                        "Field length is %d but the remaining content from the source stream had a length of %d.",
+                fieldSize, readLength);
+    }
+
     private final int fieldSize;
     private final FieldContentValueTransformer contentValueTransformer;
     
@@ -226,19 +233,25 @@ public final class FixedSizeFieldDescriptor extends AbstractFlatDataFieldDescrip
 
     @Override
     public FixedSizeField readItemEntityFrom(Reader source) {
+        
+        char[] chars = new char[fieldSize];
+        int readLength;
         try {
-            char[] chars = new char[fieldSize];
-            int len = source.read(chars);
-            assert len == fieldSize;
-
-            FixedSizeField field = this.createItemEntity();
-
-            field.setValue(contentValueTransformer.extractValueFromContent(new String(chars)));
-
-            return field;
+            readLength = source.read(chars);
         } catch (IOException e) {
             throw new FlatDataReadException(MSG_Read_failed(this.getName()), e);
         }
+        
+        if (readLength < this.fieldSize) {
+            throw new FlatDataReadException(MSG_Input_stream_too_short(this.getName(), this.fieldSize, readLength));
+        }
+        assert readLength == this.fieldSize;
+
+        FixedSizeField field = this.createItemEntity();
+
+        field.setValue(contentValueTransformer.extractValueFromContent(new String(chars)));
+
+        return field;
     }
 
     @Override
