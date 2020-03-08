@@ -23,25 +23,20 @@ SOFTWARE.
  */
 package de.fthardy.flatpony.core.field.converter;
 
+import de.fthardy.flatpony.core.FlatDataIOException;
+
 /**
- * Converts field values to Integer and vice versa.
+ * Is thrown when the conversion of a field value into a target type fails.
  * 
  * @author Frank Timothy Hardy
  */
-public final class IntegerFieldValueConverter implements FieldValueConverter<Integer> {
-
-    @Override
-    public Class<Integer> getTargetType() {
-        return Integer.class;
+public class FieldValueConvertException extends FlatDataIOException {
+    
+    public FieldValueConvertException(String message) {
+        super(message);
     }
-
-    @Override
-    public Integer convertFromFieldValue(String fieldValue) {
-        return Integer.valueOf(fieldValue);
-    }
-
-    @Override
-    public String convertToFieldValue(Integer value) {
-        return value.toString();
+    
+    public FieldValueConvertException(String message, Exception cause) {
+        super(message, cause);
     }
 }

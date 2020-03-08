@@ -34,13 +34,22 @@ package de.fthardy.flatpony.core.field.converter;
 public interface FieldValueConverter<T> {
 
     /**
+     * Get the target type.
+     * 
+     * @return the class of the target type.
+     */
+    Class<T> getTargetType();
+
+    /**
      * Convert the field value to a value with the target type.
      *
      * @param fieldValue the field value to convert.
      *
      * @return the value in the target type.
+     * 
+     * @throws FieldValueConvertException when the conversion of a field value to the target type fails.
      */
-    T convertFromFieldValue(String fieldValue);
+    T convertFromFieldValue(String fieldValue) throws FieldValueConvertException;
 
     /**
      * Convert a value to a field value.
@@ -48,6 +57,8 @@ public interface FieldValueConverter<T> {
      * @param value the value to convert.
      *
      * @return the field value.
+     *
+     * @throws FieldValueConvertException when the conversion of a field value from the target type fails.
      */
     String convertToFieldValue(T value);
 }

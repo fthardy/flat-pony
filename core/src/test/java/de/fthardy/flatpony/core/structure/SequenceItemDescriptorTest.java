@@ -124,6 +124,11 @@ class SequenceItemDescriptorTest {
                 .withFieldSize(1).build();
         FieldValueConverter<Integer> converter = new FieldValueConverter<Integer>() {
             @Override
+            public Class<Integer> getTargetType() {
+                return Integer.class;
+            }
+            
+            @Override
             public Integer convertFromFieldValue(String fieldValue) {
                 return Integer.valueOf(fieldValue);
             }

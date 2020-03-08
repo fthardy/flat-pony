@@ -43,7 +43,7 @@ import java.util.Objects;
  * 
  * @author Frank Timothy Hardy
  */
-public final class ConvertedFieldDescriptor<T> implements FlatDataFieldDescriptor<ConvertedField<T>> {
+public final class TypedFieldDescriptor<T> implements FlatDataFieldDescriptor<TypedField<T>> {
 
     /**
      * Demands the definition of a field value converter.
@@ -61,7 +61,7 @@ public final class ConvertedFieldDescriptor<T> implements FlatDataFieldDescripto
          *                  
          * @return the builder instance for creating the descriptor instance.
          */
-        ObjectBuilder<ConvertedFieldDescriptor<T>> withFieldValueConverter(FieldValueConverter<T> converter);
+        ObjectBuilder<TypedFieldDescriptor<T>> withFieldValueConverter(FieldValueConverter<T> converter);
     }
 
     private interface BuildParams<T> {
@@ -69,7 +69,7 @@ public final class ConvertedFieldDescriptor<T> implements FlatDataFieldDescripto
         FieldValueConverter<T> getFieldValueConverter();
     }
     
-    private static final class BuilderImpl<T> extends AbstractItemDescriptorBuilder<ConvertedFieldDescriptor<T>>
+    private static final class BuilderImpl<T> extends AbstractItemDescriptorBuilder<TypedFieldDescriptor<T>>
             implements DefineFieldValueConverter<T>, BuildParams<T> {
         
         private final FlatDataFieldDescriptor<?> fieldDescriptor;
@@ -96,14 +96,14 @@ public final class ConvertedFieldDescriptor<T> implements FlatDataFieldDescripto
         }
 
         @Override
-        public ObjectBuilder<ConvertedFieldDescriptor<T>> withFieldValueConverter(FieldValueConverter<T> converter) {
+        public ObjectBuilder<TypedFieldDescriptor<T>> withFieldValueConverter(FieldValueConverter<T> converter) {
             this.fieldValueConverter = Objects.requireNonNull(converter, "Undefined field value converter!");
             return this;
         }
 
         @Override
-        protected ConvertedFieldDescriptor<T> createItemDescriptorInstance() {
-            return new ConvertedFieldDescriptor<>(this);
+        protected TypedFieldDescriptor<T> createItemDescriptorInstance() {
+            return new TypedFieldDescriptor<>(this);
         }
     }
     
@@ -114,7 +114,7 @@ public final class ConvertedFieldDescriptor<T> implements FlatDataFieldDescripto
     private final FlatDataFieldDescriptor<?> decoratedFieldDescriptor;
     private final FieldValueConverter<T> fieldValueConverter;
 
-    public ConvertedFieldDescriptor(BuildParams<T> builder) {
+    public TypedFieldDescriptor(BuildParams<T> builder) {
         this.decoratedFieldDescriptor = builder.getFieldDescriptor();
         this.fieldValueConverter = builder.getFieldValueConverter();
     }
@@ -135,13 +135,13 @@ public final class ConvertedFieldDescriptor<T> implements FlatDataFieldDescripto
     }
 
     @Override
-    public ConvertedField<T> createItemEntity() {
-        return new ConvertedField<T>(this, this.decoratedFieldDescriptor.createItemEntity());
+    public TypedField<T> createItemEntity() {
+        return new TypedField<T>(this, this.decoratedFieldDescriptor.createItemEntity());
     }
 
     @Override
-    public ConvertedField<T> readItemEntityFrom(Reader source) {
-        return new ConvertedField<T>(this, this.decoratedFieldDescriptor.readItemEntityFrom(source));
+    public TypedField<T> readItemEntityFrom(Reader source) {
+        return new TypedField<T>(this, this.decoratedFieldDescriptor.readItemEntityFrom(source));
     }
 
     @Override

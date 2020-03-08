@@ -159,7 +159,7 @@ public class ConstrainedFieldItemTest {
     }
 
     @Test
-    void New_value_at_entity_violates_constraint() {
+    void New_value_at_field_violates_constraint() {
         ValueConstraint constraintMock = mock(ValueConstraint.class);
         when(constraintMock.getName()).thenReturn("Constraint");
         when(constraintMock.acceptValue(anyString())).thenReturn(true, false);
@@ -189,7 +189,7 @@ public class ConstrainedFieldItemTest {
     }
 
     @Test
-    void Set_new_valid_value_at_entity() {
+    void Set_new_valid_value_at_field() {
         ValueConstraint constraintMock = mock(ValueConstraint.class);
         when(constraintMock.getName()).thenReturn("Constraint");
         when(constraintMock.acceptValue(anyString())).thenReturn(true, true);
@@ -199,7 +199,7 @@ public class ConstrainedFieldItemTest {
         when(fieldMock.getValue()).thenReturn("Value");
         when(fieldMock.asMutableField()).then((Answer<FlatDataField<?>>) invocation -> fieldMock);
 
-        FlatDataFieldDescriptor<FlatDataField<?>> fieldDescriptorMock = mock(FlatDataFieldDescriptor.class);
+        FlatDataFieldDescriptor<?> fieldDescriptorMock = mock(FlatDataFieldDescriptor.class);
         when(fieldDescriptorMock.getName()).thenReturn("Field");
         when(fieldDescriptorMock.getDefaultValue()).thenReturn("Default value");
         when(fieldDescriptorMock.createItemEntity()).then((Answer<FlatDataField<?>>) invocation -> fieldMock);
@@ -290,7 +290,7 @@ public class ConstrainedFieldItemTest {
 
         Reader readerMock = mock(Reader.class);
 
-        FlatDataFieldDescriptor<FlatDataField<?>> fieldDescriptorMock = mock(FlatDataFieldDescriptor.class);
+        FlatDataFieldDescriptor<?> fieldDescriptorMock = mock(FlatDataFieldDescriptor.class);
         when(fieldDescriptorMock.getName()).thenReturn("Field");
         when(fieldDescriptorMock.getDefaultValue()).thenReturn("Default value");
         when(fieldDescriptorMock.readItemEntityFrom(readerMock)).then((Answer<FlatDataField<?>>) invocation -> fieldMock);

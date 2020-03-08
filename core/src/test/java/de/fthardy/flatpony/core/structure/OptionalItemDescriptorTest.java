@@ -100,6 +100,11 @@ class OptionalItemDescriptorTest {
 
         FieldValueConverter<Boolean> flagConverter = new FieldValueConverter<Boolean>() {
             @Override
+            public Class<Boolean> getTargetType() {
+                return Boolean.class;
+            }
+
+            @Override
             public Boolean convertFromFieldValue(String fieldValue) {
                 return fieldValue.equals("X");
             }
@@ -139,6 +144,11 @@ class OptionalItemDescriptorTest {
         FixedSizeFieldDescriptor flagFieldDescriptor = FixedSizeFieldDescriptor.newInstance("Flag Field").build();
 
         FieldValueConverter<Boolean> flagConverter = new FieldValueConverter<Boolean>() {
+            @Override
+            public Class<Boolean> getTargetType() {
+                return Boolean.class;
+            }
+
             @Override
             public Boolean convertFromFieldValue(String fieldValue) {
                 return fieldValue.equals("J");

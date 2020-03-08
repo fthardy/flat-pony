@@ -51,11 +51,6 @@ public abstract class AbstractFlatDataField<T extends FlatDataFieldDescriptor<?>
         return this.value;
     }
 
-    @Override
-    public FlatDataMutableField<T> asMutableField() {
-        throw new UnsupportedOperationException("This field is not mutable!");
-    }
-
     protected void setValue(String value) {
         this.value = Objects.requireNonNull(value, "Undefined field value!");
     }

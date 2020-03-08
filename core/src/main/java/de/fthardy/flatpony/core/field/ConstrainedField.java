@@ -88,9 +88,9 @@ public final class ConstrainedField extends AbstractFlatDataItemEntity<Constrain
     }
 
     /**
-     * Get the decorated field instance.
+     * Get the field decorated by this decorator.
      *
-     * @return the decorated field instance.
+     * @return the decorated field.
      */
     public FlatDataField<?> getDecoratedField() {
         return this.decoratedField;

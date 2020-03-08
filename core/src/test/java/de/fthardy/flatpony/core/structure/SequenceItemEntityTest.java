@@ -137,6 +137,11 @@ class SequenceItemEntityTest {
         FixedSizeFieldDescriptor countFieldDescriptor = FixedSizeFieldDescriptor.newInstance("Count").build();
         FieldValueConverter<Integer> converter = new FieldValueConverter<Integer>() {
             @Override
+            public Class<Integer> getTargetType() {
+                return Integer.class;
+            }
+            
+            @Override
             public Integer convertFromFieldValue(String fieldValue) {
                 return Integer.valueOf(fieldValue);
             }
@@ -182,6 +187,11 @@ class SequenceItemEntityTest {
 
         FixedSizeFieldDescriptor countFieldDescriptor = FixedSizeFieldDescriptor.newInstance("Count").build();
         FieldValueConverter<Integer> converter = new FieldValueConverter<Integer>() {
+            @Override
+            public Class<Integer> getTargetType() {
+                return Integer.class;
+            }
+            
             @Override
             public Integer convertFromFieldValue(String fieldValue) {
                 return Integer.valueOf(fieldValue);
