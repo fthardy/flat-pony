@@ -26,13 +26,13 @@ package de.fthardy.flatpony.core.structure;
 import de.fthardy.flatpony.core.FlatDataItemDescriptor;
 import de.fthardy.flatpony.core.field.ConstantFieldDescriptor;
 import de.fthardy.flatpony.core.field.FlatDataMutableField;
+import de.fthardy.flatpony.core.field.converter.BooleanFieldValueConverter;
 import de.fthardy.flatpony.core.field.converter.FieldValueConverter;
 import de.fthardy.flatpony.core.field.fixedsize.FixedSizeFieldDescriptor;
 import de.fthardy.flatpony.core.util.FieldReference;
 import org.junit.jupiter.api.Test;
 
 import java.io.StringReader;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -98,22 +98,7 @@ class OptionalItemDescriptorTest {
     void Read_with_reference_flag_field_No_success() {
         FixedSizeFieldDescriptor flagFieldDescriptor = FixedSizeFieldDescriptor.newInstance("Flag Field").build();
 
-        FieldValueConverter<Boolean> flagConverter = new FieldValueConverter<Boolean>() {
-            @Override
-            public Class<Boolean> getTargetType() {
-                return Boolean.class;
-            }
-
-            @Override
-            public Boolean convertFromFieldValue(String fieldValue) {
-                return fieldValue.equals("X");
-            }
-
-            @Override
-            public String convertToFieldValue(Boolean value) {
-                return value ? "X" : " ";
-            }
-        };
+        FieldValueConverter<Boolean> flagConverter = new BooleanFieldValueConverter("X", "");
 
         FieldReference<Boolean> flagFieldReference = 
                 FieldReference.<Boolean>newInstance(flagFieldDescriptor).usingValueConverter(flagConverter).build();
@@ -143,22 +128,7 @@ class OptionalItemDescriptorTest {
     void Read_with_reference_flag_field_Success() {
         FixedSizeFieldDescriptor flagFieldDescriptor = FixedSizeFieldDescriptor.newInstance("Flag Field").build();
 
-        FieldValueConverter<Boolean> flagConverter = new FieldValueConverter<Boolean>() {
-            @Override
-            public Class<Boolean> getTargetType() {
-                return Boolean.class;
-            }
-
-            @Override
-            public Boolean convertFromFieldValue(String fieldValue) {
-                return fieldValue.equals("J");
-            }
-
-            @Override
-            public String convertToFieldValue(Boolean value) {
-                return value ? "J" : "N";
-            }
-        };
+        FieldValueConverter<Boolean> flagConverter = new BooleanFieldValueConverter("J", "N");
 
         FieldReference<Boolean> flagFieldReference =
                 FieldReference.<Boolean>newInstance(flagFieldDescriptor).usingValueConverter(flagConverter).build();
