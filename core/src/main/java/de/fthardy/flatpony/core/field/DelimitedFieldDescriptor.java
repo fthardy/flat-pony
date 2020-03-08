@@ -37,11 +37,14 @@ import java.util.Objects;
  * The implementation of the descriptor for a delimited field.
  * <p>
  * A delimited field has an end marker which is defined by the delimiter character. Because of that the length of the
- * field content is not restricted unlike (for a fixed length field). When reading the value from a source stream the
+ * field content is not restricted unlike for a fixed length field. When reading the value from a source stream the
  * end of the field is detected when the delimiter character is read or the end of the source stream is reached. The
  * delimiter char is ignored and not part of the field value.
- * This implementation doesn't support escaping of the delimiter. This means that the delimiter character cannot be used
- * in the field content.
+ * </p>
+ * <p>
+ * WARNING:
+ * Actually this implementation doesn't support escaping of the delimiter. This means that the delimiter character
+ * cannot be used in the field content.
  * </p>
  *
  * @author Frank Timothy Hardy

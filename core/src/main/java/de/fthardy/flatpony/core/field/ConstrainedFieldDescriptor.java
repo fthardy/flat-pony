@@ -122,7 +122,7 @@ public final class ConstrainedFieldDescriptor implements FlatDataFieldDescriptor
         public AddFurtherConstraints addConstraint(ValueConstraint constraint) {
             if (this.constraintsByName.containsKey(
                     Objects.requireNonNull(constraint, "Undefined constraint!").getName())) {
-                throw new IllegalArgumentException("The name of the constraints must be unique!");
+                throw new IllegalArgumentException("Constraints must be unique!");
             }
             this.constraintsByName.put(constraint.getName(), constraint);
             return this;
@@ -130,8 +130,7 @@ public final class ConstrainedFieldDescriptor implements FlatDataFieldDescriptor
 
         @Override
         public AddFurtherConstraints addConstraints(ValueConstraint... constraints) {
-            this.addConstraints(Arrays.asList(constraints));
-            return this;
+            return this.addConstraints(Arrays.asList(constraints));
         }
 
         @Override
