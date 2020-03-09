@@ -40,10 +40,19 @@ public final class BooleanFieldValueConverter implements FieldValueConverter<Boo
     
     private final String trueValue;
     private final String falseValue;
-    
+
+    /**
+     * Create a new instance of this converter.
+     * 
+     * @param trueValue the string representing a {@code true}.
+     * @param falseValue the string representing a {@code false}.
+     */
     public BooleanFieldValueConverter(String trueValue, String falseValue) {
         this.trueValue = Objects.requireNonNull(trueValue, "Undefined string value for true-value!");
         this.falseValue = Objects.requireNonNull(falseValue, "Undefined string value for false-value!");
+        if (trueValue.equals(falseValue)) {
+            throw new IllegalArgumentException("Cannot use the same string for true and false value!");
+        }
     }
 
     @Override
