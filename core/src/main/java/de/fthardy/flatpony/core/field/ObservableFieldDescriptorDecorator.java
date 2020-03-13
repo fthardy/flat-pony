@@ -24,6 +24,7 @@ SOFTWARE.
 package de.fthardy.flatpony.core.field;
 
 import de.fthardy.flatpony.core.FlatDataItemDescriptor;
+import de.fthardy.flatpony.core.streamio.StreamReadHandler;
 
 import java.io.Reader;
 import java.util.ArrayList;
@@ -107,6 +108,11 @@ public final class ObservableFieldDescriptorDecorator implements FlatDataFieldDe
                 this.observedFieldDescriptor.readItemEntityFrom(source);
         this.observers.forEach(o -> o.onFieldEntityRead(readField));
         return readField;
+    }
+
+    @Override
+    public void pushReadFrom(Reader source, StreamReadHandler handler) {
+        this.observedFieldDescriptor.pushReadFrom(source, handler);
     }
 
     @Override

@@ -26,6 +26,7 @@ package de.fthardy.flatpony.core.structure;
 import de.fthardy.flatpony.core.FlatDataItemDescriptor;
 import de.fthardy.flatpony.core.FlatDataItemEntity;
 import de.fthardy.flatpony.core.FlatDataReadException;
+import de.fthardy.flatpony.core.streamio.StreamReadHandler;
 import de.fthardy.flatpony.core.util.AbstractItemDescriptorBuilder;
 import de.fthardy.flatpony.core.util.FieldReference;
 import de.fthardy.flatpony.core.util.ObjectBuilder;
@@ -34,6 +35,7 @@ import de.fthardy.flatpony.core.util.TypedFieldDecorator;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.Objects;
+import java.util.function.Function;
 
 /**
  * The descriptor implementation for an optional item.
@@ -139,6 +141,12 @@ public final class OptionalItemDescriptor implements FlatDataStructureDescriptor
         return String.format("Failed to read optional item '%s' from source stream!", itemName);
     }
 
+    static String MSG_No_flag_field(String itemName) {
+        return String.format(
+                "Expected a flag field for optional item '%s' because it has a field reference defined!",
+                itemName);
+    }
+
     private final FlatDataItemDescriptor<?> targetItemDescriptor;
     private final FieldReference<Boolean> flagFieldReference;
 
@@ -160,7 +168,7 @@ public final class OptionalItemDescriptor implements FlatDataStructureDescriptor
     @Override
     public OptionalItemEntity createItemEntity() {
 
-        assertCountFieldExistsWhenCountFieldIsReferenced();
+        assertFlagFieldExistsWhenFlagFieldIsReferenced();
 
         return new OptionalItemEntity(
                 this,
@@ -171,12 +179,14 @@ public final class OptionalItemDescriptor implements FlatDataStructureDescriptor
     @Override
     public OptionalItemEntity readItemEntityFrom(Reader source) {
 
-        assertCountFieldExistsWhenCountFieldIsReferenced();
+        assertFlagFieldExistsWhenFlagFieldIsReferenced();
         
         OptionalItemEntity optionalItemEntity;
         if (this.flagFieldReference == null) {
             optionalItemEntity = new OptionalItemEntity(
-                    this, this.readItemEntityByTrialAndErrorFrom(source), null);
+                    this,
+                    this.readByTrialAndError(source, this.targetItemDescriptor::readItemEntityFrom),
+                    null);
         } else {
             TypedFieldDecorator<Boolean> flagField = this.flagFieldReference.getReferencedField();
             FlatDataItemEntity<?> itemEntity = flagField.getTypedValue() ?
@@ -184,6 +194,27 @@ public final class OptionalItemDescriptor implements FlatDataStructureDescriptor
             optionalItemEntity = new OptionalItemEntity(this, itemEntity, flagField);
         }
         return optionalItemEntity;
+    }
+
+    @Override
+    public void pushReadFrom(Reader source, StreamReadHandler handler) {
+
+        assertFlagFieldExistsWhenFlagFieldIsReferenced();
+
+        handler.onStructureItemStart(this);
+        
+        if (this.flagFieldReference == null) {
+            this.readByTrialAndError(source, s ->  { 
+                    this.targetItemDescriptor.pushReadFrom(s, handler);
+                    return null; 
+                });
+        } else {
+            if (this.flagFieldReference.getReferencedField().getTypedValue()) {
+                this.targetItemDescriptor.pushReadFrom(source, handler);
+            }
+        }
+        
+        handler.onStructureItemEnd(this);
     }
 
     @Override
@@ -202,13 +233,13 @@ public final class OptionalItemDescriptor implements FlatDataStructureDescriptor
         return this.targetItemDescriptor;
     }
 
-    private void assertCountFieldExistsWhenCountFieldIsReferenced() {
+    private void assertFlagFieldExistsWhenFlagFieldIsReferenced() {
         if (this.flagFieldReference != null && this.flagFieldReference.getReferencedField() == null) {
-            throw new IllegalStateException("Expected a flag field because flag field reference has been defined!");
+            throw new IllegalStateException(MSG_No_flag_field(this.getName()));
         }
     }
 
-    private FlatDataItemEntity<?> readItemEntityByTrialAndErrorFrom(Reader source) {
+    private <R> R readByTrialAndError(Reader source, Function<Reader, R> readFunction) {
         if (source.markSupported()) {
             try {
                 source.mark(this.targetItemDescriptor.getMinLength());
@@ -217,7 +248,7 @@ public final class OptionalItemDescriptor implements FlatDataStructureDescriptor
             }
 
             try {
-                return this.targetItemDescriptor.readItemEntityFrom(source);
+                return readFunction.apply(source);
             } catch (Exception e) {
                 try {
                     source.reset();

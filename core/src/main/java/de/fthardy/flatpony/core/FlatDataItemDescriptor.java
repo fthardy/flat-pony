@@ -23,6 +23,8 @@ SOFTWARE.
  */
 package de.fthardy.flatpony.core;
 
+import de.fthardy.flatpony.core.streamio.StreamReadHandler;
+
 import java.io.Reader;
 
 /**
@@ -96,6 +98,37 @@ public interface FlatDataItemDescriptor<T extends FlatDataItemEntity<?>> {
      * @return a new item entity instance which represents the root of an item entity model (IEM).
      */
     T readItemEntityFrom(Reader source);
+
+    /**
+     * Start to read the data of the receiving item from a given source stream in a push fashion.
+     * <p>
+     * When starting a push read the reading client has to provide an implementation of a {@link StreamReadHandler}
+     * which gets constantly pushed read events by the read control algorithm. This means the reading client has no
+     * control over the reading process itself. It is just processing read events which are being pushed by the read
+     * control algorithm until the read process is finished.
+     * </p>
+     * 
+     * @param source the reader of the source stream.
+     * @param handler the push event handler.
+     */
+    void pushReadFrom(Reader source, StreamReadHandler handler);
+
+    /**
+     * Start to puĺl read from a given source stream.
+     * 
+     * @param source the reader of the source stream.
+     *               
+     * @return the iterator to pull read events an control the read process.
+     */
+    // TODO PullReadIterator pullReadFromSourceStream(Reader source);
+
+    /**
+     * Start a stream write to a given target stream.
+     * 
+     * @param writer the writer to write the data to.
+     * @param provider the provider which provides the field data to write.
+     */
+    // TODO void writeToTargetStream(Writer writer, FieldValueProvider provider);
 
     /**
      * Apply a handler to the receiving descriptor.

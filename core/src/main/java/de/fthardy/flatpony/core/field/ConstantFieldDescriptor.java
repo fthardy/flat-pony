@@ -25,6 +25,7 @@ package de.fthardy.flatpony.core.field;
 
 import de.fthardy.flatpony.core.FlatDataItemDescriptor;
 import de.fthardy.flatpony.core.FlatDataReadException;
+import de.fthardy.flatpony.core.streamio.StreamReadHandler;
 import de.fthardy.flatpony.core.util.AbstractItemDescriptorBuilder;
 import de.fthardy.flatpony.core.util.ObjectBuilder;
 
@@ -177,6 +178,29 @@ public final class ConstantFieldDescriptor extends AbstractFlatDataFieldDescript
 
     @Override
     public ConstantField readItemEntityFrom(Reader source) {
+        String value = this.readValue(source);
+        if (this.getDefaultValue().equals(value)) {
+            return this.fieldInstance;
+        } else {
+            throw new FlatDataReadException(MSG_Invalid_value(this.getName(), value, this.getDefaultValue()));
+        }
+    }
+
+    @Override
+    public void pushReadFrom(Reader source, StreamReadHandler handler) {
+        handler.onFieldItem(this, this.readValue(source));
+    }
+
+    @Override
+    public void applyHandler(FlatDataItemDescriptor.Handler handler) {
+        if (handler instanceof FlatDataFieldDescriptor.Handler) {
+            ((FlatDataFieldDescriptor.Handler) handler).handleConstantFieldDescriptor(this);
+        } else {
+            handler.handleFlatDataItemDescriptor(this);
+        }
+    }
+    
+    private String readValue(Reader source) {
         char[] charsToRead = new char[this.getDefaultValue().length()];
         try {
             int length = source.read(charsToRead);
@@ -187,20 +211,6 @@ public final class ConstantFieldDescriptor extends AbstractFlatDataFieldDescript
             throw new FlatDataReadException(MSG_Read_failed(this.getName()), e);
         }
 
-        String value = new String(charsToRead);
-        if (this.getDefaultValue().equals(value)) {
-            return this.fieldInstance;
-        } else {
-            throw new FlatDataReadException(MSG_Invalid_value(this.getName(), value, this.getDefaultValue()));
-        }
-    }
-
-    @Override
-    public void applyHandler(FlatDataItemDescriptor.Handler handler) {
-        if (handler instanceof FlatDataFieldDescriptor.Handler) {
-            ((FlatDataFieldDescriptor.Handler) handler).handleConstantFieldDescriptor(this);
-        } else {
-            handler.handleFlatDataItemDescriptor(this);
-        }
+        return new String(charsToRead);
     }
 }

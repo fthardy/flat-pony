@@ -25,6 +25,7 @@ package de.fthardy.flatpony.core.field;
 
 import de.fthardy.flatpony.core.FlatDataItemDescriptor;
 import de.fthardy.flatpony.core.field.converter.FieldValueConverter;
+import de.fthardy.flatpony.core.streamio.StreamReadHandler;
 import de.fthardy.flatpony.core.util.AbstractItemDescriptorBuilder;
 import de.fthardy.flatpony.core.util.ObjectBuilder;
 
@@ -142,6 +143,11 @@ public final class TypedFieldDescriptor<T> implements FlatDataFieldDescriptor<Ty
     @Override
     public TypedField<T> readItemEntityFrom(Reader source) {
         return new TypedField<T>(this, this.decoratedFieldDescriptor.readItemEntityFrom(source));
+    }
+
+    @Override
+    public void pushReadFrom(Reader source, StreamReadHandler handler) {
+        this.decoratedFieldDescriptor.pushReadFrom(source, handler);
     }
 
     @Override

@@ -25,6 +25,7 @@ package de.fthardy.flatpony.core.field;
 
 import de.fthardy.flatpony.core.FlatDataItemDescriptor;
 import de.fthardy.flatpony.core.FlatDataReadException;
+import de.fthardy.flatpony.core.streamio.StreamReadHandler;
 import de.fthardy.flatpony.core.structure.DelimitedItemDescriptor;
 import de.fthardy.flatpony.core.util.AbstractItemDescriptorBuilder;
 import de.fthardy.flatpony.core.util.ObjectBuilder;
@@ -178,21 +179,14 @@ public final class DelimitedFieldDescriptor extends AbstractFlatDataFieldDescrip
 
     @Override
     public DelimitedField readItemEntityFrom(Reader source) {
-        StringBuilder valueBuilder = new StringBuilder();
-        try {
-            int charValue = source.read();
-            while (charValue != -1 && charValue != delimiter) {
-                valueBuilder.append((char) charValue);
-                charValue = source.read();
-            }
-        } catch (IOException e) {
-            throw new FlatDataReadException(MSG_Read_failed(this.getName()), e);
-        }
-
         DelimitedField field = this.createItemEntity();
-        field.setValue(valueBuilder.toString());
-        
+        field.setValue(this.readValue(source));
         return field;
+    }
+
+    @Override
+    public void pushReadFrom(Reader source, StreamReadHandler handler) {
+        handler.onFieldItem(this, this.readValue(source));
     }
 
     @Override
@@ -211,5 +205,19 @@ public final class DelimitedFieldDescriptor extends AbstractFlatDataFieldDescrip
      */
     public char getDelimiter() {
         return (char) this.delimiter;
+    }
+    
+    private String readValue(Reader source) {
+        StringBuilder valueBuilder = new StringBuilder();
+        try {
+            int charValue = source.read();
+            while (charValue != -1 && charValue != delimiter) {
+                valueBuilder.append((char) charValue);
+                charValue = source.read();
+            }
+        } catch (IOException e) {
+            throw new FlatDataReadException(MSG_Read_failed(this.getName()), e);
+        }
+        return valueBuilder.toString();
     }
 }

@@ -27,6 +27,7 @@ import de.fthardy.flatpony.core.FlatDataItemDescriptor;
 import de.fthardy.flatpony.core.FlatDataReadException;
 import de.fthardy.flatpony.core.field.AbstractFlatDataFieldDescriptor;
 import de.fthardy.flatpony.core.field.FlatDataFieldDescriptor;
+import de.fthardy.flatpony.core.streamio.StreamReadHandler;
 import de.fthardy.flatpony.core.util.AbstractItemDescriptorBuilder;
 import de.fthardy.flatpony.core.util.ObjectBuilder;
 
@@ -233,25 +234,14 @@ public final class FixedSizeFieldDescriptor extends AbstractFlatDataFieldDescrip
 
     @Override
     public FixedSizeField readItemEntityFrom(Reader source) {
-        
-        char[] chars = new char[fieldSize];
-        int readLength;
-        try {
-            readLength = source.read(chars);
-        } catch (IOException e) {
-            throw new FlatDataReadException(MSG_Read_failed(this.getName()), e);
-        }
-        
-        if (readLength < this.fieldSize) {
-            throw new FlatDataReadException(MSG_Input_stream_too_short(this.getName(), this.fieldSize, readLength));
-        }
-        assert readLength == this.fieldSize;
-
         FixedSizeField field = this.createItemEntity();
-
-        field.setValue(contentValueTransformer.extractValueFromContent(new String(chars)));
-
+        field.setValue(this.readValue(source));
         return field;
+    }
+
+    @Override
+    public void pushReadFrom(Reader source, StreamReadHandler handler) {
+        handler.onFieldItem(this, this.readValue(source));
     }
 
     @Override
@@ -265,5 +255,22 @@ public final class FixedSizeFieldDescriptor extends AbstractFlatDataFieldDescrip
 
     String makeContentFromValue(String value) {
         return contentValueTransformer.makeContentFromValue(value, this.fieldSize);
+    }
+    
+    private String readValue(Reader source) {
+        char[] chars = new char[fieldSize];
+        int readLength;
+        try {
+            readLength = source.read(chars);
+        } catch (IOException e) {
+            throw new FlatDataReadException(MSG_Read_failed(this.getName()), e);
+        }
+
+        if (readLength < this.fieldSize) {
+            throw new FlatDataReadException(MSG_Input_stream_too_short(this.getName(), this.fieldSize, readLength));
+        }
+        assert readLength == this.fieldSize;
+        
+        return contentValueTransformer.extractValueFromContent(new String(chars));
     }
 }

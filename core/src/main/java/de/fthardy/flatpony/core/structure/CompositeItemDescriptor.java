@@ -25,6 +25,7 @@ package de.fthardy.flatpony.core.structure;
 
 import de.fthardy.flatpony.core.AbstractFlatDataItemDescriptor;
 import de.fthardy.flatpony.core.FlatDataItemDescriptor;
+import de.fthardy.flatpony.core.streamio.StreamReadHandler;
 import de.fthardy.flatpony.core.util.AbstractItemDescriptorBuilder;
 import de.fthardy.flatpony.core.util.ObjectBuilder;
 
@@ -158,7 +159,7 @@ public final class CompositeItemDescriptor extends AbstractFlatDataItemDescripto
     public static AddElementItemDescriptors newInstance(String name) {
         return new BuilderImpl(name);
     }
-
+    
     private final Map<String, FlatDataItemDescriptor<?>> elementItemDescriptorMap;
 
     private CompositeItemDescriptor(BuildParams params) {
@@ -182,6 +183,13 @@ public final class CompositeItemDescriptor extends AbstractFlatDataItemDescripto
     public CompositeItemEntity readItemEntityFrom(Reader source) {
         return new CompositeItemEntity(this, this.elementItemDescriptorMap.values().stream().map(descriptor ->
                 descriptor.readItemEntityFrom(source)).collect(Collectors.toList()));
+    }
+
+    @Override
+    public void pushReadFrom(Reader source, StreamReadHandler handler) {
+        handler.onStructureItemStart(this);
+        this.elementItemDescriptorMap.values().forEach(d -> d.pushReadFrom(source, handler));
+        handler.onStructureItemEnd(this);
     }
 
     @Override

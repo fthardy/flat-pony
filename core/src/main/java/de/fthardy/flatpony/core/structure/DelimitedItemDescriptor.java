@@ -26,6 +26,7 @@ package de.fthardy.flatpony.core.structure;
 import de.fthardy.flatpony.core.FlatDataItemDescriptor;
 import de.fthardy.flatpony.core.FlatDataItemEntity;
 import de.fthardy.flatpony.core.FlatDataReadException;
+import de.fthardy.flatpony.core.streamio.StreamReadHandler;
 import de.fthardy.flatpony.core.util.AbstractItemDescriptorBuilder;
 import de.fthardy.flatpony.core.util.ObjectBuilder;
 
@@ -152,18 +153,19 @@ public final class DelimitedItemDescriptor implements FlatDataStructureDescripto
 
     @Override
     public DelimitedItemEntity readItemEntityFrom(Reader source) {
-        try {
-            FlatDataItemEntity<?> item = this.targetItemDescriptor.readItemEntityFrom(source);
+        FlatDataItemEntity<?> item = this.targetItemDescriptor.readItemEntityFrom(source);
+        
+        this.readDelimiter(source);
+        
+        return new DelimitedItemEntity(this, item);
+    }
 
-            int i = source.read();
-            if (i != -1 && i != this.delimiter) {
-                throw new FlatDataReadException(MSG_No_delimiter_found(this.targetItemDescriptor.getName()));
-            }
-
-            return new DelimitedItemEntity(this, item);
-        } catch (IOException e) {
-            throw new FlatDataReadException(MSG_Read_failed(this.getName()), e);
-        }
+    @Override
+    public void pushReadFrom(Reader source, StreamReadHandler handler) {
+        handler.onStructureItemStart(this);
+        this.targetItemDescriptor.pushReadFrom(source, handler);
+        this.readDelimiter(source);
+        handler.onStructureItemEnd(this);
     }
 
     @Override
@@ -187,5 +189,16 @@ public final class DelimitedItemDescriptor implements FlatDataStructureDescripto
      */
     public FlatDataItemDescriptor<?> getTargetItemDescriptor() {
         return targetItemDescriptor;
+    }
+    
+    private void readDelimiter(Reader source) {
+        try {
+            int i = source.read();
+            if (i != -1 && i != this.delimiter) {
+                throw new FlatDataReadException(MSG_No_delimiter_found(this.targetItemDescriptor.getName()));
+            }
+        } catch (IOException e) {
+            throw new FlatDataReadException(MSG_Read_failed(this.getName()), e);
+        }
     }
 }
