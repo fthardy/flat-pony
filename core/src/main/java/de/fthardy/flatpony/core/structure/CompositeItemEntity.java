@@ -82,6 +82,15 @@ public final class CompositeItemEntity extends AbstractFlatDataItemEntity<Compos
     }
 
     /**
+     * Get all element item entities.
+     * 
+     * @return an unmodifiable list of the element item entities.
+     */
+    public List<FlatDataItemEntity<?>> getElementItemEntities() {
+        return Collections.unmodifiableList(new ArrayList<>(this.elementItemEntityMap.values()));
+    }
+
+    /**
      * Get a particular element item entity by its name.
      * 
      * @param name the name of the element item entity to get.

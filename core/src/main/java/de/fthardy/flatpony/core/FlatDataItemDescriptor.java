@@ -24,6 +24,7 @@ SOFTWARE.
 package de.fthardy.flatpony.core;
 
 import de.fthardy.flatpony.core.streamio.StreamReadHandler;
+import de.fthardy.flatpony.core.streamio.PullReadIterator;
 
 import java.io.Reader;
 
@@ -114,21 +115,13 @@ public interface FlatDataItemDescriptor<T extends FlatDataItemEntity<?>> {
     void pushReadFrom(Reader source, StreamReadHandler handler);
 
     /**
-     * Start to puĺl read from a given source stream.
+     * Start to read the data of the receiving item from a given source stream in a pull fashion.
      * 
-     * @param source the reader of the source stream.
+     * @param reader the reader of the source stream.
      *               
-     * @return the iterator to pull read events an control the read process.
+     * @return the iterator to read the items.
      */
-    // TODO PullReadIterator pullReadFromSourceStream(Reader source);
-
-    /**
-     * Start a stream write to a given target stream.
-     * 
-     * @param writer the writer to write the data to.
-     * @param provider the provider which provides the field data to write.
-     */
-    // TODO void writeToTargetStream(Writer writer, FieldValueProvider provider);
+    default PullReadIterator pullReadFrom(Reader reader) { return null; }
 
     /**
      * Apply a handler to the receiving descriptor.

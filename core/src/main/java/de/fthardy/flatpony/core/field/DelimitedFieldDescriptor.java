@@ -25,6 +25,8 @@ package de.fthardy.flatpony.core.field;
 
 import de.fthardy.flatpony.core.FlatDataItemDescriptor;
 import de.fthardy.flatpony.core.FlatDataReadException;
+import de.fthardy.flatpony.core.streamio.FieldPullReadIterator;
+import de.fthardy.flatpony.core.streamio.PullReadIterator;
 import de.fthardy.flatpony.core.streamio.StreamReadHandler;
 import de.fthardy.flatpony.core.structure.DelimitedItemDescriptor;
 import de.fthardy.flatpony.core.util.AbstractItemDescriptorBuilder;
@@ -190,6 +192,26 @@ public final class DelimitedFieldDescriptor extends AbstractFlatDataFieldDescrip
     }
 
     @Override
+    public PullReadIterator pullReadFrom(Reader source) {
+        return new FieldPullReadIterator<>(this, source);
+    }
+
+    @Override
+    public String readValue(Reader source) {
+        StringBuilder valueBuilder = new StringBuilder();
+        try {
+            int charValue = source.read();
+            while (charValue != -1 && charValue != delimiter) {
+                valueBuilder.append((char) charValue);
+                charValue = source.read();
+            }
+        } catch (IOException e) {
+            throw new FlatDataReadException(MSG_Read_failed(this.getName()), e);
+        }
+        return valueBuilder.toString();
+    }
+
+    @Override
     public void applyHandler(FlatDataItemDescriptor.Handler handler) {
         if (handler instanceof FlatDataFieldDescriptor.Handler) {
             ((FlatDataFieldDescriptor.Handler) handler).handleDelimitedFieldDescriptor(this);
@@ -205,19 +227,5 @@ public final class DelimitedFieldDescriptor extends AbstractFlatDataFieldDescrip
      */
     public char getDelimiter() {
         return (char) this.delimiter;
-    }
-    
-    private String readValue(Reader source) {
-        StringBuilder valueBuilder = new StringBuilder();
-        try {
-            int charValue = source.read();
-            while (charValue != -1 && charValue != delimiter) {
-                valueBuilder.append((char) charValue);
-                charValue = source.read();
-            }
-        } catch (IOException e) {
-            throw new FlatDataReadException(MSG_Read_failed(this.getName()), e);
-        }
-        return valueBuilder.toString();
     }
 }

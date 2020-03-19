@@ -25,7 +25,9 @@ package de.fthardy.flatpony.core.structure;
 
 import de.fthardy.flatpony.core.AbstractFlatDataItemDescriptor;
 import de.fthardy.flatpony.core.FlatDataItemDescriptor;
+import de.fthardy.flatpony.core.streamio.StructureItemPullReadIteratorBase;
 import de.fthardy.flatpony.core.streamio.StreamReadHandler;
+import de.fthardy.flatpony.core.streamio.PullReadIterator;
 import de.fthardy.flatpony.core.util.AbstractItemDescriptorBuilder;
 import de.fthardy.flatpony.core.util.ObjectBuilder;
 
@@ -159,7 +161,11 @@ public final class CompositeItemDescriptor extends AbstractFlatDataItemDescripto
     public static AddElementItemDescriptors newInstance(String name) {
         return new BuilderImpl(name);
     }
-    
+
+    static String MSG_No_pull_read_event(String name) {
+        return String.format("Composite-Item '%s' has no further pull read event!", name);
+    }
+
     private final Map<String, FlatDataItemDescriptor<?>> elementItemDescriptorMap;
 
     private CompositeItemDescriptor(BuildParams params) {
@@ -190,6 +196,38 @@ public final class CompositeItemDescriptor extends AbstractFlatDataItemDescripto
         handler.onStructureItemStart(this);
         this.elementItemDescriptorMap.values().forEach(d -> d.pushReadFrom(source, handler));
         handler.onStructureItemEnd(this);
+    }
+    
+    @Override
+    public PullReadIterator pullReadFrom(Reader source) {
+        return new StructureItemPullReadIteratorBase<CompositeItemDescriptor>(this, source) {
+
+            Iterator<FlatDataItemDescriptor<?>> elementItemIterator;
+            PullReadIterator currentElementStreamIterator;
+
+            @Override
+            protected boolean handleContent(StreamReadHandler handler) {
+                if (elementItemIterator.hasNext()) {
+                    if (!currentElementStreamIterator.hasNextEvent()) {
+                        currentElementStreamIterator = elementItemIterator.next().pullReadFrom(source);
+                    }
+                    currentElementStreamIterator.nextEvent(handler);
+                } else {
+                    if (currentElementStreamIterator.hasNextEvent()) {
+                        currentElementStreamIterator.nextEvent(handler);
+                    } else {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            @Override
+            protected void fetchContent() {
+                elementItemIterator = elementItemDescriptorMap.values().iterator();
+                currentElementStreamIterator = elementItemIterator.next().pullReadFrom(source);
+            }
+        };
     }
 
     @Override

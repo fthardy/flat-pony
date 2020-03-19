@@ -27,6 +27,8 @@ import de.fthardy.flatpony.core.FlatDataItemDescriptor;
 import de.fthardy.flatpony.core.FlatDataReadException;
 import de.fthardy.flatpony.core.field.AbstractFlatDataFieldDescriptor;
 import de.fthardy.flatpony.core.field.FlatDataFieldDescriptor;
+import de.fthardy.flatpony.core.streamio.FieldPullReadIterator;
+import de.fthardy.flatpony.core.streamio.PullReadIterator;
 import de.fthardy.flatpony.core.streamio.StreamReadHandler;
 import de.fthardy.flatpony.core.util.AbstractItemDescriptorBuilder;
 import de.fthardy.flatpony.core.util.ObjectBuilder;
@@ -245,19 +247,12 @@ public final class FixedSizeFieldDescriptor extends AbstractFlatDataFieldDescrip
     }
 
     @Override
-    public void applyHandler(FlatDataItemDescriptor.Handler handler) {
-        if (handler instanceof FlatDataFieldDescriptor.Handler) {
-            ((FlatDataFieldDescriptor.Handler) handler).handleFixedSizeFieldDescriptor(this);
-        } else {
-            handler.handleFlatDataItemDescriptor(this);
-        }
+    public PullReadIterator pullReadFrom(Reader source) {
+        return new FieldPullReadIterator<>(this, source);
     }
 
-    String makeContentFromValue(String value) {
-        return contentValueTransformer.makeContentFromValue(value, this.fieldSize);
-    }
-    
-    private String readValue(Reader source) {
+    @Override
+    public String readValue(Reader source) {
         char[] chars = new char[fieldSize];
         int readLength;
         try {
@@ -270,7 +265,20 @@ public final class FixedSizeFieldDescriptor extends AbstractFlatDataFieldDescrip
             throw new FlatDataReadException(MSG_Input_stream_too_short(this.getName(), this.fieldSize, readLength));
         }
         assert readLength == this.fieldSize;
-        
+
         return contentValueTransformer.extractValueFromContent(new String(chars));
+    }
+
+    @Override
+    public void applyHandler(FlatDataItemDescriptor.Handler handler) {
+        if (handler instanceof FlatDataFieldDescriptor.Handler) {
+            ((FlatDataFieldDescriptor.Handler) handler).handleFixedSizeFieldDescriptor(this);
+        } else {
+            handler.handleFlatDataItemDescriptor(this);
+        }
+    }
+
+    String makeContentFromValue(String value) {
+        return contentValueTransformer.makeContentFromValue(value, this.fieldSize);
     }
 }

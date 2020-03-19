@@ -27,6 +27,7 @@ import de.fthardy.flatpony.core.FlatDataItemDescriptor;
 import de.fthardy.flatpony.core.field.constraint.ValueConstraint;
 import de.fthardy.flatpony.core.field.constraint.ValueConstraintViolationException;
 import de.fthardy.flatpony.core.streamio.StreamReadHandler;
+import de.fthardy.flatpony.core.streamio.PullReadIterator;
 import de.fthardy.flatpony.core.util.AbstractItemDescriptorBuilder;
 import de.fthardy.flatpony.core.util.ObjectBuilder;
 
@@ -204,6 +205,16 @@ public final class ConstrainedFieldDescriptor implements FlatDataFieldDescriptor
     @Override
     public void pushReadFrom(Reader source, StreamReadHandler handler) {
         this.fieldDescriptor.pushReadFrom(source, handler);
+    }
+
+    @Override
+    public PullReadIterator pullReadFrom(Reader source) {
+        return this.fieldDescriptor.pullReadFrom(source);
+    }
+
+    @Override
+    public String readValue(Reader source) {
+        return this.fieldDescriptor.readValue(source);
     }
 
     @Override

@@ -25,6 +25,7 @@ package de.fthardy.flatpony.core.field;
 
 import de.fthardy.flatpony.core.FlatDataItemDescriptor;
 import de.fthardy.flatpony.core.streamio.StreamReadHandler;
+import de.fthardy.flatpony.core.streamio.PullReadIterator;
 
 import java.io.Reader;
 import java.util.ArrayList;
@@ -52,7 +53,7 @@ public final class ObservableFieldDescriptorDecorator implements FlatDataFieldDe
          *
          * @param field the new field entity instance.
          */
-        // TODO Does the field has to be mutabel - don't think so
+        // TODO Does the field has to be mutable - don't think so
         void onFieldEntityCreated(FlatDataMutableField<? extends FlatDataFieldDescriptor<?>> field);
 
         /**
@@ -60,7 +61,7 @@ public final class ObservableFieldDescriptorDecorator implements FlatDataFieldDe
          *
          * @param field the field entity instance read from a source stream.
          */
-        // TODO Does the field has to be mutabel - don't think so
+        // TODO Does the field has to be mutable - don't think so
         void onFieldEntityRead(FlatDataMutableField<? extends FlatDataFieldDescriptor<?>> field);
     }
 
@@ -113,6 +114,16 @@ public final class ObservableFieldDescriptorDecorator implements FlatDataFieldDe
     @Override
     public void pushReadFrom(Reader source, StreamReadHandler handler) {
         this.observedFieldDescriptor.pushReadFrom(source, handler);
+    }
+
+    @Override
+    public PullReadIterator pullReadFrom(Reader source) {
+        return this.observedFieldDescriptor.pullReadFrom(source);
+    }
+
+    @Override
+    public String readValue(Reader source) {
+        return this.observedFieldDescriptor.readValue(source);
     }
 
     @Override

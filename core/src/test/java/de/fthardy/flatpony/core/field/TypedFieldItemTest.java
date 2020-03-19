@@ -74,7 +74,7 @@ public class TypedFieldItemTest {
         
         verifyNoMoreInteractions(handlerMock);
         
-        verify(fieldDescriptorHandlerMock).handleConvertedFieldDescriptor(descriptor);
+        verify(fieldDescriptorHandlerMock).handleTypedFieldDescriptor(descriptor);
         
         verifyNoMoreInteractions(fieldDescriptorHandlerMock);
 
@@ -304,7 +304,7 @@ public class TypedFieldItemTest {
         
         verifyNoMoreInteractions(handlerMock);
         
-        verify(fieldHandlerMock).handleConvertedField(field);
+        verify(fieldHandlerMock).handleTypedField(field);
         
         verifyNoMoreInteractions(fieldHandlerMock);
         

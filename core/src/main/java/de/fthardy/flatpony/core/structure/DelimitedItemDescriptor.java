@@ -26,6 +26,8 @@ package de.fthardy.flatpony.core.structure;
 import de.fthardy.flatpony.core.FlatDataItemDescriptor;
 import de.fthardy.flatpony.core.FlatDataItemEntity;
 import de.fthardy.flatpony.core.FlatDataReadException;
+import de.fthardy.flatpony.core.streamio.StructureItemPullReadIteratorBase;
+import de.fthardy.flatpony.core.streamio.PullReadIterator;
 import de.fthardy.flatpony.core.streamio.StreamReadHandler;
 import de.fthardy.flatpony.core.util.AbstractItemDescriptorBuilder;
 import de.fthardy.flatpony.core.util.ObjectBuilder;
@@ -116,7 +118,7 @@ public final class DelimitedItemDescriptor implements FlatDataStructureDescripto
     static String MSG_No_delimiter_found(String itemName) {
         return MSG_Read_failed(itemName) + " No delimiter after item.";
     }
-
+    
     /**
      * Create a builder instance to configure and create a new {@link DelimitedItemDescriptor} instance.
      * 
@@ -168,6 +170,28 @@ public final class DelimitedItemDescriptor implements FlatDataStructureDescripto
         handler.onStructureItemEnd(this);
     }
 
+    @Override
+    public PullReadIterator pullReadFrom(Reader reader) {
+        return new StructureItemPullReadIteratorBase<DelimitedItemDescriptor>(this, reader) {
+            
+            PullReadIterator targetItemStreamIterator;
+
+            @Override
+            protected boolean handleContent(StreamReadHandler handler) {
+                if (!targetItemStreamIterator.hasNextEvent()) {
+                    return true;
+                }
+                targetItemStreamIterator.nextEvent(handler);
+                return false;
+            }
+
+            @Override
+            protected void fetchContent() {
+                targetItemStreamIterator = targetItemDescriptor.pullReadFrom(reader);
+            }
+        };
+    }
+    
     @Override
     public void applyHandler(FlatDataItemDescriptor.Handler handler) {
         if (handler instanceof FlatDataStructureDescriptor.Handler) {

@@ -24,7 +24,6 @@ SOFTWARE.
 package de.fthardy.flatpony.core.structure;
 
 import de.fthardy.flatpony.core.AbstractFlatDataItemEntity;
-import de.fthardy.flatpony.core.FlatDataItemDescriptor;
 import de.fthardy.flatpony.core.FlatDataItemEntity;
 import de.fthardy.flatpony.core.FlatDataWriteException;
 import de.fthardy.flatpony.core.util.TypedFieldDecorator;
@@ -54,7 +53,7 @@ public final class SequenceItemEntity extends AbstractFlatDataItemEntity<Sequenc
         return elements;
     }
 
-    private final List<FlatDataItemEntity<?>> elements;
+    private final List<FlatDataItemEntity<?>> elementItemEntities;
     private final TypedFieldDecorator<Integer> countField;
 
     /**
@@ -77,28 +76,28 @@ public final class SequenceItemEntity extends AbstractFlatDataItemEntity<Sequenc
      * </p>
      *
      * @param descriptor the descriptor which created this instance.
-     * @param elements the list of the read element item entities.
+     * @param elementItemEntities the list of the read element item entities.
      * @param countField the count field entity instance or {@code null}.
      */
     SequenceItemEntity(
             SequenceItemDescriptor descriptor,
-            List<FlatDataItemEntity<?>> elements,
+            List<FlatDataItemEntity<?>> elementItemEntities,
             TypedFieldDecorator<Integer> countField) {
         super(descriptor);
-        this.elements = new ArrayList<>(elements);
+        this.elementItemEntities = new ArrayList<>(elementItemEntities);
         this.countField = countField;
     }
 
     @Override
     public int getLength() {
-        return this.elements.stream().mapToInt(FlatDataItemEntity::getLength).sum();
+        return this.elementItemEntities.stream().mapToInt(FlatDataItemEntity::getLength).sum();
     }
 
     @Override
     public void writeTo(Writer target) {
         SequenceItemDescriptor.Multiplicity multiplicity = this.getDescriptor().getMultiplicity();
-        if (multiplicity == null || multiplicity.isSizeWithinBounds(this.elements.size())) {
-            this.elements.forEach(e -> e.writeTo(target));
+        if (multiplicity == null || multiplicity.isSizeWithinBounds(this.elementItemEntities.size())) {
+            this.elementItemEntities.forEach(e -> e.writeTo(target));
         } else {
             throw new FlatDataWriteException(SequenceItemDescriptor.MSG_Multiplicity_constraint_violated(
                     this.getDescriptor().getName(), this.getDescriptor().getMultiplicity()));
@@ -117,8 +116,8 @@ public final class SequenceItemEntity extends AbstractFlatDataItemEntity<Sequenc
     /**
      * @return a new list with the element item entities.
      */
-    public List<FlatDataItemEntity<?>> getElements() {
-        return new ArrayList<>(this.elements);
+    public List<FlatDataItemEntity<?>> getElementItemEntities() {
+        return new ArrayList<>(this.elementItemEntities);
     }
 
     /**
@@ -126,9 +125,9 @@ public final class SequenceItemEntity extends AbstractFlatDataItemEntity<Sequenc
      * 
      * @return the newly created element item entity.
      */
-    public FlatDataItemEntity<?> createAndAddNewElement() {
+    public FlatDataItemEntity<?> createAndAddNewElementItemEntity() {
         FlatDataItemEntity<?> element = this.getDescriptor().getElementItemDescriptor().createItemEntity();
-        this.addElement(element);
+        this.addElementItemEntity(element);
         return element;
     }
 
@@ -141,12 +140,12 @@ public final class SequenceItemEntity extends AbstractFlatDataItemEntity<Sequenc
      * @throws IllegalArgumentException when the given element item entity already exists or doesn't have the element
      *                                  item descriptor from this optional items descriptor.
      */
-    public void addElement(FlatDataItemEntity<?> elementItem) {
-        if (!this.elements.contains(Objects.requireNonNull(elementItem, "Undefined element item entity!"))
+    public void addElementItemEntity(FlatDataItemEntity<?> elementItem) {
+        if (!this.elementItemEntities.contains(Objects.requireNonNull(elementItem, "Undefined element item entity!"))
                 || elementItem.getDescriptor() != this.getDescriptor().getElementItemDescriptor()) {
             throw new IllegalArgumentException("Invalid element item entity!");
         }
-        this.elements.add(elementItem);
+        this.elementItemEntities.add(elementItem);
         this.updateCountField();
     }
 
@@ -155,8 +154,8 @@ public final class SequenceItemEntity extends AbstractFlatDataItemEntity<Sequenc
      *
      * @param elementItem the element item to discard.
      */
-    public void discardElement(FlatDataItemEntity<?> elementItem) {
-        if (!this.elements.remove(elementItem)) {
+    public void discardElementItemEntity(FlatDataItemEntity<?> elementItem) {
+        if (!this.elementItemEntities.remove(elementItem)) {
             throw new IllegalArgumentException("Invalid element item entity!");
         }
         this.updateCountField();
@@ -165,14 +164,14 @@ public final class SequenceItemEntity extends AbstractFlatDataItemEntity<Sequenc
     /**
      * Discard all element item entities.
      */
-    public void discardAllElements() {
-        this.elements.clear();
+    public void discardAllElementItemEntities() {
+        this.elementItemEntities.clear();
         this.updateCountField();
     }
 
     private void updateCountField() {
         if (this.countField != null) {
-            this.countField.setTypedValue(this.elements.size());
+            this.countField.setTypedValue(this.elementItemEntities.size());
         }
     }
 }

@@ -25,6 +25,8 @@ package de.fthardy.flatpony.core.field;
 
 import de.fthardy.flatpony.core.FlatDataItemDescriptor;
 import de.fthardy.flatpony.core.FlatDataReadException;
+import de.fthardy.flatpony.core.streamio.FieldPullReadIterator;
+import de.fthardy.flatpony.core.streamio.PullReadIterator;
 import de.fthardy.flatpony.core.streamio.StreamReadHandler;
 import de.fthardy.flatpony.core.util.AbstractItemDescriptorBuilder;
 import de.fthardy.flatpony.core.util.ObjectBuilder;
@@ -192,15 +194,12 @@ public final class ConstantFieldDescriptor extends AbstractFlatDataFieldDescript
     }
 
     @Override
-    public void applyHandler(FlatDataItemDescriptor.Handler handler) {
-        if (handler instanceof FlatDataFieldDescriptor.Handler) {
-            ((FlatDataFieldDescriptor.Handler) handler).handleConstantFieldDescriptor(this);
-        } else {
-            handler.handleFlatDataItemDescriptor(this);
-        }
+    public PullReadIterator pullReadFrom(Reader source) {
+        return new FieldPullReadIterator<>(this, source);
     }
-    
-    private String readValue(Reader source) {
+
+    @Override
+    public String readValue(Reader source) {
         char[] charsToRead = new char[this.getDefaultValue().length()];
         try {
             int length = source.read(charsToRead);
@@ -212,5 +211,14 @@ public final class ConstantFieldDescriptor extends AbstractFlatDataFieldDescript
         }
 
         return new String(charsToRead);
+    }
+
+    @Override
+    public void applyHandler(FlatDataItemDescriptor.Handler handler) {
+        if (handler instanceof FlatDataFieldDescriptor.Handler) {
+            ((FlatDataFieldDescriptor.Handler) handler).handleConstantFieldDescriptor(this);
+        } else {
+            handler.handleFlatDataItemDescriptor(this);
+        }
     }
 }

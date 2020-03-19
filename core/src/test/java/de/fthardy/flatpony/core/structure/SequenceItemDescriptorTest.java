@@ -112,7 +112,7 @@ class SequenceItemDescriptorTest {
         assertThat(descriptor.getElementItemDescriptor()).isSameAs(constantFieldDescriptor);
 
         SequenceItemEntity sequenceItemEntity = descriptor.createItemEntity();
-        assertThat(sequenceItemEntity.getElements()).isEmpty();
+        assertThat(sequenceItemEntity.getElementItemEntities()).isEmpty();
     }
 
     @Test
@@ -156,7 +156,7 @@ class SequenceItemDescriptorTest {
         countField.setValue("3");
 
         SequenceItemEntity sequenceItemEntity = descriptor.createItemEntity();
-        assertThat(sequenceItemEntity.getElements()).hasSize(3);
+        assertThat(sequenceItemEntity.getElementItemEntities()).hasSize(3);
     }
     
     @Test
@@ -168,7 +168,7 @@ class SequenceItemDescriptorTest {
                 .build();
 
         SequenceItemEntity sequenceItemEntity = descriptor.createItemEntity();
-        assertThat(sequenceItemEntity.getElements()).isEmpty();
+        assertThat(sequenceItemEntity.getElementItemEntities()).isEmpty();
     }
 
     @Test
@@ -183,9 +183,9 @@ class SequenceItemDescriptorTest {
         StringReader reader2 = new StringReader("TESTTEST");
 
         SequenceItemEntity sequenceItemEntity1 = descriptor.readItemEntityFrom(reader1);
-        assertThat(sequenceItemEntity1.getElements()).hasSize(3);
+        assertThat(sequenceItemEntity1.getElementItemEntities()).hasSize(3);
         SequenceItemEntity sequenceItemEntity2 = descriptor.readItemEntityFrom(reader2);
-        assertThat(sequenceItemEntity2.getElements()).hasSize(2);
+        assertThat(sequenceItemEntity2.getElementItemEntities()).hasSize(2);
     }
 
     @Test
@@ -204,9 +204,9 @@ class SequenceItemDescriptorTest {
         StringReader reader2 = new StringReader("TESTTEST");
 
         SequenceItemEntity sequenceItemEntity1 = descriptor.readItemEntityFrom(reader1);
-        assertThat(sequenceItemEntity1.getElements()).hasSize(3);
+        assertThat(sequenceItemEntity1.getElementItemEntities()).hasSize(3);
         SequenceItemEntity sequenceItemEntity2 = descriptor.readItemEntityFrom(reader2);
-        assertThat(sequenceItemEntity2.getElements()).hasSize(2);
+        assertThat(sequenceItemEntity2.getElementItemEntities()).hasSize(2);
     }
 
     @Test
@@ -253,10 +253,10 @@ class SequenceItemDescriptorTest {
 
         fieldReference.getFieldDescriptorDecorator().readItemEntityFrom(reader1);
         SequenceItemEntity sequenceItemEntity1 = descriptor.readItemEntityFrom(reader1);
-        assertThat(sequenceItemEntity1.getElements()).hasSize(3);
+        assertThat(sequenceItemEntity1.getElementItemEntities()).hasSize(3);
 
         fieldReference.getFieldDescriptorDecorator().readItemEntityFrom(reader2);
         SequenceItemEntity sequenceItemEntity2 = descriptor.readItemEntityFrom(reader2);
-        assertThat(sequenceItemEntity2.getElements()).hasSize(2);
+        assertThat(sequenceItemEntity2.getElementItemEntities()).hasSize(2);
     }
 }

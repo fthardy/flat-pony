@@ -24,7 +24,7 @@ SOFTWARE.
 package de.fthardy.flatpony.core.structure;
 
 import de.fthardy.flatpony.core.*;
-import de.fthardy.flatpony.core.streamio.StreamReadHandler;
+import de.fthardy.flatpony.core.streamio.*;
 import de.fthardy.flatpony.core.util.AbstractItemDescriptorBuilder;
 import de.fthardy.flatpony.core.util.FieldReference;
 import de.fthardy.flatpony.core.util.ObjectBuilder;
@@ -32,10 +32,7 @@ import de.fthardy.flatpony.core.util.TypedFieldDecorator;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.function.Function;
+import java.util.*;
 
 /**
  * The implementation of a descriptor for a sequence item.
@@ -232,6 +229,83 @@ public final class SequenceItemDescriptor extends AbstractFlatDataItemDescriptor
             return !this.isSizeWithinBounds(size);
         }
     }
+    
+    private final class PullReadIteratorWithCountField extends StructureItemPullReadIteratorBase<SequenceItemDescriptor> {
+
+        private final int targetCount;
+        private int currentElementCount = 0;
+        private PullReadIterator elementItemStreamIterator;
+        
+        protected PullReadIteratorWithCountField(Reader source, int targetCount) {
+            super(SequenceItemDescriptor.this, source);
+            this.targetCount = targetCount;
+        }
+
+        @Override
+        protected boolean handleContent(StreamReadHandler handler) {
+            if (elementItemStreamIterator == null) {
+                return true;
+            }
+            if (elementItemStreamIterator.hasNextEvent()) {
+                elementItemStreamIterator.nextEvent(handler);
+            } else if (currentElementCount == targetCount) {
+                return true;
+            } else {
+                elementItemStreamIterator = elementItemDescriptor.pullReadFrom(source);
+                currentElementCount++;
+            }
+            return false;
+        }
+
+        @Override
+        protected void fetchContent() {
+            if (targetCount > 0) {
+                elementItemStreamIterator = elementItemDescriptor.pullReadFrom(source);
+                currentElementCount++;
+            }
+        }
+    }
+    
+    private final class PullReadIteratorWithoutCountField extends StructureItemPullReadIteratorBase<SequenceItemDescriptor> {
+
+        private final Deque<FlatDataStructure<?>> lastStructureItemEntityDeque = new ArrayDeque<>();
+        private Iterator<FlatDataItemEntity<?>> elementItemEntityIterator;
+        private Iterator<FlatDataItemEntity<?>> flattenedElementItemEntityIterator;
+
+        protected PullReadIteratorWithoutCountField(Reader source) {
+            super(SequenceItemDescriptor.this, source);
+        }
+
+        @Override
+        protected boolean handleContent(StreamReadHandler handler) {
+            boolean sendEndEvent = false;
+            if (flattenedElementItemEntityIterator != null && flattenedElementItemEntityIterator.hasNext()) {
+                FlatDataItemEntity<?> nextItemEntity = flattenedElementItemEntityIterator.next();
+                if (nextItemEntity == lastStructureItemEntityDeque.peek()) {
+                    handler.onStructureItemEnd(lastStructureItemEntityDeque.pop().getDescriptor());
+                } else if (nextItemEntity instanceof FlatDataStructure) {
+                    FlatDataStructure<?> structure = (FlatDataStructure<?>) nextItemEntity;
+                    lastStructureItemEntityDeque.push(structure);
+                    handler.onStructureItemStart(structure.getDescriptor());
+                } else {
+                    nextItemEntity.applyHandler(new PullReadFieldHandler(handler));
+                }
+            } else if (elementItemEntityIterator.hasNext()) {
+                FlatDataItemEntity<?> itemEntity = elementItemEntityIterator.next();
+                ItemEntityStructureFlattener itemCollector = new ItemEntityStructureFlattener();
+                itemEntity.applyHandler(itemCollector);
+                flattenedElementItemEntityIterator = itemCollector.getFlattenedItemEntities().iterator();
+            } else {
+                sendEndEvent = true;
+            }
+            return sendEndEvent;
+        }
+
+        @Override
+        protected void fetchContent() {
+            elementItemEntityIterator = readElementsByTrialAndErrorFrom(source).iterator();
+        }
+    }
 
     static String MSG_Multiplicity_constraint_violated(String sequenceName, Multiplicity multiplicity) {
         return String.format(
@@ -312,10 +386,6 @@ public final class SequenceItemDescriptor extends AbstractFlatDataItemDescriptor
 
         List<FlatDataItemEntity<?>> elementItems = countField == null ?
                 this.readElementsByTrialAndErrorFrom(source) : this.readWithCountField(source, countField.getTypedValue());
-
-        if (multiplicity != null && multiplicity.isSizeNotWithinBounds(elementItems.size())) {
-            throw new FlatDataReadException(MSG_Multiplicity_constraint_violated(this.getName(), this.multiplicity));
-        }
         
         return new SequenceItemEntity(this, elementItems, countField);
     }
@@ -324,21 +394,26 @@ public final class SequenceItemDescriptor extends AbstractFlatDataItemDescriptor
     public void pushReadFrom(Reader source, StreamReadHandler handler) {
 
         assertCountFieldExistsWhenCountFieldIsReferenced();
-
-        TypedFieldDecorator<Integer> countField =
-                this.countFieldReference == null ? null : this.countFieldReference.getReferencedField();
         
         handler.onStructureItemStart(this);
 
-        int elementCount = countField == null ? 
-                this.pushReadElementsByTrialAndErrorFrom(source, handler) : 
-                this.pushReadWithCountField(source, handler, countField.getTypedValue());
-
-        if (multiplicity != null && multiplicity.isSizeNotWithinBounds(elementCount)) {
-            throw new FlatDataReadException(MSG_Multiplicity_constraint_violated(this.getName(), this.multiplicity));
+        if (this.countFieldReference == null) {
+            this.pushReadElementsByTrialAndErrorFrom(source, handler); 
+        } else {
+            this.pushReadWithCountField(source, handler, this.countFieldReference.getReferencedField().getTypedValue());
         }
 
         handler.onStructureItemEnd(this);
+    }
+
+    @Override
+    public PullReadIterator pullReadFrom(Reader source) {
+        
+        assertCountFieldExistsWhenCountFieldIsReferenced();
+        
+        return this.countFieldReference == null ?
+                new PullReadIteratorWithoutCountField(source) :
+                new PullReadIteratorWithCountField(source, countFieldReference.getReferencedField().getTypedValue());
     }
 
     @Override
@@ -367,6 +442,14 @@ public final class SequenceItemDescriptor extends AbstractFlatDataItemDescriptor
     private void assertCountFieldExistsWhenCountFieldIsReferenced() {
         if (this.countFieldReference != null && this.countFieldReference.getReferencedField() == null) {
             throw new IllegalStateException(MSG_No_count_field(this.getName()));
+        } else if (this.countFieldReference != null) {
+            this.assertMultiplicityConstraintOn(this.countFieldReference.getReferencedField().getTypedValue());
+        }
+    }
+
+    private void assertMultiplicityConstraintOn(int count) {
+        if (multiplicity != null && multiplicity.isSizeNotWithinBounds(count)) {
+            throw new FlatDataReadException(MSG_Multiplicity_constraint_violated(this.getName(), this.multiplicity));
         }
     }
 
@@ -374,12 +457,14 @@ public final class SequenceItemDescriptor extends AbstractFlatDataItemDescriptor
         List<FlatDataItemEntity<?>> elementItems = new ArrayList<>();
         FlatDataItemEntity<?> itemEntity;
         do {
-            itemEntity = readByTrialAndErrorFrom(
-                    source, this.elementItemDescriptor::readItemEntityFrom, null);
+            itemEntity = this.readByTrialAndErrorFrom(source);
             if (itemEntity != null) {
                 elementItems.add(itemEntity);
             }
         } while(itemEntity != null);
+        
+        this.assertMultiplicityConstraintOn(elementItems.size());
+        
         return elementItems;
     }
 
@@ -391,31 +476,27 @@ public final class SequenceItemDescriptor extends AbstractFlatDataItemDescriptor
         return elementItems;
     }
 
-    private int pushReadElementsByTrialAndErrorFrom(Reader source, StreamReadHandler handler) {
+    private void pushReadElementsByTrialAndErrorFrom(Reader source, StreamReadHandler handler) {
         int elementCount = 0;
-        boolean itemFound;
+        FlatDataItemEntity<?> itemEntity;
         do {
-            itemFound = readByTrialAndErrorFrom(
-                    source, s -> { 
-                        this.elementItemDescriptor.pushReadFrom(s, handler);
-                        return true; },
-                    false); 
-            if (itemFound) {
+            itemEntity = this.readByTrialAndErrorFrom(source);
+            if (itemEntity != null) {
                 elementCount++;
+                itemEntity.applyHandler(new PushReadItemEntityTreeWalker(handler));
             }
-        } while (itemFound);
+        } while (itemEntity != null);
         
-        return elementCount;
+        this.assertMultiplicityConstraintOn(elementCount);
     }
 
-    private int pushReadWithCountField(Reader source, StreamReadHandler handler, Integer count) {
+    private void pushReadWithCountField(Reader source, StreamReadHandler handler, Integer count) {
         for (int i = 0; i < count; i++) {
             this.elementItemDescriptor.pushReadFrom(source, handler);
         }
-        return count;
     }
 
-    private <R> R readByTrialAndErrorFrom(Reader source, Function<Reader, R> readFunction, R resultOnReadFail) {
+    private FlatDataItemEntity<?> readByTrialAndErrorFrom(Reader source) {
         if (source.markSupported()) {
             try {
                 source.mark(this.elementItemDescriptor.getMinLength());
@@ -424,14 +505,14 @@ public final class SequenceItemDescriptor extends AbstractFlatDataItemDescriptor
             }
 
             try {
-                return readFunction.apply(source);
+                return elementItemDescriptor.readItemEntityFrom(source);
             } catch (Exception e) {
                 try {
                     source.reset();
                 } catch (IOException ex) {
                     throw new FlatDataReadException(MSG_Failed_to_reset_stream(getName()), ex);
                 }
-                return resultOnReadFail;
+                return null;
             }
         } else {
             throw new FlatDataReadException(MSG_Mark_not_supported(getName()));

@@ -98,7 +98,7 @@ public final class TypedField<T> extends AbstractFlatDataItemEntity<TypedFieldDe
     @Override
     public void applyHandler(FlatDataItemEntity.Handler handler) {
         if (handler instanceof FlatDataField.Handler) {
-            ((FlatDataField.Handler) handler).handleConvertedField(this);
+            ((FlatDataField.Handler) handler).handleTypedField(this);
         } else {
             handler.handleFlatDataItemEntity(this);
         }

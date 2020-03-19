@@ -26,7 +26,7 @@ package de.fthardy.flatpony.core.structure;
 import de.fthardy.flatpony.core.FlatDataItemDescriptor;
 import de.fthardy.flatpony.core.FlatDataItemEntity;
 import de.fthardy.flatpony.core.FlatDataReadException;
-import de.fthardy.flatpony.core.streamio.StreamReadHandler;
+import de.fthardy.flatpony.core.streamio.*;
 import de.fthardy.flatpony.core.util.AbstractItemDescriptorBuilder;
 import de.fthardy.flatpony.core.util.FieldReference;
 import de.fthardy.flatpony.core.util.ObjectBuilder;
@@ -34,8 +34,7 @@ import de.fthardy.flatpony.core.util.TypedFieldDecorator;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.util.Objects;
-import java.util.function.Function;
+import java.util.*;
 
 /**
  * The descriptor implementation for an optional item.
@@ -113,6 +112,75 @@ public final class OptionalItemDescriptor implements FlatDataStructureDescriptor
         }
     }
 
+    private final class PullReadIteratorWithFlagField extends StructureItemPullReadIteratorBase<OptionalItemDescriptor> {
+
+        private PullReadIterator targetItemStreamIterator;
+
+        PullReadIteratorWithFlagField(Reader source) {
+            super(OptionalItemDescriptor.this, source);
+        }
+
+        @Override
+        protected boolean handleContent(StreamReadHandler handler) {
+            if (targetItemStreamIterator == null) {
+                return true;
+            }
+            if (!targetItemStreamIterator.hasNextEvent()) {
+                return true;
+            }
+            targetItemStreamIterator.nextEvent(handler);
+            return false;
+        }
+
+        @Override
+        protected void fetchContent() {
+            if (flagFieldReference.getReferencedField().getTypedValue()) {
+                targetItemStreamIterator = targetItemDescriptor.pullReadFrom(source);
+            }
+        }
+    }
+    
+    private final class PullReadIteratorWithoutFlagField extends StructureItemPullReadIteratorBase<OptionalItemDescriptor> {
+
+        private final Deque<FlatDataStructure<?>> lastStructureItemEntityDeque = new ArrayDeque<>();
+        private Iterator<FlatDataItemEntity<?>> flattenedItemEntityIterator;
+
+        PullReadIteratorWithoutFlagField(Reader source) {
+            super(OptionalItemDescriptor.this, source);
+        }
+
+        @Override
+        protected boolean handleContent(StreamReadHandler handler) {
+            if (flattenedItemEntityIterator == null) {
+                return true;
+            }
+            if (!flattenedItemEntityIterator.hasNext()) {
+                return true;
+            }
+            FlatDataItemEntity<?> nextItemEntity = flattenedItemEntityIterator.next();
+            if (nextItemEntity == lastStructureItemEntityDeque.peek()) {
+                handler.onStructureItemEnd(lastStructureItemEntityDeque.pop().getDescriptor());
+            } else if (nextItemEntity instanceof FlatDataStructure) {
+                FlatDataStructure<?> structure = (FlatDataStructure<?>) nextItemEntity;
+                lastStructureItemEntityDeque.push(structure);
+                handler.onStructureItemStart(structure.getDescriptor());
+            } else {
+                nextItemEntity.applyHandler(new PullReadFieldHandler(handler));
+            }
+            return false;
+        }
+
+        @Override
+        protected void fetchContent() {
+            FlatDataItemEntity<?> itemEntity = readByTrialAndErrorFrom(source);
+            if (itemEntity != null) {
+                ItemEntityStructureFlattener itemCollector = new ItemEntityStructureFlattener();
+                itemEntity.applyHandler(itemCollector);
+                flattenedItemEntityIterator = itemCollector.getFlattenedItemEntities().iterator();
+            }
+        }
+    }
+
     /**
      * Create a new instance of this item descriptor.
      * 
@@ -183,10 +251,7 @@ public final class OptionalItemDescriptor implements FlatDataStructureDescriptor
         
         OptionalItemEntity optionalItemEntity;
         if (this.flagFieldReference == null) {
-            optionalItemEntity = new OptionalItemEntity(
-                    this,
-                    this.readByTrialAndError(source, this.targetItemDescriptor::readItemEntityFrom),
-                    null);
+            optionalItemEntity = new OptionalItemEntity(this, this.readByTrialAndErrorFrom(source), null);
         } else {
             TypedFieldDecorator<Boolean> flagField = this.flagFieldReference.getReferencedField();
             FlatDataItemEntity<?> itemEntity = flagField.getTypedValue() ?
@@ -204,10 +269,10 @@ public final class OptionalItemDescriptor implements FlatDataStructureDescriptor
         handler.onStructureItemStart(this);
         
         if (this.flagFieldReference == null) {
-            this.readByTrialAndError(source, s ->  { 
-                    this.targetItemDescriptor.pushReadFrom(s, handler);
-                    return null; 
-                });
+            FlatDataItemEntity<?> itemEntity = this.readByTrialAndErrorFrom(source);
+            if (itemEntity != null) {
+                itemEntity.applyHandler(new PushReadItemEntityTreeWalker(handler));
+            }
         } else {
             if (this.flagFieldReference.getReferencedField().getTypedValue()) {
                 this.targetItemDescriptor.pushReadFrom(source, handler);
@@ -215,6 +280,15 @@ public final class OptionalItemDescriptor implements FlatDataStructureDescriptor
         }
         
         handler.onStructureItemEnd(this);
+    }
+
+    @Override
+    public PullReadIterator pullReadFrom(Reader source) {
+        
+        this.assertFlagFieldExistsWhenFlagFieldIsReferenced();
+        
+        return this.flagFieldReference == null ? 
+                new PullReadIteratorWithoutFlagField(source) : new PullReadIteratorWithFlagField(source);
     }
 
     @Override
@@ -239,7 +313,7 @@ public final class OptionalItemDescriptor implements FlatDataStructureDescriptor
         }
     }
 
-    private <R> R readByTrialAndError(Reader source, Function<Reader, R> readFunction) {
+    private FlatDataItemEntity<?> readByTrialAndErrorFrom(Reader source) {
         if (source.markSupported()) {
             try {
                 source.mark(this.targetItemDescriptor.getMinLength());
@@ -248,7 +322,7 @@ public final class OptionalItemDescriptor implements FlatDataStructureDescriptor
             }
 
             try {
-                return readFunction.apply(source);
+                return this.targetItemDescriptor.readItemEntityFrom(source);
             } catch (Exception e) {
                 try {
                     source.reset();

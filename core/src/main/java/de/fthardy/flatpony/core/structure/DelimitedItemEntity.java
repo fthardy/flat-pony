@@ -45,28 +45,28 @@ public final class DelimitedItemEntity extends AbstractFlatDataItemEntity<Delimi
         return String.format("Failed to write delimited item '%s' to target stream!", itemName);
     }
 
-    private final FlatDataItemEntity<?> item;
+    private final FlatDataItemEntity<?> targetItem;
 
     /**
      * Creates a new instance of this item.
      *
      * @param descriptor the descriptor which is creating this item.
-     * @param item the (delimited) item.
+     * @param targetItem the (delimited) item.
      */
-    DelimitedItemEntity(DelimitedItemDescriptor descriptor, FlatDataItemEntity<?> item) {
+    DelimitedItemEntity(DelimitedItemDescriptor descriptor, FlatDataItemEntity<?> targetItem) {
         super(descriptor);
-        this.item = item;
+        this.targetItem = targetItem;
     }
 
     @Override
     public int getLength() {
-        return item.getLength();
+        return targetItem.getLength();
     }
 
     @Override
     public void writeTo(Writer target) {
         try {
-            item.writeTo(target);
+            targetItem.writeTo(target);
             target.write(this.getDescriptor().getDelimiter());
         } catch (IOException e) {
             throw new FlatDataWriteException(MSG_Write_failed(this.getDescriptor().getName()), e);
@@ -85,7 +85,7 @@ public final class DelimitedItemEntity extends AbstractFlatDataItemEntity<Delimi
     /**
      * @return the inner (delimited) item entity.
      */
-    public FlatDataItemEntity<?> getItem() {
-        return this.item;
+    public FlatDataItemEntity<?> getTargetItem() {
+        return this.targetItem;
     }
 }

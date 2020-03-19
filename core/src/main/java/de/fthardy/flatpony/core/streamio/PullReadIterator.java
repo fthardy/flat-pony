@@ -23,40 +23,24 @@ SOFTWARE.
  */
 package de.fthardy.flatpony.core.streamio;
 
-import de.fthardy.flatpony.core.field.FlatDataFieldDescriptor;
-import de.fthardy.flatpony.core.structure.FlatDataStructureDescriptor;
-
-import java.io.Reader;
-
 /**
- * The interface definition for a handler which handles read events which occur while reading from a source stream.
+ * The interface definition for a stream read iterator which is used for pull reads.
  * 
  * @author Frank Timothy Hardy
- * 
- * @see de.fthardy.flatpony.core.FlatDataItemDescriptor#pushReadFrom(Reader, StreamReadHandler)
- * @see PullReadIterator#nextEvent(StreamReadHandler)
  */
-public interface StreamReadHandler {
+public interface PullReadIterator {
 
     /**
-     * Allows to react to a read field value.
+     * Check if there is a next event to read.
      * 
-     * @param fieldDescriptor the descriptor of the field.
-     * @param value the read value of the field.
+     * @return {@code true} if there is a next event.
      */
-    void onFieldItem(FlatDataFieldDescriptor<?> fieldDescriptor, String value);
+    boolean hasNextEvent();
 
     /**
-     * Allows to react to the start of a particular structure item.
-     *
-     * @param itemDescriptor the descriptor of the structure item.
+     * Advance to the next event.
+     * 
+     * @param handler the handler to handle the read event.
      */
-    void onStructureItemStart(FlatDataStructureDescriptor<?> itemDescriptor);
-
-    /**
-     * Allows to react to the end of a particular structure item.
-     *
-     * @param itemDescriptor the descriptor of the structure item.
-     */
-    void onStructureItemEnd(FlatDataStructureDescriptor<?> itemDescriptor);
+    void nextEvent(StreamReadHandler handler);
 }

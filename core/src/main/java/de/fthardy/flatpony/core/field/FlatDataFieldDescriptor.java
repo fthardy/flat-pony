@@ -26,6 +26,8 @@ package de.fthardy.flatpony.core.field;
 import de.fthardy.flatpony.core.FlatDataItemDescriptor;
 import de.fthardy.flatpony.core.field.fixedsize.FixedSizeFieldDescriptor;
 
+import java.io.Reader;
+
 /**
  * The interface for a flat data field descriptor.
  * <p>
@@ -77,11 +79,11 @@ public interface FlatDataFieldDescriptor<T extends FlatDataField<?>> extends Fla
         void handleConstrainedFieldDescriptor(ConstrainedFieldDescriptor descriptor);
 
         /**
-         * Handle a constrained field descriptor.
+         * Handle a typed field descriptor.
          *
          * @param descriptor the descriptor to be handled by the receiving instance.
          */
-        void handleConvertedFieldDescriptor(TypedFieldDescriptor<?> descriptor);
+        void handleTypedFieldDescriptor(TypedFieldDescriptor<?> descriptor);
     }
 
     /**
@@ -90,4 +92,13 @@ public interface FlatDataFieldDescriptor<T extends FlatDataField<?>> extends Fla
      * @return the default value for the field.
      */
     String getDefaultValue();
+
+    /**
+     * Read the value of the field from a given source stream.
+     * 
+     * @param source the source stream to read from.
+     *               
+     * @return the value of the field.
+     */
+    String readValue(Reader source);
 }
