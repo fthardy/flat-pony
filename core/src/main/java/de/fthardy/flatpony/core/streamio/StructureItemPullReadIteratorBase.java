@@ -39,9 +39,9 @@ public abstract class StructureItemPullReadIteratorBase<T extends FlatDataStruct
 
     static String MSG_No_pull_read_event(FlatDataStructureDescriptor<?> descriptor) {
         return String.format(
-                "%s-Item '%s' has no further pull read event!",
-                descriptor.getClass().getSimpleName(),
-                descriptor.getName());
+                "Structure-Item '%s' [%s] has no further pull read event!",
+                descriptor.getName(),
+                descriptor.getClass().getSimpleName());
     }
 
     protected final T descriptor;

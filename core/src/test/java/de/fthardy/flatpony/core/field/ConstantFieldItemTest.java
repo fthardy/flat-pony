@@ -114,18 +114,6 @@ class ConstantFieldItemTest {
     }
 
     @Test
-    void Returns_always_the_same_field_instance() {
-        ConstantFieldDescriptor descriptor =
-                ConstantFieldDescriptor.newInstance("Constant").withConstant("Foo").build();
-
-        assertSame(descriptor.createItemEntity(), descriptor.createItemEntity());
-
-        StringReader reader = new StringReader("Foo");
-
-        assertSame(descriptor.createItemEntity(), descriptor.readItemEntityFrom(reader));
-    }
-
-    @Test
     void Apply_handler_to_descriptor() {
         ConstantFieldDescriptor descriptor =
                 ConstantFieldDescriptor.newInstance("Constant").withConstant("Foo").build();

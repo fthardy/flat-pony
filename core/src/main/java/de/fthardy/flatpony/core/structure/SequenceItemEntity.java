@@ -141,7 +141,7 @@ public final class SequenceItemEntity extends AbstractFlatDataItemEntity<Sequenc
      *                                  item descriptor from this optional items descriptor.
      */
     public void addElementItemEntity(FlatDataItemEntity<?> elementItem) {
-        if (!this.elementItemEntities.contains(Objects.requireNonNull(elementItem, "Undefined element item entity!"))
+        if (this.elementItemEntities.contains(Objects.requireNonNull(elementItem, "Undefined element item entity!"))
                 || elementItem.getDescriptor() != this.getDescriptor().getElementItemDescriptor()) {
             throw new IllegalArgumentException("Invalid element item entity!");
         }

@@ -36,7 +36,12 @@ import de.fthardy.flatpony.core.field.fixedsize.FixedSizeField;
  * 
  * @see ItemEntityStructureFlattener
  */
-public class PullReadFieldHandler implements FlatDataField.Handler {
+public final class PullReadFieldHandler implements FlatDataField.Handler {
+    
+    static String MSG_Unsupported_item_entity(FlatDataItemEntity<?> itemEntity) {
+        return String.format("Unsupported item entity '%s' [%s]!", 
+                itemEntity.getDescriptor().getName(), itemEntity.getClass().getName());
+    }
 
     private final StreamReadHandler handler;
     
@@ -70,7 +75,7 @@ public class PullReadFieldHandler implements FlatDataField.Handler {
     }
 
     @Override
-    public void handleFlatDataItemEntity(FlatDataItemEntity<?> item) {
-        throw new IllegalStateException("Illegal item entity type: " + item.getClass().getName());
+    public void handleFlatDataItemEntity(FlatDataItemEntity<?> itemEntity) {
+        throw new IllegalStateException(MSG_Unsupported_item_entity(itemEntity));
     }
 }

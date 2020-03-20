@@ -41,8 +41,13 @@ import java.util.List;
  * 
  * @see PullReadFieldHandler
  */
-public class ItemEntityStructureFlattener implements FlatDataField.Handler, FlatDataStructure.Handler {
-    
+public final class ItemEntityStructureFlattener implements FlatDataField.Handler, FlatDataStructure.Handler {
+
+    static String MSG_Unsupported_item_entity(FlatDataItemEntity<?> itemEntity) {
+        return String.format("Unsupported item entity '%s' [%s]!",
+                itemEntity.getDescriptor().getName(), itemEntity.getClass().getName());
+    }
+
     private final List<FlatDataItemEntity<?>> flattenedItemEntities = new ArrayList<>();
     
     @Override
@@ -73,36 +78,39 @@ public class ItemEntityStructureFlattener implements FlatDataField.Handler, Flat
     @Override
     public void handleCompositeItemEntity(CompositeItemEntity item) {
         flattenedItemEntities.add(item);
-        flattenedItemEntities.addAll(item.getElementItemEntities());
+        item.getElementItemEntities().forEach(i -> i.applyHandler(this));
         flattenedItemEntities.add(item);
     }
 
     @Override
     public void handleDelimitedItemEntity(DelimitedItemEntity item) {
         flattenedItemEntities.add(item);
-        flattenedItemEntities.add(item.getTargetItem());
+        item.getTargetItem().applyHandler(this);
         flattenedItemEntities.add(item);
     }
 
     @Override
     public void handleOptionalItemEntity(OptionalItemEntity item) {
         flattenedItemEntities.add(item);
-        item.getTargetItem().ifPresent(flattenedItemEntities::add);
+        item.getTargetItem().ifPresent(i -> i.applyHandler(this));
         flattenedItemEntities.add(item);
     }
 
     @Override
     public void handleSequenceItemEntity(SequenceItemEntity item) {
         flattenedItemEntities.add(item);
-        flattenedItemEntities.addAll(item.getElementItemEntities());
+        item.getElementItemEntities().forEach(i -> i.applyHandler(this));
         flattenedItemEntities.add(item);
     }
 
     @Override
-    public void handleFlatDataItemEntity(FlatDataItemEntity<?> item) {
-        throw new IllegalStateException("Unhandled item entity type: " + item.getClass().getName());
+    public void handleFlatDataItemEntity(FlatDataItemEntity<?> itemEntity) {
+        throw new IllegalStateException(MSG_Unsupported_item_entity(itemEntity));
     }
 
+    /**
+     * @return the list of the collected, flattened item entities.
+     */
     public List<FlatDataItemEntity<?>> getFlattenedItemEntities() {
         return Collections.unmodifiableList(flattenedItemEntities);
     }

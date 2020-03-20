@@ -161,11 +161,8 @@ public final class ConstantFieldDescriptor extends AbstractFlatDataFieldDescript
         return newInstance("reserve-" + UUID.randomUUID()).withConstant(new String(reservedSpace)).build();
     }
 
-    private final ConstantField fieldInstance;
-
     private ConstantFieldDescriptor(BuildParams params) {
         super(params.getDescriptorName(), params.getConstant());
-        this.fieldInstance = new ConstantField(this);
     }
 
     @Override
@@ -175,14 +172,14 @@ public final class ConstantFieldDescriptor extends AbstractFlatDataFieldDescript
 
     @Override
     public ConstantField createItemEntity() {
-        return this.fieldInstance;
+        return new ConstantField(this);
     }
 
     @Override
     public ConstantField readItemEntityFrom(Reader source) {
         String value = this.readValue(source);
         if (this.getDefaultValue().equals(value)) {
-            return this.fieldInstance;
+            return this.createItemEntity();
         } else {
             throw new FlatDataReadException(MSG_Invalid_value(this.getName(), value, this.getDefaultValue()));
         }

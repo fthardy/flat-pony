@@ -30,11 +30,16 @@ import de.fthardy.flatpony.core.structure.*;
 
 /**
  * An item entity handler (visitor) implementation which is used during a push read process to iterate over an item
- * entity structure that has been pre-read in a trial and error scenario.
+ * entity (tree) structure that has been pre-read during a trial and error scenario.
  * 
  * @author Frank Timothy Hardy
  */
-public class PushReadItemEntityTreeWalker implements FlatDataField.Handler, FlatDataStructure.Handler {
+public final class PushReadItemEntityTreeWalker implements FlatDataField.Handler, FlatDataStructure.Handler {
+    
+    static String MSG_Unsupported_item_entity(FlatDataItemEntity itemEntity) {
+        return String.format("Unsupported item entity '%s' [%s]!",
+                itemEntity.getDescriptor().getName(), itemEntity.getClass().getName());
+    }
 
     private final StreamReadHandler handler;
     
@@ -97,6 +102,6 @@ public class PushReadItemEntityTreeWalker implements FlatDataField.Handler, Flat
 
     @Override
     public void handleFlatDataItemEntity(FlatDataItemEntity<?> item) {
-        throw new IllegalStateException("Unhandled item entity type: " + item.getClass().getName());
+        throw new IllegalStateException(MSG_Unsupported_item_entity(item));
     }
 }
