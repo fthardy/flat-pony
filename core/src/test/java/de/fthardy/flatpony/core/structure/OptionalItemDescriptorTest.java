@@ -25,7 +25,7 @@ package de.fthardy.flatpony.core.structure;
 
 import de.fthardy.flatpony.core.FlatDataItemDescriptor;
 import de.fthardy.flatpony.core.field.ConstantFieldDescriptor;
-import de.fthardy.flatpony.core.field.FlatDataMutableField;
+import de.fthardy.flatpony.core.field.FlatDataField;
 import de.fthardy.flatpony.core.field.converter.BooleanFieldValueConverter;
 import de.fthardy.flatpony.core.field.converter.FieldValueConverter;
 import de.fthardy.flatpony.core.field.fixedsize.FixedSizeFieldDescriptor;
@@ -111,7 +111,7 @@ class OptionalItemDescriptorTest {
 
         StringReader reader = new StringReader(" TEST");
 
-        FlatDataMutableField<?> flagField = flagFieldReference.getFieldDescriptorDecorator().readItemEntityFrom(reader);
+        FlatDataField<?> flagField = flagFieldReference.getFieldDescriptorDecorator().readItemEntityFrom(reader);
         assertEquals("", flagField.getValue());
         
         OptionalItemEntity optionalItemEntity = descriptor.readItemEntityFrom(reader);
@@ -141,7 +141,7 @@ class OptionalItemDescriptorTest {
 
         StringReader reader = new StringReader("JTEST");
 
-        FlatDataMutableField<?> flagField = flagFieldReference.getFieldDescriptorDecorator().readItemEntityFrom(reader);
+        FlatDataField<?> flagField = flagFieldReference.getFieldDescriptorDecorator().readItemEntityFrom(reader);
         assertEquals("J", flagField.getValue());
         
         OptionalItemEntity optionalItemEntity = descriptor.readItemEntityFrom(reader);

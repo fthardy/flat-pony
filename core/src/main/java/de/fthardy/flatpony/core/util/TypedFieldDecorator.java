@@ -24,6 +24,7 @@ SOFTWARE.
 package de.fthardy.flatpony.core.util;
 
 import de.fthardy.flatpony.core.FlatDataItemEntity;
+import de.fthardy.flatpony.core.field.FlatDataField;
 import de.fthardy.flatpony.core.field.FlatDataFieldDescriptor;
 import de.fthardy.flatpony.core.field.FlatDataMutableField;
 import de.fthardy.flatpony.core.field.converter.FieldValueConverter;
@@ -50,8 +51,8 @@ public final class TypedFieldDecorator<T> implements FlatDataMutableField<FlatDa
      * @param typeConverter the type converter.
      */
     public TypedFieldDecorator(
-            FlatDataMutableField<? extends FlatDataFieldDescriptor<?>> decoratedField, FieldValueConverter<T> typeConverter) {
-        this.decoratedField = Objects.requireNonNull(decoratedField, "Undefined field to decorate!");
+            FlatDataField<? extends FlatDataFieldDescriptor<?>> decoratedField, FieldValueConverter<T> typeConverter) {
+        this.decoratedField = Objects.requireNonNull(decoratedField, "Undefined field to decorate!").asMutableField();
         this.typeConverter = Objects.requireNonNull(typeConverter, "Undefined type converter!");
     }
 

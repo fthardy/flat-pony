@@ -25,6 +25,10 @@ package de.fthardy.flatpony.core.structure;
 
 import de.fthardy.flatpony.core.*;
 import de.fthardy.flatpony.core.streamio.*;
+import de.fthardy.flatpony.core.streamio.PushReadItemEntityTreeWalker;
+import de.fthardy.flatpony.core.streamio.StructureItemPullReadIteratorBase;
+import de.fthardy.flatpony.core.streamio.ItemEntityStructureFlattener;
+import de.fthardy.flatpony.core.streamio.PullReadFieldHandler;
 import de.fthardy.flatpony.core.util.AbstractItemDescriptorBuilder;
 import de.fthardy.flatpony.core.util.FieldReference;
 import de.fthardy.flatpony.core.util.ObjectBuilder;

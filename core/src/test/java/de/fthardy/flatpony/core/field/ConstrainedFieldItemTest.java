@@ -4,6 +4,8 @@ import de.fthardy.flatpony.core.FlatDataItemDescriptor;
 import de.fthardy.flatpony.core.FlatDataItemEntity;
 import de.fthardy.flatpony.core.field.constraint.ValueConstraint;
 import de.fthardy.flatpony.core.field.constraint.ValueConstraintViolationException;
+import de.fthardy.flatpony.core.streamio.PullReadIterator;
+import de.fthardy.flatpony.core.streamio.StreamReadHandler;
 import org.junit.jupiter.api.Test;
 import org.mockito.stubbing.Answer;
 
@@ -140,8 +142,8 @@ public class ConstrainedFieldItemTest {
         descriptor.applyHandler(handlerMock);
         descriptor.applyHandler(fieldDescriptorHandlerMock);
 
-        verify(fieldDescriptorMock, times(1)).getName();
-        verify(fieldDescriptorMock, times(1)).getDefaultValue();
+        verify(fieldDescriptorMock).getName();
+        verify(fieldDescriptorMock).getDefaultValue();
 
         verifyNoMoreInteractions(fieldDescriptorMock);
 
@@ -176,7 +178,7 @@ public class ConstrainedFieldItemTest {
         assertThrows(ValueConstraintViolationException.class, () -> field.setValue("Bad value"));
 
         verify(fieldDescriptorMock, times(2)).getName();
-        verify(fieldDescriptorMock, times(1)).getDefaultValue();
+        verify(fieldDescriptorMock).getDefaultValue();
         verify(fieldDescriptorMock).createItemEntity();
 
         verifyNoMoreInteractions(fieldDescriptorMock);
@@ -216,8 +218,8 @@ public class ConstrainedFieldItemTest {
         
         field.setValue("Good value");
         
-        verify(fieldDescriptorMock, times(1)).getName();
-        verify(fieldDescriptorMock, times(1)).getDefaultValue();
+        verify(fieldDescriptorMock).getName();
+        verify(fieldDescriptorMock).getDefaultValue();
         verify(fieldDescriptorMock).createItemEntity();
 
         verifyNoMoreInteractions(fieldDescriptorMock);
@@ -265,8 +267,8 @@ public class ConstrainedFieldItemTest {
         
         verifyNoMoreInteractions(fieldHandlerMock);
 
-        verify(fieldDescriptorMock, times(1)).getName();
-        verify(fieldDescriptorMock, times(1)).getDefaultValue();
+        verify(fieldDescriptorMock).getName();
+        verify(fieldDescriptorMock).getDefaultValue();
         verify(fieldDescriptorMock).createItemEntity();
 
         verifyNoMoreInteractions(fieldDescriptorMock);
@@ -303,8 +305,8 @@ public class ConstrainedFieldItemTest {
         Writer writerMock = mock(Writer.class);
         field.writeTo(writerMock);
         
-        verify(fieldDescriptorMock, times(1)).getName();
-        verify(fieldDescriptorMock, times(1)).getDefaultValue();
+        verify(fieldDescriptorMock).getName();
+        verify(fieldDescriptorMock).getDefaultValue();
         verify(fieldDescriptorMock).readItemEntityFrom(readerMock);
 
         verifyNoMoreInteractions(fieldDescriptorMock);
@@ -320,5 +322,107 @@ public class ConstrainedFieldItemTest {
         
         verifyZeroInteractions(readerMock);
         verifyZeroInteractions(writerMock);
+    }
+    
+    @Test
+    void Push_read() {
+        FlatDataFieldDescriptor<?> fieldDescriptorMock = mock(FlatDataFieldDescriptor.class);
+        when(fieldDescriptorMock.getName()).thenReturn("Field");
+        when(fieldDescriptorMock.getDefaultValue()).thenReturn("Default value");
+
+        ConstrainedFieldDescriptor descriptor =
+                ConstrainedFieldDescriptor.newInstance(fieldDescriptorMock).addConstraint(new ValueConstraint() {
+                    @Override
+                    public String getName() {
+                        return "Dummy";
+                    }
+
+                    @Override
+                    public boolean acceptValue(String value) {
+                        return true;
+                    }
+                }).build();
+        
+        Reader readerMock = mock(Reader.class);
+        StreamReadHandler streamReadHandlerMock = mock(StreamReadHandler.class);
+        
+        descriptor.pushReadFrom(readerMock, streamReadHandlerMock);
+
+        verify(fieldDescriptorMock).getName();
+        verify(fieldDescriptorMock).getDefaultValue();
+        verify(fieldDescriptorMock).pushReadFrom(readerMock, streamReadHandlerMock);
+        verifyNoMoreInteractions(fieldDescriptorMock);
+        
+        verifyZeroInteractions(readerMock);
+        
+        verifyZeroInteractions(streamReadHandlerMock);
+    }
+
+    @Test
+    void Pull_read() {
+        FlatDataFieldDescriptor<?> fieldDescriptorMock = mock(FlatDataFieldDescriptor.class);
+        when(fieldDescriptorMock.getName()).thenReturn("Field");
+        when(fieldDescriptorMock.getDefaultValue()).thenReturn("Default value");
+
+        ConstrainedFieldDescriptor descriptor =
+                ConstrainedFieldDescriptor.newInstance(fieldDescriptorMock).addConstraint(new ValueConstraint() {
+                    @Override
+                    public String getName() {
+                        return "Dummy";
+                    }
+
+                    @Override
+                    public boolean acceptValue(String value) {
+                        return true;
+                    }
+                }).build();
+
+        Reader readerMock = mock(Reader.class);
+        StreamReadHandler streamReadHandlerMock = mock(StreamReadHandler.class);
+
+        descriptor.pullReadFrom(readerMock);
+
+        verify(fieldDescriptorMock).getName();
+        verify(fieldDescriptorMock).getDefaultValue();
+        verify(fieldDescriptorMock).pullReadFrom(readerMock);
+        verifyNoMoreInteractions(fieldDescriptorMock);
+
+        verifyZeroInteractions(readerMock);
+
+        verifyZeroInteractions(streamReadHandlerMock);
+    }
+
+    @Test
+    void Read_value() {
+        FlatDataFieldDescriptor<?> fieldDescriptorMock = mock(FlatDataFieldDescriptor.class);
+        when(fieldDescriptorMock.getName()).thenReturn("Field");
+        when(fieldDescriptorMock.getDefaultValue()).thenReturn("Default value");
+
+        ConstrainedFieldDescriptor descriptor =
+                ConstrainedFieldDescriptor.newInstance(fieldDescriptorMock).addConstraint(new ValueConstraint() {
+                    @Override
+                    public String getName() {
+                        return "Dummy";
+                    }
+
+                    @Override
+                    public boolean acceptValue(String value) {
+                        return true;
+                    }
+                }).build();
+
+        Reader readerMock = mock(Reader.class);
+        StreamReadHandler streamReadHandlerMock = mock(StreamReadHandler.class);
+
+        descriptor.readValue(readerMock);
+
+        verify(fieldDescriptorMock).getName();
+        verify(fieldDescriptorMock).getDefaultValue();
+        verify(fieldDescriptorMock).readValue(readerMock);
+        verifyNoMoreInteractions(fieldDescriptorMock);
+
+        verifyZeroInteractions(readerMock);
+
+        verifyZeroInteractions(streamReadHandlerMock);
     }
 }

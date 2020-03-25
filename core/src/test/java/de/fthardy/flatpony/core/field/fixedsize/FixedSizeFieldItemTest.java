@@ -29,12 +29,14 @@ import de.fthardy.flatpony.core.FlatDataReadException;
 import de.fthardy.flatpony.core.FlatDataWriteException;
 import de.fthardy.flatpony.core.field.FlatDataField;
 import de.fthardy.flatpony.core.field.FlatDataFieldDescriptor;
+import de.fthardy.flatpony.core.streamio.PullReadIterator;
+import de.fthardy.flatpony.core.streamio.StreamReadHandler;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class FixedSizeFieldItemTest {
@@ -246,6 +248,40 @@ class FixedSizeFieldItemTest {
                 assertThrows(FlatDataReadException.class, () -> fieldDescriptor.readItemEntityFrom(reader));
         assertThat(exception.getMessage()).isEqualTo(FixedSizeFieldDescriptor.MSG_Input_stream_too_short(
                 fieldDescriptor.getName(), fieldDescriptor.getMinLength(), 3));
+    }
+    
+    @Test
+    void Push_read() {
+        FixedSizeFieldDescriptor fieldDescriptor = 
+                FixedSizeFieldDescriptor.newInstance("Field").withFieldSize(10).build();
+        
+        Reader reader = new StringReader("TestTestTest");
+
+        StreamReadHandler streamReadHandlerMock = mock(StreamReadHandler.class);
+
+        fieldDescriptor.pushReadFrom(reader, streamReadHandlerMock);
+        
+        verify(streamReadHandlerMock).onFieldItem(fieldDescriptor, "TestTestTe");
+        verifyNoMoreInteractions(streamReadHandlerMock);
+    }
+    
+    @Test
+    void Pull_read() {
+        FixedSizeFieldDescriptor fieldDescriptor =
+                FixedSizeFieldDescriptor.newInstance("Field").withFieldSize(10).build();
+
+        Reader reader = new StringReader("TestTestTest");
+
+        PullReadIterator pullReadIterator = fieldDescriptor.pullReadFrom(reader);
+        assertTrue(pullReadIterator.hasNextEvent());
+        
+        StreamReadHandler streamReadHandlerMock = mock(StreamReadHandler.class);
+        pullReadIterator.nextEvent(streamReadHandlerMock);
+
+        assertFalse(pullReadIterator.hasNextEvent());
+
+        verify(streamReadHandlerMock).onFieldItem(fieldDescriptor, "TestTestTe");
+        verifyNoMoreInteractions(streamReadHandlerMock);
     }
 
     @Test

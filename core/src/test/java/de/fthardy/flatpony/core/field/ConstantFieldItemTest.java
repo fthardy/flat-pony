@@ -27,6 +27,9 @@ import de.fthardy.flatpony.core.FlatDataItemDescriptor;
 import de.fthardy.flatpony.core.FlatDataItemEntity;
 import de.fthardy.flatpony.core.FlatDataReadException;
 import de.fthardy.flatpony.core.FlatDataWriteException;
+import de.fthardy.flatpony.core.field.fixedsize.FixedSizeFieldDescriptor;
+import de.fthardy.flatpony.core.streamio.PullReadIterator;
+import de.fthardy.flatpony.core.streamio.StreamReadHandler;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
@@ -193,6 +196,40 @@ class ConstantFieldItemTest {
 
         verify(readerMock).read(any(char[].class));
         verifyNoMoreInteractions(readerMock);
+    }
+
+    @Test
+    void Push_read() {
+        ConstantFieldDescriptor descriptor =
+                ConstantFieldDescriptor.newInstance("Constant").withConstant("Foo").build();
+
+        Reader reader = new StringReader("FooFoo");
+
+        StreamReadHandler streamReadHandlerMock = mock(StreamReadHandler.class);
+
+        descriptor.pushReadFrom(reader, streamReadHandlerMock);
+
+        verify(streamReadHandlerMock).onFieldItem(descriptor, "Foo");
+        verifyNoMoreInteractions(streamReadHandlerMock);
+    }
+
+    @Test
+    void Pull_read() {
+        ConstantFieldDescriptor descriptor =
+                ConstantFieldDescriptor.newInstance("Constant").withConstant("Foo").build();
+
+        Reader reader = new StringReader("FooFoo");
+
+        PullReadIterator pullReadIterator = descriptor.pullReadFrom(reader);
+        assertTrue(pullReadIterator.hasNextEvent());
+
+        StreamReadHandler streamReadHandlerMock = mock(StreamReadHandler.class);
+        pullReadIterator.nextEvent(streamReadHandlerMock);
+        
+        assertFalse(pullReadIterator.hasNextEvent());
+
+        verify(streamReadHandlerMock).onFieldItem(descriptor, "Foo");
+        verifyNoMoreInteractions(streamReadHandlerMock);
     }
 
     @Test

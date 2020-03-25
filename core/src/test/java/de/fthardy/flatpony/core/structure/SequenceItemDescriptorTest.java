@@ -35,7 +35,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.StringReader;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
@@ -152,7 +152,8 @@ class SequenceItemDescriptorTest {
         assertThat(descriptor.getMinLength()).isEqualTo(0);
         assertThat(descriptor.getElementItemDescriptor()).isSameAs(constantFieldDescriptor);
 
-        FlatDataMutableField<?> countField = fieldReference.getFieldDescriptorDecorator().createItemEntity();
+        FlatDataMutableField<?> countField = 
+                fieldReference.getFieldDescriptorDecorator().createItemEntity().asMutableField();
         countField.setValue("3");
 
         SequenceItemEntity sequenceItemEntity = descriptor.createItemEntity();

@@ -23,9 +23,10 @@ SOFTWARE.
  */
 package de.fthardy.flatpony.core.util;
 
+import de.fthardy.flatpony.core.field.FlatDataField;
 import de.fthardy.flatpony.core.field.FlatDataFieldDescriptor;
 import de.fthardy.flatpony.core.field.FlatDataMutableField;
-import de.fthardy.flatpony.core.field.ObservableFieldDescriptorDecorator;
+import de.fthardy.flatpony.core.field.ObservableFieldDescriptor;
 import de.fthardy.flatpony.core.field.converter.FieldValueConverter;
 
 import java.util.Objects;
@@ -77,31 +78,31 @@ public final class FieldReference<T> {
     }
 
     private interface BuildParams<T> {
-        ObservableFieldDescriptorDecorator getFieldDescriptorDecorator();
+        ObservableFieldDescriptor getFieldDescriptorDecorator();
         ThreadLocal<TypedFieldDecorator<T>> getThreadLocalFieldReference();
     }
     
     private static final class BuilderImpl<T> implements DefineValueConverter<T>, Builder<T>, BuildParams<T> {
 
-        private final ObservableFieldDescriptorDecorator fieldDescriptorDecorator;
+        private final ObservableFieldDescriptor fieldDescriptorDecorator;
         private final ThreadLocal<TypedFieldDecorator<T>> fieldReference = new ThreadLocal<>();
 
         BuilderImpl(FlatDataFieldDescriptor<? extends FlatDataMutableField<? extends FlatDataFieldDescriptor<?>>> fieldDescriptor) {
-            this.fieldDescriptorDecorator = new ObservableFieldDescriptorDecorator(
+            this.fieldDescriptorDecorator = new ObservableFieldDescriptor(
                     Objects.requireNonNull(fieldDescriptor, "Undefined field descriptor!"));
         }
 
         @Override
         public Builder<T> usingValueConverter(final FieldValueConverter<T> valueConverter) {
-            fieldDescriptorDecorator.addObserver(new ObservableFieldDescriptorDecorator.Observer() {
+            fieldDescriptorDecorator.addObserver(new ObservableFieldDescriptor.Observer() {
                 @Override
-                public void onFieldEntityCreated(FlatDataMutableField<? extends FlatDataFieldDescriptor<?>> field) {
+                public void onFieldEntityCreated(FlatDataField<? extends FlatDataFieldDescriptor<?>> field) {
                     fieldReference.set(new TypedFieldDecorator<T>(
                             field, Objects.requireNonNull(valueConverter, "Undefined value converter!")));
                 }
 
                 @Override
-                public void onFieldEntityRead(FlatDataMutableField<? extends FlatDataFieldDescriptor<?>> field) {
+                public void onFieldEntityRead(FlatDataField<? extends FlatDataFieldDescriptor<?>> field) {
                     this.onFieldEntityCreated(field);
                 }
             });
@@ -110,7 +111,7 @@ public final class FieldReference<T> {
         }
 
         @Override
-        public ObservableFieldDescriptorDecorator getFieldDescriptorDecorator() {
+        public ObservableFieldDescriptor getFieldDescriptorDecorator() {
             return this.fieldDescriptorDecorator;
         }
 
@@ -139,7 +140,7 @@ public final class FieldReference<T> {
         return new BuilderImpl<>(fieldDescriptor);
     }
 
-    private final ObservableFieldDescriptorDecorator fieldDescriptorDecorator;
+    private final ObservableFieldDescriptor fieldDescriptorDecorator;
     private final ThreadLocal<TypedFieldDecorator<T>> threadLocalFieldReference;
     
     private FieldReference(BuildParams<T> params) {
@@ -152,7 +153,7 @@ public final class FieldReference<T> {
      * 
      * @return the descriptor observable decorator.
      */
-    public ObservableFieldDescriptorDecorator getFieldDescriptorDecorator() {
+    public ObservableFieldDescriptor getFieldDescriptorDecorator() {
         return this.fieldDescriptorDecorator;
     }
 

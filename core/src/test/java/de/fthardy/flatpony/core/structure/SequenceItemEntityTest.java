@@ -26,7 +26,7 @@ package de.fthardy.flatpony.core.structure;
 import de.fthardy.flatpony.core.FlatDataItemEntity;
 import de.fthardy.flatpony.core.FlatDataWriteException;
 import de.fthardy.flatpony.core.field.ConstantFieldDescriptor;
-import de.fthardy.flatpony.core.field.FlatDataMutableField;
+import de.fthardy.flatpony.core.field.FlatDataField;
 import de.fthardy.flatpony.core.field.converter.FieldValueConverter;
 import de.fthardy.flatpony.core.field.fixedsize.FixedSizeFieldDescriptor;
 import de.fthardy.flatpony.core.util.FieldReference;
@@ -35,8 +35,8 @@ import org.junit.jupiter.api.Test;
 import java.io.StringReader;
 import java.io.StringWriter;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 class SequenceItemEntityTest {
@@ -163,7 +163,7 @@ class SequenceItemEntityTest {
 
         StringReader reader = new StringReader("3TESTTESTTESTBAL");
 
-        FlatDataMutableField<?> countField = fieldReference.getFieldDescriptorDecorator().readItemEntityFrom(reader);
+        FlatDataField<?> countField = fieldReference.getFieldDescriptorDecorator().readItemEntityFrom(reader);
         assertThat(countField.getValue()).isEqualTo("3");
 
         SequenceItemEntity sequenceItemEntity = descriptor.readItemEntityFrom(reader);
@@ -214,7 +214,7 @@ class SequenceItemEntityTest {
 
         StringReader reader = new StringReader("3TESTTESTTESTBAL");
 
-        FlatDataMutableField<?> countField = fieldReference.getFieldDescriptorDecorator().readItemEntityFrom(reader);
+        FlatDataField<?> countField = fieldReference.getFieldDescriptorDecorator().readItemEntityFrom(reader);
         assertThat(countField.getValue()).isEqualTo("3");
 
         SequenceItemEntity sequenceItemEntity = descriptor.readItemEntityFrom(reader);

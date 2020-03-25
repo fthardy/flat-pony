@@ -4,6 +4,7 @@ import de.fthardy.flatpony.core.FlatDataItemDescriptor;
 import de.fthardy.flatpony.core.FlatDataItemEntity;
 import de.fthardy.flatpony.core.field.converter.FieldValueConvertException;
 import de.fthardy.flatpony.core.field.converter.FieldValueConverter;
+import de.fthardy.flatpony.core.streamio.StreamReadHandler;
 import org.junit.jupiter.api.Test;
 
 import java.io.Reader;
@@ -360,5 +361,122 @@ public class TypedFieldItemTest {
 
         verifyZeroInteractions(readerMock);
         verifyZeroInteractions(writerMock);
+    }
+    
+    @Test
+    void Push_read() {
+        FlatDataFieldDescriptor<?> fieldDescriptorMock = mock(FlatDataFieldDescriptor.class);
+        when(fieldDescriptorMock.getName()).thenReturn("Field");
+        when(fieldDescriptorMock.getDefaultValue()).thenReturn("Default value");
+
+        TypedFieldDescriptor<Object> descriptor =
+                TypedFieldDescriptor.newInstance(fieldDescriptorMock).withFieldValueConverter(
+                        new FieldValueConverter<Object>() {
+                            @Override
+                            public Class<Object> getTargetType() {
+                                return Object.class;
+                            }
+
+                            @Override
+                            public Object convertFromFieldValue(String fieldValue) throws FieldValueConvertException {
+                                return fieldValue;
+                            }
+
+                            @Override
+                            public String convertToFieldValue(Object value) {
+                                return value.toString();
+                            }
+                        }).build();
+
+        Reader readerMock = mock(Reader.class);
+        StreamReadHandler streamReadHandlerMock = mock(StreamReadHandler.class);
+
+        descriptor.pushReadFrom(readerMock, streamReadHandlerMock);
+
+        verify(fieldDescriptorMock).getName();
+        verify(fieldDescriptorMock).pushReadFrom(readerMock, streamReadHandlerMock);
+        verifyNoMoreInteractions(fieldDescriptorMock);
+
+        verifyZeroInteractions(readerMock);
+
+        verifyZeroInteractions(streamReadHandlerMock);
+    }
+
+    @Test
+    void Pull_read() {
+        FlatDataFieldDescriptor<?> fieldDescriptorMock = mock(FlatDataFieldDescriptor.class);
+        when(fieldDescriptorMock.getName()).thenReturn("Field");
+        when(fieldDescriptorMock.getDefaultValue()).thenReturn("Default value");
+
+        TypedFieldDescriptor<Object> descriptor =
+                TypedFieldDescriptor.newInstance(fieldDescriptorMock).withFieldValueConverter(
+                        new FieldValueConverter<Object>() {
+                            @Override
+                            public Class<Object> getTargetType() {
+                                return Object.class;
+                            }
+
+                            @Override
+                            public Object convertFromFieldValue(String fieldValue) throws FieldValueConvertException {
+                                return fieldValue;
+                            }
+
+                            @Override
+                            public String convertToFieldValue(Object value) {
+                                return value.toString();
+                            }
+                        }).build();
+
+        Reader readerMock = mock(Reader.class);
+        StreamReadHandler streamReadHandlerMock = mock(StreamReadHandler.class);
+
+        descriptor.pullReadFrom(readerMock);
+
+        verify(fieldDescriptorMock).getName();
+        verify(fieldDescriptorMock).pullReadFrom(readerMock);
+        verifyNoMoreInteractions(fieldDescriptorMock);
+
+        verifyZeroInteractions(readerMock);
+
+        verifyZeroInteractions(streamReadHandlerMock);
+    }
+
+    @Test
+    void Read_value() {
+        FlatDataFieldDescriptor<?> fieldDescriptorMock = mock(FlatDataFieldDescriptor.class);
+        when(fieldDescriptorMock.getName()).thenReturn("Field");
+        when(fieldDescriptorMock.getDefaultValue()).thenReturn("Default value");
+
+        TypedFieldDescriptor<Object> descriptor =
+                TypedFieldDescriptor.newInstance(fieldDescriptorMock).withFieldValueConverter(
+                        new FieldValueConverter<Object>() {
+                            @Override
+                            public Class<Object> getTargetType() {
+                                return Object.class;
+                            }
+
+                            @Override
+                            public Object convertFromFieldValue(String fieldValue) throws FieldValueConvertException {
+                                return fieldValue;
+                            }
+
+                            @Override
+                            public String convertToFieldValue(Object value) {
+                                return value.toString();
+                            }
+                        }).build();
+
+        Reader readerMock = mock(Reader.class);
+        StreamReadHandler streamReadHandlerMock = mock(StreamReadHandler.class);
+
+        descriptor.readValue(readerMock);
+
+        verify(fieldDescriptorMock).getName();
+        verify(fieldDescriptorMock).readValue(readerMock);
+        verifyNoMoreInteractions(fieldDescriptorMock);
+
+        verifyZeroInteractions(readerMock);
+
+        verifyZeroInteractions(streamReadHandlerMock);
     }
 }

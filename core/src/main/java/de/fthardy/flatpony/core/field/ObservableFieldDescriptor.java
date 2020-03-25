@@ -24,8 +24,8 @@ SOFTWARE.
 package de.fthardy.flatpony.core.field;
 
 import de.fthardy.flatpony.core.FlatDataItemDescriptor;
-import de.fthardy.flatpony.core.streamio.StreamReadHandler;
 import de.fthardy.flatpony.core.streamio.PullReadIterator;
+import de.fthardy.flatpony.core.streamio.StreamReadHandler;
 
 import java.io.Reader;
 import java.util.ArrayList;
@@ -33,13 +33,18 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * A decorator implementation for a field descriptor which allows to be observed.
+ * The implementation of a descriptor wrapper for a field descriptor that allows to observe it.
+ * <p>
+ * This descriptor wrapper allows to observe another field descriptor. {@link Observer} instances can be registered via
+ * the method {@link #addObserver(Observer)}. The observers are then notified when a new field entity is created or a
+ * field entity is read from a source stream.
+ * </p>
  *
  * @author Frank Timothy Hardy
  *
  * @see Observer
  */
-public final class ObservableFieldDescriptorDecorator implements FlatDataFieldDescriptor<FlatDataMutableField<?>> {
+public final class ObservableFieldDescriptor implements FlatDataFieldDescriptor<FlatDataField<?>> {
 
     /**
      * The observer interface which allows to get informed about a newly created or a read field entities.
@@ -53,19 +58,17 @@ public final class ObservableFieldDescriptorDecorator implements FlatDataFieldDe
          *
          * @param field the new field entity instance.
          */
-        // TODO Does the field has to be mutable - don't think so
-        void onFieldEntityCreated(FlatDataMutableField<? extends FlatDataFieldDescriptor<?>> field);
+        void onFieldEntityCreated(FlatDataField<? extends FlatDataFieldDescriptor<?>> field);
 
         /**
          * Is called when a field entity instance has been read from a source stream.
          *
          * @param field the field entity instance read from a source stream.
          */
-        // TODO Does the field has to be mutable - don't think so
-        void onFieldEntityRead(FlatDataMutableField<? extends FlatDataFieldDescriptor<?>> field);
+        void onFieldEntityRead(FlatDataField<? extends FlatDataFieldDescriptor<?>> field);
     }
 
-    private final FlatDataFieldDescriptor<? extends FlatDataMutableField<? extends FlatDataFieldDescriptor<?>>> observedFieldDescriptor;
+    private final FlatDataFieldDescriptor<? extends FlatDataField<?>> observedFieldDescriptor;
     private final List<Observer> observers = new ArrayList<>();
 
     /**
@@ -73,11 +76,8 @@ public final class ObservableFieldDescriptorDecorator implements FlatDataFieldDe
      *
      * @param fieldDescriptor the field descriptor to observe.
      */
-    public ObservableFieldDescriptorDecorator(
-            FlatDataFieldDescriptor<? extends FlatDataMutableField<? extends FlatDataFieldDescriptor<?>>> fieldDescriptor) {
-        if (fieldDescriptor instanceof ObservableFieldDescriptorDecorator) {
-            throw new IllegalArgumentException("It doesn't make sense to observe an observable field descriptor!");
-        }
+    public ObservableFieldDescriptor(
+            FlatDataFieldDescriptor<? extends FlatDataField<? extends FlatDataFieldDescriptor<?>>> fieldDescriptor) {
         this.observedFieldDescriptor = Objects.requireNonNull(fieldDescriptor, "No field descriptor defined!");
     }
 
@@ -97,15 +97,15 @@ public final class ObservableFieldDescriptorDecorator implements FlatDataFieldDe
     }
 
     @Override
-    public FlatDataMutableField<?> createItemEntity() {
-        FlatDataMutableField<? extends FlatDataFieldDescriptor<?>> newField = this.observedFieldDescriptor.createItemEntity();
+    public FlatDataField<?> createItemEntity() {
+        FlatDataField<? extends FlatDataFieldDescriptor<?>> newField = this.observedFieldDescriptor.createItemEntity();
         this.observers.forEach(o -> o.onFieldEntityCreated(newField));
         return newField;
     }
 
     @Override
-    public FlatDataMutableField<?> readItemEntityFrom(Reader source) {
-        FlatDataMutableField<? extends FlatDataFieldDescriptor<?>> readField = 
+    public FlatDataField<?> readItemEntityFrom(Reader source) {
+        FlatDataField<? extends FlatDataFieldDescriptor<?>> readField = 
                 this.observedFieldDescriptor.readItemEntityFrom(source);
         this.observers.forEach(o -> o.onFieldEntityRead(readField));
         return readField;
