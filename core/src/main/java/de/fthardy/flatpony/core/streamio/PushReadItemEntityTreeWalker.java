@@ -52,7 +52,7 @@ public final class PushReadItemEntityTreeWalker implements FlatDataField.Handler
     @Override
     public void handleCompositeItemEntity(CompositeItemEntity item) {
         this.handler.onStructureItemStart(item.getDescriptor());
-        item.getElementItemEntities().forEach(elementItem -> elementItem.applyHandler(this));
+        item.getComponentItemEntities().forEach(elementItem -> elementItem.applyHandler(this));
         this.handler.onStructureItemEnd(item.getDescriptor());
     }
 

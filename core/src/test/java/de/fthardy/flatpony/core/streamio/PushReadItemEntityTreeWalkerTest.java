@@ -136,7 +136,7 @@ class PushReadItemEntityTreeWalkerTest {
     void handleCompositeItemEntity() {
         FixedSizeFieldDescriptor fieldDescriptor = FixedSizeFieldDescriptor.newInstance("Fixed").build();
         CompositeItemDescriptor descriptor = 
-                CompositeItemDescriptor.newInstance("Composite").addElementItemDescriptor(fieldDescriptor).build();
+                CompositeItemDescriptor.newInstance("Composite").addComponentItemDescriptor(fieldDescriptor).build();
         CompositeItemEntity composite = descriptor.createItemEntity();
         
         treeWalker.handleCompositeItemEntity(composite);

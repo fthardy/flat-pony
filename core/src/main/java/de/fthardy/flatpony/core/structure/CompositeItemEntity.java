@@ -49,7 +49,7 @@ public final class CompositeItemEntity extends AbstractFlatDataItemEntity<Compos
         return Collections.unmodifiableMap(map);
     }
 
-    private final Map<String, FlatDataItemEntity<?>> elementItemEntityMap;
+    private final Map<String, FlatDataItemEntity<?>> componentItemEntityMap;
 
     /**
      * Creates a new instance of this composite item.
@@ -59,17 +59,17 @@ public final class CompositeItemEntity extends AbstractFlatDataItemEntity<Compos
      */
     CompositeItemEntity(CompositeItemDescriptor descriptor, List<FlatDataItemEntity<?>> items) {
         super(descriptor);
-        this.elementItemEntityMap = mapByName(items);
+        this.componentItemEntityMap = mapByName(items);
     }
 
     @Override
     public int getLength() {
-        return this.elementItemEntityMap.values().stream().mapToInt(FlatDataItemEntity::getLength).sum();
+        return this.componentItemEntityMap.values().stream().mapToInt(FlatDataItemEntity::getLength).sum();
     }
 
     @Override
     public void writeTo(Writer target) {
-        this.elementItemEntityMap.values().forEach(dataItem -> dataItem.writeTo(target));
+        this.componentItemEntityMap.values().forEach(dataItem -> dataItem.writeTo(target));
     }
 
     @Override
@@ -82,26 +82,26 @@ public final class CompositeItemEntity extends AbstractFlatDataItemEntity<Compos
     }
 
     /**
-     * Get all element item entities.
+     * Get all component item entities.
      * 
-     * @return an unmodifiable list of the element item entities.
+     * @return an unmodifiable list of the component item entities.
      */
-    public List<FlatDataItemEntity<?>> getElementItemEntities() {
-        return Collections.unmodifiableList(new ArrayList<>(this.elementItemEntityMap.values()));
+    public List<FlatDataItemEntity<?>> getComponentItemEntities() {
+        return Collections.unmodifiableList(new ArrayList<>(this.componentItemEntityMap.values()));
     }
 
     /**
-     * Get a particular element item entity by its name.
+     * Get a particular component item entity by its name.
      * 
-     * @param name the name of the element item entity to get.
+     * @param name the name of the component item entity to get.
      *             
      * @return the item entity.
      * 
-     * @throws NoSuchElementException when there is no element item entity for the given name.
+     * @throws NoSuchElementException when there is no component item entity for the given name.
      */
-    public FlatDataItemEntity<?> getElementItemEntityByName(String name) {
-        if (this.elementItemEntityMap.containsKey(name)) {
-            return this.elementItemEntityMap.get(name);
+    public FlatDataItemEntity<?> getComponentItemEntityByName(String name) {
+        if (this.componentItemEntityMap.containsKey(name)) {
+            return this.componentItemEntityMap.get(name);
         } else {
             throw new NoSuchElementException(name);
         }

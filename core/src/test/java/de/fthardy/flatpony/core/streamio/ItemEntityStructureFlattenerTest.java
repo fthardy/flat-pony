@@ -131,15 +131,15 @@ class ItemEntityStructureFlattenerTest {
                 DelimitedFieldDescriptor.newInstance("Delimited").build();
 
         CompositeItemDescriptor compositeDescriptor = CompositeItemDescriptor.newInstance("Composite")
-                .addElementItemDescriptors(fixedSizeFieldDescriptor, delimitedFieldDescriptor).build();
+                .addComponentItemDescriptors(fixedSizeFieldDescriptor, delimitedFieldDescriptor).build();
         CompositeItemEntity compositeEntity = compositeDescriptor.createItemEntity();
         
         flattener.handleCompositeItemEntity(compositeEntity);
         
         assertThat(flattener.getFlattenedItemEntities()).containsExactly(
                 compositeEntity,
-                compositeEntity.getElementItemEntityByName("Fixed"),
-                compositeEntity.getElementItemEntityByName("Delimited"),
+                compositeEntity.getComponentItemEntityByName("Fixed"),
+                compositeEntity.getComponentItemEntityByName("Delimited"),
                 compositeEntity);
     }
 

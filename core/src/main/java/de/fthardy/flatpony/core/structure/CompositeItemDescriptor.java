@@ -25,9 +25,9 @@ package de.fthardy.flatpony.core.structure;
 
 import de.fthardy.flatpony.core.AbstractFlatDataItemDescriptor;
 import de.fthardy.flatpony.core.FlatDataItemDescriptor;
-import de.fthardy.flatpony.core.streamio.StructureItemPullReadIteratorBase;
-import de.fthardy.flatpony.core.streamio.StreamReadHandler;
 import de.fthardy.flatpony.core.streamio.PullReadIterator;
+import de.fthardy.flatpony.core.streamio.StreamReadHandler;
+import de.fthardy.flatpony.core.streamio.StructureItemPullReadIteratorBase;
 import de.fthardy.flatpony.core.util.AbstractItemDescriptorBuilder;
 import de.fthardy.flatpony.core.util.ObjectBuilder;
 
@@ -49,7 +49,7 @@ public final class CompositeItemDescriptor extends AbstractFlatDataItemDescripto
         implements FlatDataStructureDescriptor<CompositeItemEntity> {
 
     /**
-     * Demands the addition of at least one element item descriptor for the composition.
+     * Demands the addition of at least one component item descriptor for the composition.
      * <p>
      * There is no limitation on how many items can be added to the composite item but any item descriptor instance can
      * only be added once and the names of the items have to be unique. If a particular item descriptor instance is
@@ -60,89 +60,92 @@ public final class CompositeItemDescriptor extends AbstractFlatDataItemDescripto
      * 
      * @author Frank Timothy Hardy
      */
-    public interface AddElementItemDescriptors {
+    public interface AddComponentItemDescriptors {
 
         /**
-         * Add a single element item descriptor to the composite item.
+         * Add a single component item descriptor to the composite item.
          * 
-         * @param itemDescriptor the element item descriptor to add.
+         * @param itemDescriptor the component item descriptor to add.
          *                       
          * @return the builder instance for further configuration or instance creation.
          */
-        AddFurtherElementItemDescriptors addElementItemDescriptor(FlatDataItemDescriptor<?> itemDescriptor);
+        AddFurtherComponentItemDescriptors addComponentItemDescriptor(FlatDataItemDescriptor<?> itemDescriptor);
 
         /**
-         * Add a bunch of element item descriptors to the composite item.
+         * Add a bunch of component item descriptors to the composite item.
          * 
-         * @param itemDescriptors the element item descriptors to add.
+         * @param itemDescriptors the component item descriptors to add.
          *                        
          * @return the builder instance for further configuration or instance creation.
          */
-        AddFurtherElementItemDescriptors addElementItemDescriptors(FlatDataItemDescriptor<?>... itemDescriptors);
+        AddFurtherComponentItemDescriptors addComponentItemDescriptors(FlatDataItemDescriptor<?>... itemDescriptors);
 
         /**
-         * Add a bunch of element item descriptors to the composite item provided by an iterable.
+         * Add a bunch of component item descriptors to the composite item provided by an iterable.
          *
-         * @param itemDescriptors the iterable providing the element item descriptors to add.
+         * @param itemDescriptors the iterable providing the component item descriptors to add.
          *
          * @return the builder instance for further configuration or instance creation.
          */
-        AddFurtherElementItemDescriptors addElementItemDescriptors(Iterable<FlatDataItemDescriptor<?>> itemDescriptors);
+        AddFurtherComponentItemDescriptors addComponentItemDescriptors(
+                Iterable<FlatDataItemDescriptor<?>> itemDescriptors);
     }
 
     /**
-     * Allows to add further element item descriptors.
+     * Allows to add further component item descriptors.
      * 
      * @author Frank Timothy Hardy
      */
-    public interface AddFurtherElementItemDescriptors 
-            extends AddElementItemDescriptors, ObjectBuilder<CompositeItemDescriptor> {
+    public interface AddFurtherComponentItemDescriptors 
+            extends AddComponentItemDescriptors, ObjectBuilder<CompositeItemDescriptor> {
         // Aggregate interface with no further method definitions 
     }
     
     private interface BuildParams {
 
         String getDescriptorName();
-        Map<String, FlatDataItemDescriptor<?>> getElementItemDescriptorMap();
+        Map<String, FlatDataItemDescriptor<?>> getComponentItemDescriptorMap();
     }
     
     private static final class BuilderImpl extends AbstractItemDescriptorBuilder<CompositeItemDescriptor>
-            implements AddFurtherElementItemDescriptors, BuildParams {
+            implements AddFurtherComponentItemDescriptors, BuildParams {
         
-        private final Map<String, FlatDataItemDescriptor<?>> elementItemDescriptorMap = new LinkedHashMap<>();
+        private final Map<String, FlatDataItemDescriptor<?>> componentItemDescriptorMap = new LinkedHashMap<>();
         
         BuilderImpl(String descriptorName) {
             super(descriptorName);
         }
 
         @Override
-        public AddFurtherElementItemDescriptors addElementItemDescriptor(FlatDataItemDescriptor<?> itemDescriptor) {
-            if (this.elementItemDescriptorMap.containsKey(
-                    Objects.requireNonNull(itemDescriptor, "Undefined item descriptor!").getName())) {
-                throw new IllegalArgumentException(String.format(
-                        "Cannot add an item descriptor instance with the same name [%s] twice!",
-                        itemDescriptor.getName()));
+        public AddFurtherComponentItemDescriptors addComponentItemDescriptor(FlatDataItemDescriptor<?> itemDescriptor) {
+            if (this.componentItemDescriptorMap.containsValue(Objects.requireNonNull(itemDescriptor,
+                    "Undefined item descriptor!"))) {
+                throw new IllegalArgumentException("Tried to add the same item descriptor again!");
             }
-            this.elementItemDescriptorMap.put(itemDescriptor.getName(), itemDescriptor);
+            if (this.componentItemDescriptorMap.containsKey(itemDescriptor.getName())) {
+                throw new IllegalArgumentException(String.format(
+                        "Another item descriptor with the name [%s] already exists!", itemDescriptor.getName()));
+            }
+            this.componentItemDescriptorMap.put(itemDescriptor.getName(), itemDescriptor);
             return this;
         }
 
         @Override
-        public AddFurtherElementItemDescriptors addElementItemDescriptors(FlatDataItemDescriptor<?>... itemDescriptors) {
-            this.addElementItemDescriptors(Arrays.asList(itemDescriptors));
+        public AddFurtherComponentItemDescriptors addComponentItemDescriptors(FlatDataItemDescriptor<?>... itemDescriptors) {
+            this.addComponentItemDescriptors(Arrays.asList(itemDescriptors));
             return this;
         }
 
         @Override
-        public AddFurtherElementItemDescriptors addElementItemDescriptors(Iterable<FlatDataItemDescriptor<?>> itemDescriptors) {
+        public AddFurtherComponentItemDescriptors addComponentItemDescriptors(Iterable<FlatDataItemDescriptor<?>> itemDescriptors) {
             Objects.requireNonNull(itemDescriptors, "Undefined item descriptors!").forEach(
-                    this::addElementItemDescriptor);
+                    this::addComponentItemDescriptor);
             return this;
         }
 
         @Override
-        public Map<String, FlatDataItemDescriptor<?>> getElementItemDescriptorMap() {
-            return Collections.unmodifiableMap(this.elementItemDescriptorMap);
+        public Map<String, FlatDataItemDescriptor<?>> getComponentItemDescriptorMap() {
+            return Collections.unmodifiableMap(this.componentItemDescriptorMap);
         }
 
         @Override
@@ -158,19 +161,15 @@ public final class CompositeItemDescriptor extends AbstractFlatDataItemDescripto
      *             
      * @return the builder instance to configure and create the new instance.
      */
-    public static AddElementItemDescriptors newInstance(String name) {
+    public static AddComponentItemDescriptors newInstance(String name) {
         return new BuilderImpl(name);
-    }
-
-    static String MSG_No_pull_read_event(String name) {
-        return String.format("Composite-Item '%s' has no further pull read event!", name);
     }
 
     private final Map<String, FlatDataItemDescriptor<?>> elementItemDescriptorMap;
 
     private CompositeItemDescriptor(BuildParams params) {
         super(params.getDescriptorName());
-        this.elementItemDescriptorMap = params.getElementItemDescriptorMap();
+        this.elementItemDescriptorMap = params.getComponentItemDescriptorMap();
     }
 
     @Override
@@ -248,7 +247,7 @@ public final class CompositeItemDescriptor extends AbstractFlatDataItemDescripto
      * 
      * @throws NoSuchElementException when no element item descriptor is found for the given name.
      */
-    public FlatDataItemDescriptor<?> getElementItemDescriptorByName(String name) {
+    public FlatDataItemDescriptor<?> getComponentItemDescriptorByName(String name) {
         if (this.elementItemDescriptorMap.containsKey(name)) {
             return this.elementItemDescriptorMap.get(name);
         } else {

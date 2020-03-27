@@ -78,7 +78,7 @@ public final class ItemEntityStructureFlattener implements FlatDataField.Handler
     @Override
     public void handleCompositeItemEntity(CompositeItemEntity item) {
         flattenedItemEntities.add(item);
-        item.getElementItemEntities().forEach(i -> i.applyHandler(this));
+        item.getComponentItemEntities().forEach(i -> i.applyHandler(this));
         flattenedItemEntities.add(item);
     }
 

@@ -37,7 +37,7 @@ import java.util.Objects;
 public abstract class StructureItemPullReadIteratorBase<T extends FlatDataStructureDescriptor<?>>
         implements PullReadIterator {
 
-    static String MSG_No_pull_read_event(FlatDataStructureDescriptor<?> descriptor) {
+    public static String MSG_No_pull_read_event(FlatDataStructureDescriptor<?> descriptor) {
         return String.format(
                 "Structure-Item '%s' [%s] has no further pull read event!",
                 descriptor.getName(),
