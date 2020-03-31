@@ -37,11 +37,8 @@ import java.util.Objects;
 public abstract class StructureItemPullReadIteratorBase<T extends FlatDataStructureDescriptor<?>>
         implements PullReadIterator {
 
-    public static String MSG_No_pull_read_event(FlatDataStructureDescriptor<?> descriptor) {
-        return String.format(
-                "Structure-Item '%s' [%s] has no further pull read event!",
-                descriptor.getName(),
-                descriptor.getClass().getSimpleName());
+    public static String MSG_No_pull_read_event(String itemName, String descriptorClassName) {
+        return String.format("Structure-Item '%s' [%s] has no further pull read event!", itemName, descriptorClassName);
     }
 
     protected final T descriptor;
@@ -69,7 +66,7 @@ public abstract class StructureItemPullReadIteratorBase<T extends FlatDataStruct
     @Override
     public void nextEvent(StreamReadHandler handler) {
         if (this.endEventSent) {
-            throw new NoSuchElementException(MSG_No_pull_read_event(this.descriptor));
+            throw new NoSuchElementException(MSG_No_pull_read_event(this.descriptor.getName(), this.descriptor.getClass().getSimpleName()));
         } else if (this.startEventSent) {
             if (handleContent(handler)) {
                 handler.onStructureItemEnd(this.descriptor);
