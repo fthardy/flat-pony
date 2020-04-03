@@ -75,6 +75,11 @@ public final class PullReadFieldHandler implements FlatDataField.Handler {
     }
 
     @Override
+    public void handleObservableField(ObservableField field) {
+        field.getObservedField().applyHandler(this);
+    }
+
+    @Override
     public void handleFlatDataItemEntity(FlatDataItemEntity<?> itemEntity) {
         throw new IllegalStateException(MSG_Unsupported_item_entity(itemEntity));
     }

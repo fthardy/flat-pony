@@ -81,6 +81,13 @@ public interface FlatDataField<T extends FlatDataFieldDescriptor<?>> extends Fla
          * @param field the field to be handled.
          */
         void handleTypedField(TypedField<?> field);
+
+        /**
+         * Handle an observable field.
+         *
+         * @param field the field to be handled.
+         */
+        void handleObservableField(ObservableField field);
     }
 
     /**

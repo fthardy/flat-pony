@@ -38,16 +38,18 @@ import java.util.stream.Collectors;
 /**
  * The implementation of a descriptor for a field which has value constraints.
  * <p>
- * A constrained field has {@link ValueConstraint value constraints} which are used to validate the field value if it is
- * read, set or modified. A constrained field is not an independent field but a decorator which wraps around any type of
- * field. Be aware that the default value of a field is also validated by the constraints so it must conform to these
- * constraints.
+ * This descriptor is a decorator implementation which can be used to extend any type of field.
+ * A constrained field has one or more {@link ValueConstraint}s which are used to validate the field value when it is
+ * read, set or modified. Be aware that the default value of a decorated field is also validated by the constraints
+ * hence the default value must conform to these constraints.
  * </p>
  *
  * @author Frank Timothy Hardy
+ * 
+ * @see ValueConstraint
  */
 public final class ConstrainedFieldDescriptor implements FlatDataFieldDescriptor<ConstrainedField> {
-
+    
     /**
      * Demands the addition of at least one value constraint.
      * <p>
@@ -62,7 +64,7 @@ public final class ConstrainedFieldDescriptor implements FlatDataFieldDescriptor
      * 
      * @author Frank Timothy Hardy
      */
-    public interface AddConstraints {
+    public interface AddConstraints extends ObjectBuilder<ConstrainedFieldDescriptor> {
 
         /**
          * Add a new value constraint.
@@ -71,7 +73,7 @@ public final class ConstrainedFieldDescriptor implements FlatDataFieldDescriptor
          *                   
          * @return the builder instance for adding further constraints or instance creation.
          */
-        AddFurtherConstraints addConstraint(ValueConstraint constraint);
+        AddConstraints addConstraint(ValueConstraint constraint);
 
         /**
          * Add several value constraints.
@@ -80,7 +82,7 @@ public final class ConstrainedFieldDescriptor implements FlatDataFieldDescriptor
          *
          * @return the builder instance for adding further constraints or instance creation.
          */
-        AddFurtherConstraints addConstraints(ValueConstraint... constraints);
+        AddConstraints addConstraints(ValueConstraint... constraints);
 
         /**
          * Add several value constraints.
@@ -89,19 +91,7 @@ public final class ConstrainedFieldDescriptor implements FlatDataFieldDescriptor
          *
          * @return the builder instance for adding further constraints or instance creation.
          */
-        AddFurtherConstraints addConstraints(Iterable<ValueConstraint> constraints);
-    }
-
-    /**
-     * Allows to add further value constraints.
-     *
-     * @see AddConstraints
-     * @see ConstrainedFieldDescriptor
-     * 
-     * @author Frank Timothy Hardy
-     */
-    public interface AddFurtherConstraints extends AddConstraints, ObjectBuilder<ConstrainedFieldDescriptor> {
-        // Aggregator interface with no further method definitions
+        AddConstraints addConstraints(Iterable<ValueConstraint> constraints);
     }
     
     private interface BuildParams {
@@ -110,7 +100,7 @@ public final class ConstrainedFieldDescriptor implements FlatDataFieldDescriptor
     }
     
     private static final class BuilderImpl extends AbstractItemDescriptorBuilder<ConstrainedFieldDescriptor> 
-            implements AddFurtherConstraints, BuildParams {
+            implements AddConstraints, BuildParams {
 
         private final FlatDataFieldDescriptor<?> fieldDescriptor;
         private final Map<String, ValueConstraint> constraintsByName = new LinkedHashMap<>();
@@ -121,7 +111,7 @@ public final class ConstrainedFieldDescriptor implements FlatDataFieldDescriptor
         }
 
         @Override
-        public AddFurtherConstraints addConstraint(ValueConstraint constraint) {
+        public AddConstraints addConstraint(ValueConstraint constraint) {
             if (this.constraintsByName.containsKey(
                     Objects.requireNonNull(constraint, "Undefined constraint!").getName())) {
                 throw new IllegalArgumentException("Constraints must be unique!");
@@ -131,12 +121,13 @@ public final class ConstrainedFieldDescriptor implements FlatDataFieldDescriptor
         }
 
         @Override
-        public AddFurtherConstraints addConstraints(ValueConstraint... constraints) {
-            return this.addConstraints(Arrays.asList(constraints));
+        public AddConstraints addConstraints(ValueConstraint... constraints) {
+            return this.addConstraints(Arrays.asList(Objects.requireNonNull(
+                    constraints, "Undefined value constraints!")));
         }
 
         @Override
-        public AddFurtherConstraints addConstraints(Iterable<ValueConstraint> constraints) {
+        public AddConstraints addConstraints(Iterable<ValueConstraint> constraints) {
             Objects.requireNonNull(constraints, "Undefined value constraints!").forEach(this::addConstraint);
             return this;
         }

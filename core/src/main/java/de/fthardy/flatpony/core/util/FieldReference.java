@@ -23,9 +23,9 @@ SOFTWARE.
  */
 package de.fthardy.flatpony.core.util;
 
-import de.fthardy.flatpony.core.field.FlatDataField;
 import de.fthardy.flatpony.core.field.FlatDataFieldDescriptor;
 import de.fthardy.flatpony.core.field.FlatDataMutableField;
+import de.fthardy.flatpony.core.field.ObservableField;
 import de.fthardy.flatpony.core.field.ObservableFieldDescriptor;
 import de.fthardy.flatpony.core.field.converter.FieldValueConverter;
 
@@ -88,22 +88,27 @@ public final class FieldReference<T> {
         private final ThreadLocal<TypedFieldDecorator<T>> fieldReference = new ThreadLocal<>();
 
         BuilderImpl(FlatDataFieldDescriptor<? extends FlatDataMutableField<? extends FlatDataFieldDescriptor<?>>> fieldDescriptor) {
-            this.fieldDescriptorDecorator = new ObservableFieldDescriptor(
-                    Objects.requireNonNull(fieldDescriptor, "Undefined field descriptor!"));
+            this.fieldDescriptorDecorator = ObservableFieldDescriptor.newInstance(
+                    Objects.requireNonNull(fieldDescriptor, "Undefined field descriptor!")).build();
         }
 
         @Override
         public Builder<T> usingValueConverter(final FieldValueConverter<T> valueConverter) {
             fieldDescriptorDecorator.addObserver(new ObservableFieldDescriptor.Observer() {
                 @Override
-                public void onFieldEntityCreated(FlatDataField<? extends FlatDataFieldDescriptor<?>> field) {
+                public void onFieldEntityCreated(ObservableField field) {
                     fieldReference.set(new TypedFieldDecorator<T>(
                             field, Objects.requireNonNull(valueConverter, "Undefined value converter!")));
                 }
 
                 @Override
-                public void onFieldEntityRead(FlatDataField<? extends FlatDataFieldDescriptor<?>> field) {
+                public void onFieldEntityRead(ObservableField field) {
                     this.onFieldEntityCreated(field);
+                }
+
+                @Override
+                public void onFieldValueRead(ObservableFieldDescriptor descriptor, String value) {
+                    // TODO
                 }
             });
 
