@@ -34,7 +34,7 @@ import java.util.Set;
  *
  * @author Frank Timothy Hardy
  */
-public final class ValueConstraintViolationException extends FlatDataException {
+public class ValueConstraintViolationException extends FlatDataException {
 
     private static String message(String fieldName, String value, Set<String> constraintNames) {
         return String.format(

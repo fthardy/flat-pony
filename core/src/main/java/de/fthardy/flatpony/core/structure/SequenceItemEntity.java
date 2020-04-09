@@ -26,7 +26,7 @@ package de.fthardy.flatpony.core.structure;
 import de.fthardy.flatpony.core.AbstractFlatDataItemEntity;
 import de.fthardy.flatpony.core.FlatDataItemEntity;
 import de.fthardy.flatpony.core.FlatDataWriteException;
-import de.fthardy.flatpony.core.util.TypedFieldDecorator;
+import de.fthardy.flatpony.core.util.FieldReference;
 
 import java.io.Writer;
 import java.util.ArrayList;
@@ -38,23 +38,26 @@ import java.util.Objects;
  *
  * @author Frank Timothy Hardy
  */
-public final class SequenceItemEntity extends AbstractFlatDataItemEntity<SequenceItemDescriptor>
+public class SequenceItemEntity extends AbstractFlatDataItemEntity<SequenceItemDescriptor>
         implements FlatDataStructure<SequenceItemDescriptor> {
 
     private static List<FlatDataItemEntity<?>> createElementList(
-            SequenceItemDescriptor descriptor, TypedFieldDecorator<Integer> countField) {
-        int size = countField == null ? 
-                descriptor.getMultiplicity().getMinOccurrences() :
-                countField.getTypedValue();
+            SequenceItemDescriptor descriptor, FieldReference.ReferencedField<Integer> countField) {
+        int size = countField == null ? descriptor.getMultiplicity().getMinOccurrences() : countField.getValue();
         List<FlatDataItemEntity<?>> elements = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             elements.add(descriptor.getElementItemDescriptor().createItemEntity());
         }
         return elements;
     }
+    
+    static String MSG_Element_count_is_not_equal_to_count_field_value(String itemName, int countFieldValue) {
+        return String.format("The element count of sequence item '%s' doesn't equal the count field value of %d!",
+                itemName, countFieldValue);
+    }
 
     private final List<FlatDataItemEntity<?>> elementItemEntities;
-    private final TypedFieldDecorator<Integer> countField;
+    private final FieldReference.ReferencedField<Integer> countField;
 
     /**
      * Creates a new instance of this item entity.
@@ -65,7 +68,7 @@ public final class SequenceItemEntity extends AbstractFlatDataItemEntity<Sequenc
      * @param descriptor the descriptor which created this instance.
      * @param countField the count field entity instance or {@code null}.
      */
-    SequenceItemEntity(SequenceItemDescriptor descriptor, TypedFieldDecorator<Integer> countField) {
+    SequenceItemEntity(SequenceItemDescriptor descriptor, FieldReference.ReferencedField<Integer> countField) {
         this(descriptor, createElementList(descriptor, countField), countField);
     }
 
@@ -82,7 +85,7 @@ public final class SequenceItemEntity extends AbstractFlatDataItemEntity<Sequenc
     SequenceItemEntity(
             SequenceItemDescriptor descriptor,
             List<FlatDataItemEntity<?>> elementItemEntities,
-            TypedFieldDecorator<Integer> countField) {
+            FieldReference.ReferencedField<Integer> countField) {
         super(descriptor);
         this.elementItemEntities = new ArrayList<>(elementItemEntities);
         this.countField = countField;
@@ -95,8 +98,12 @@ public final class SequenceItemEntity extends AbstractFlatDataItemEntity<Sequenc
 
     @Override
     public void writeTo(Writer target) {
-        SequenceItemDescriptor.Multiplicity multiplicity = this.getDescriptor().getMultiplicity();
-        if (multiplicity == null || multiplicity.isSizeWithinBounds(this.elementItemEntities.size())) {
+        if (this.getDescriptor().getMultiplicity().isSizeWithinBounds(this.elementItemEntities.size())) {
+            Integer countFieldValue = this.countField == null ? null : this.countField.getValue();
+            if (countFieldValue != null && countFieldValue != this.elementItemEntities.size()) {
+                throw new FlatDataWriteException(SequenceItemEntity.MSG_Element_count_is_not_equal_to_count_field_value(
+                        this.getDescriptor().getName(), countFieldValue));
+            }
             this.elementItemEntities.forEach(e -> e.writeTo(target));
         } else {
             throw new FlatDataWriteException(SequenceItemDescriptor.MSG_Multiplicity_constraint_violated(
@@ -171,7 +178,7 @@ public final class SequenceItemEntity extends AbstractFlatDataItemEntity<Sequenc
 
     private void updateCountField() {
         if (this.countField != null) {
-            this.countField.setTypedValue(this.elementItemEntities.size());
+            this.countField.setValue(this.elementItemEntities.size());
         }
     }
 }

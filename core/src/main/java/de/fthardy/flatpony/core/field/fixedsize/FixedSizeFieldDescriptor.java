@@ -61,7 +61,7 @@ import java.util.Objects;
  *
  * @author Frank Timothy Hardy
  */
-public final class FixedSizeFieldDescriptor extends AbstractFlatDataFieldDescriptor<FixedSizeField>
+public class FixedSizeFieldDescriptor extends AbstractFlatDataFieldDescriptor<FixedSizeField>
         implements FlatDataFieldDescriptor<FixedSizeField> {
 
     /**

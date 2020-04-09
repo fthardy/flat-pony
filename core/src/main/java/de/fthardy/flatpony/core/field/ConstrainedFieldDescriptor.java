@@ -48,7 +48,7 @@ import java.util.stream.Collectors;
  * 
  * @see ValueConstraint
  */
-public final class ConstrainedFieldDescriptor implements FlatDataFieldDescriptor<ConstrainedField> {
+public class ConstrainedFieldDescriptor implements FlatDataFieldDescriptor<ConstrainedField> {
     
     /**
      * Demands the addition of at least one value constraint.

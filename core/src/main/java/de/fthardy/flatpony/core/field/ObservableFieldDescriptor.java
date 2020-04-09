@@ -45,7 +45,7 @@ import java.util.*;
  *
  * @author Frank Timothy Hardy
  */
-public final class ObservableFieldDescriptor implements FlatDataFieldDescriptor<ObservableField> {
+public class ObservableFieldDescriptor implements FlatDataFieldDescriptor<ObservableField> {
     
     /**
      * The interface definition for an observer of a field descriptor.

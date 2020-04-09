@@ -45,7 +45,7 @@ import java.util.Objects;
  * 
  * @author Frank Timothy Hardy
  */
-public final class TypedFieldDescriptor<T> implements FlatDataFieldDescriptor<TypedField<T>> {
+public class TypedFieldDescriptor<T> implements FlatDataFieldDescriptor<TypedField<T>> {
 
     /**
      * Demands the definition of a field value converter.

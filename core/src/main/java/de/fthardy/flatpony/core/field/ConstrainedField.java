@@ -36,7 +36,7 @@ import java.io.Writer;
  *
  * @author Frank Timothy Hardy
  */
-public final class ConstrainedField extends AbstractFlatDataItemEntity<ConstrainedFieldDescriptor>
+public class ConstrainedField extends AbstractFlatDataItemEntity<ConstrainedFieldDescriptor>
         implements FlatDataMutableField<ConstrainedFieldDescriptor> {
 
     private final FlatDataField<?> decoratedField;

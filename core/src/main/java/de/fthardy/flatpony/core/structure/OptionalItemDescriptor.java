@@ -27,18 +27,16 @@ import de.fthardy.flatpony.core.FlatDataItemDescriptor;
 import de.fthardy.flatpony.core.FlatDataItemEntity;
 import de.fthardy.flatpony.core.FlatDataReadException;
 import de.fthardy.flatpony.core.streamio.*;
-import de.fthardy.flatpony.core.streamio.PushReadItemEntityTreeWalker;
-import de.fthardy.flatpony.core.streamio.StructureItemPullReadIteratorBase;
-import de.fthardy.flatpony.core.streamio.ItemEntityStructureFlattener;
-import de.fthardy.flatpony.core.streamio.PullReadFieldHandler;
 import de.fthardy.flatpony.core.util.AbstractItemDescriptorBuilder;
 import de.fthardy.flatpony.core.util.FieldReference;
 import de.fthardy.flatpony.core.util.ObjectBuilder;
-import de.fthardy.flatpony.core.util.TypedFieldDecorator;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.Iterator;
+import java.util.Objects;
 
 /**
  * The descriptor implementation for an optional item.
@@ -53,7 +51,7 @@ import java.util.*;
  *
  * @author Frank Timothy Hardy
  */
-public final class OptionalItemDescriptor implements FlatDataStructureDescriptor<OptionalItemEntity> {
+public class OptionalItemDescriptor implements FlatDataStructureDescriptor<OptionalItemEntity> {
 
     /**
      * Allows to optionally define a reference to a flag field.
@@ -100,12 +98,7 @@ public final class OptionalItemDescriptor implements FlatDataStructureDescriptor
         }
 
         @Override
-        public ObjectBuilder<OptionalItemDescriptor> withFlagFieldReference(
-                FieldReference<Boolean> fieldReference) {
-            
-            if (this.fieldReference != null) {
-                throw new IllegalStateException("A flag field reference has been already defined!");
-            }
+        public ObjectBuilder<OptionalItemDescriptor> withFlagFieldReference(FieldReference<Boolean> fieldReference) {
             this.fieldReference = Objects.requireNonNull(fieldReference);
             return this;
         }
@@ -118,10 +111,12 @@ public final class OptionalItemDescriptor implements FlatDataStructureDescriptor
 
     private final class PullReadIteratorWithFlagField extends StructureItemPullReadIteratorBase<OptionalItemDescriptor> {
 
+        private final boolean flagValue;
         private PullReadIterator targetItemStreamIterator;
 
-        PullReadIteratorWithFlagField(Reader source) {
+        PullReadIteratorWithFlagField(Reader source, boolean flagValue) {
             super(OptionalItemDescriptor.this, source);
+            this.flagValue = flagValue;
         }
 
         @Override
@@ -138,13 +133,14 @@ public final class OptionalItemDescriptor implements FlatDataStructureDescriptor
 
         @Override
         protected void fetchContent() {
-            if (flagFieldReference.getReferencedField().getTypedValue()) {
+            if (this.flagValue) {
                 targetItemStreamIterator = targetItemDescriptor.pullReadFrom(source);
             }
         }
     }
     
-    private final class PullReadIteratorWithoutFlagField extends StructureItemPullReadIteratorBase<OptionalItemDescriptor> {
+    private final class PullReadIteratorWithoutFlagField 
+            extends StructureItemPullReadIteratorBase<OptionalItemDescriptor> {
 
         private final Deque<FlatDataStructure<?>> lastStructureItemEntityDeque = new ArrayDeque<>();
         private Iterator<FlatDataItemEntity<?>> flattenedItemEntityIterator;
@@ -213,12 +209,6 @@ public final class OptionalItemDescriptor implements FlatDataStructureDescriptor
         return String.format("Failed to read optional item '%s' from source stream!", itemName);
     }
 
-    static String MSG_No_flag_field(String itemName) {
-        return String.format(
-                "Expected a flag field for optional item '%s' because it has a field reference defined!",
-                itemName);
-    }
-
     private final FlatDataItemDescriptor<?> targetItemDescriptor;
     private final FieldReference<Boolean> flagFieldReference;
 
@@ -239,37 +229,42 @@ public final class OptionalItemDescriptor implements FlatDataStructureDescriptor
 
     @Override
     public OptionalItemEntity createItemEntity() {
-
-        assertFlagFieldExistsWhenFlagFieldIsReferenced();
-
-        return new OptionalItemEntity(
-                this,
-                null,
-                this.flagFieldReference == null ? null : this.flagFieldReference.getReferencedField());
+        OptionalItemEntity itemEntity;
+        if (this.flagFieldReference == null) {
+            itemEntity = new OptionalItemEntity(this, null, null);
+        } else {
+            FieldReference.ReferencedField<Boolean> flagField = this.flagFieldReference.getReferencedField();
+            if (flagField == null) {
+                itemEntity = new OptionalItemEntity(this, null, null);
+            } else {
+                FlatDataItemEntity<?> targetItemEntity = flagField.getValue() ? 
+                        this.targetItemDescriptor.createItemEntity() : null;
+                itemEntity = new OptionalItemEntity(this, targetItemEntity, flagField);
+            }
+        }
+        return itemEntity;
     }
 
     @Override
     public OptionalItemEntity readItemEntityFrom(Reader source) {
-
-        assertFlagFieldExistsWhenFlagFieldIsReferenced();
-        
-        OptionalItemEntity optionalItemEntity;
+        OptionalItemEntity itemEntity;
         if (this.flagFieldReference == null) {
-            optionalItemEntity = new OptionalItemEntity(this, this.readByTrialAndErrorFrom(source), null);
+            itemEntity = new OptionalItemEntity(this, this.readByTrialAndErrorFrom(source), null);
         } else {
-            TypedFieldDecorator<Boolean> flagField = this.flagFieldReference.getReferencedField();
-            FlatDataItemEntity<?> itemEntity = flagField.getTypedValue() ?
-                    this.targetItemDescriptor.readItemEntityFrom(source) : null;
-            optionalItemEntity = new OptionalItemEntity(this, itemEntity, flagField);
+            FieldReference.ReferencedField<Boolean> flagField = this.flagFieldReference.getReferencedField();
+            if (flagField == null) {
+                itemEntity = new OptionalItemEntity(this, this.readByTrialAndErrorFrom(source), null);
+            } else {
+                FlatDataItemEntity<?> targetItemEntity = flagField.getValue() ?
+                        this.targetItemDescriptor.readItemEntityFrom(source) : null;
+                itemEntity = new OptionalItemEntity(this, targetItemEntity, flagField);
+            }
         }
-        return optionalItemEntity;
+        return itemEntity;
     }
 
     @Override
     public void pushReadFrom(Reader source, StreamReadHandler handler) {
-
-        assertFlagFieldExistsWhenFlagFieldIsReferenced();
-
         handler.onStructureItemStart(this);
         
         if (this.flagFieldReference == null) {
@@ -278,8 +273,16 @@ public final class OptionalItemDescriptor implements FlatDataStructureDescriptor
                 itemEntity.applyHandler(new PushReadItemEntityTreeWalker(handler));
             }
         } else {
-            if (this.flagFieldReference.getReferencedField().getTypedValue()) {
-                this.targetItemDescriptor.pushReadFrom(source, handler);
+            Boolean fieldValue = this.flagFieldReference.getFieldValue();
+            if (fieldValue == null) {
+                FlatDataItemEntity<?> itemEntity = this.readByTrialAndErrorFrom(source);
+                if (itemEntity != null) {
+                    itemEntity.applyHandler(new PushReadItemEntityTreeWalker(handler));
+                }
+            } else {
+                if (fieldValue) {
+                    this.targetItemDescriptor.pushReadFrom(source, handler);
+                }
             }
         }
         
@@ -288,11 +291,18 @@ public final class OptionalItemDescriptor implements FlatDataStructureDescriptor
 
     @Override
     public PullReadIterator pullReadFrom(Reader source) {
-        
-        this.assertFlagFieldExistsWhenFlagFieldIsReferenced();
-        
-        return this.flagFieldReference == null ? 
-                new PullReadIteratorWithoutFlagField(source) : new PullReadIteratorWithFlagField(source);
+        PullReadIterator pullReadIterator;
+        if (this.flagFieldReference == null) {
+            pullReadIterator = new PullReadIteratorWithoutFlagField(source); 
+        } else {
+            Boolean fieldValue = this.flagFieldReference.getFieldValue();
+            if (fieldValue == null) {
+                pullReadIterator = new PullReadIteratorWithoutFlagField(source); 
+            } else {
+                pullReadIterator = new PullReadIteratorWithFlagField(source, fieldValue);
+            }
+        }
+        return pullReadIterator; 
     }
 
     @Override
@@ -311,10 +321,11 @@ public final class OptionalItemDescriptor implements FlatDataStructureDescriptor
         return this.targetItemDescriptor;
     }
 
-    private void assertFlagFieldExistsWhenFlagFieldIsReferenced() {
-        if (this.flagFieldReference != null && this.flagFieldReference.getReferencedField() == null) {
-            throw new IllegalStateException(MSG_No_flag_field(this.getName()));
-        }
+    /**
+     * @return the flag field reference.
+     */
+    public FieldReference<Boolean> getFlagFieldReference() {
+        return this.flagFieldReference;
     }
 
     private FlatDataItemEntity<?> readByTrialAndErrorFrom(Reader source) {

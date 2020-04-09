@@ -47,7 +47,7 @@ import java.util.Objects;
  *
  * @author Frank Timothy Hardy
  */
-public final class DelimitedItemDescriptor implements FlatDataStructureDescriptor<DelimitedItemEntity> {
+public class DelimitedItemDescriptor implements FlatDataStructureDescriptor<DelimitedItemEntity> {
 
     /**
      * Allows to define a different delimiter character.

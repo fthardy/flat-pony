@@ -38,7 +38,7 @@ import java.io.Writer;
  *
  * @author Frank Timothy Hardy
  */
-public final class DelimitedItemEntity extends AbstractFlatDataItemEntity<DelimitedItemDescriptor>
+public class DelimitedItemEntity extends AbstractFlatDataItemEntity<DelimitedItemDescriptor>
         implements FlatDataStructure<DelimitedItemDescriptor> {
 
     static String MSG_Write_failed(String itemName) {

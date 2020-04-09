@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
  *
  * @author Frank Timothy Hardy
  */
-public final class CompositeItemDescriptor extends AbstractFlatDataItemDescriptor<CompositeItemEntity>
+public class CompositeItemDescriptor extends AbstractFlatDataItemDescriptor<CompositeItemEntity>
         implements FlatDataStructureDescriptor<CompositeItemEntity> {
 
     /**

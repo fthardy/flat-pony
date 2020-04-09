@@ -66,7 +66,8 @@ public abstract class StructureItemPullReadIteratorBase<T extends FlatDataStruct
     @Override
     public void nextEvent(StreamReadHandler handler) {
         if (this.endEventSent) {
-            throw new NoSuchElementException(MSG_No_pull_read_event(this.descriptor.getName(), this.descriptor.getClass().getSimpleName()));
+            throw new NoSuchElementException(MSG_No_pull_read_event(
+                    this.descriptor.getName(), this.descriptor.getClass().getSimpleName()));
         } else if (this.startEventSent) {
             if (handleContent(handler)) {
                 handler.onStructureItemEnd(this.descriptor);

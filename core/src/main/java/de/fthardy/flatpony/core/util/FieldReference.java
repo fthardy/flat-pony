@@ -23,8 +23,6 @@ SOFTWARE.
  */
 package de.fthardy.flatpony.core.util;
 
-import de.fthardy.flatpony.core.field.FlatDataFieldDescriptor;
-import de.fthardy.flatpony.core.field.FlatDataMutableField;
 import de.fthardy.flatpony.core.field.ObservableField;
 import de.fthardy.flatpony.core.field.ObservableFieldDescriptor;
 import de.fthardy.flatpony.core.field.converter.FieldValueConverter;
@@ -32,7 +30,14 @@ import de.fthardy.flatpony.core.field.converter.FieldValueConverter;
 import java.util.Objects;
 
 /**
- * Represents a reference to a field which is sometimes necessary to read particular structure items correctly.
+ * Represents a reference to an observable flat data field.
+ * <p>
+ * A field reference encapsulates an {@link ObservableFieldDescriptor}. It provides type specific access to the field
+ * entity or value of the observed field depending on the method which is used to create or read the field. If a new
+ * instance of the observed field is created or read the field entity is accessible through 
+ * {@link #getReferencedField()}. If the observed field is read by a stream read method (push or pull read) then the
+ * read field value is accessible through {@link #getFieldValue()}. 
+ * </p>
  *
  * @param <T> the type of the field value.
  *           
@@ -41,7 +46,7 @@ import java.util.Objects;
  *     
  * @author Frank Timothy Hardy
  */
-public final class FieldReference<T> {
+public class FieldReference<T> {
 
     /**
      * Demands the definition of a value converter for the field value.
@@ -59,70 +64,74 @@ public final class FieldReference<T> {
          *                       
          * @return the builder instance for further configuration.
          */
-        Builder<T> usingValueConverter(FieldValueConverter<T> valueConverter);
-    }
-
-    /**
-     * Builds the field reference.
-     * 
-     * @param <T> the type of the field value.
-     *     
-     * @author Frank Timothy Hardy
-     */
-    public interface Builder<T> {
-
-        /**
-         * @return a new field reference instance.
-         */
-        FieldReference<T> build();
-    }
-
-    private interface BuildParams<T> {
-        ObservableFieldDescriptor getFieldDescriptorDecorator();
-        ThreadLocal<TypedFieldDecorator<T>> getThreadLocalFieldReference();
+        ObjectBuilder<FieldReference<T>> usingValueConverter(FieldValueConverter<T> valueConverter);
     }
     
-    private static final class BuilderImpl<T> implements DefineValueConverter<T>, Builder<T>, BuildParams<T> {
+    /**
+     * A field entity adapter implementation which allows to access the field value of a referenced field in a given type.
+     *
+     * @author Frank Timothy Hardy
+     */
+    public static class ReferencedField<T> {
 
-        private final ObservableFieldDescriptor fieldDescriptorDecorator;
-        private final ThreadLocal<TypedFieldDecorator<T>> fieldReference = new ThreadLocal<>();
+        private final ObservableField referencedField;
+        private final FieldValueConverter<T> valueConverter;
 
-        BuilderImpl(FlatDataFieldDescriptor<? extends FlatDataMutableField<? extends FlatDataFieldDescriptor<?>>> fieldDescriptor) {
-            this.fieldDescriptorDecorator = ObservableFieldDescriptor.newInstance(
-                    Objects.requireNonNull(fieldDescriptor, "Undefined field descriptor!")).build();
+        /**
+         * Create a new instance of this field adapter.
+         *
+         * @param referencedField the field entity instance to adapt.
+         * @param valueConverter the boolean value converter.
+         */
+        ReferencedField(ObservableField referencedField, FieldValueConverter<T> valueConverter) {
+            this.referencedField = Objects.requireNonNull(referencedField, "Undefined referenced field!");
+            this.valueConverter = Objects.requireNonNull(valueConverter, "Undefined value converter!");
+        }
+
+        /**
+         * @return the flag value.
+         */
+        public T getValue() {
+            return this.valueConverter.convertFromFieldValue(this.referencedField.getValue());
+        }
+
+        /**
+         * @param value the new flag value.
+         */
+        public void setValue(T value) {
+            this.referencedField.setValue(this.valueConverter.convertToFieldValue(value));
+        }
+    }
+    
+    private interface BuildParams<T> {
+        ObservableFieldDescriptor getFieldDescriptor();
+        FieldValueConverter<T> getValueConverter();
+    }
+    
+    private static final class BuilderImpl<T> 
+            implements DefineValueConverter<T>, ObjectBuilder<FieldReference<T>>, BuildParams<T> {
+
+        private final ObservableFieldDescriptor fieldDescriptor;
+        private FieldValueConverter<T> valueConverter;
+
+        BuilderImpl(ObservableFieldDescriptor fieldDescriptor) {
+            this.fieldDescriptor = Objects.requireNonNull(fieldDescriptor, "Undefined field descriptor!");
         }
 
         @Override
-        public Builder<T> usingValueConverter(final FieldValueConverter<T> valueConverter) {
-            fieldDescriptorDecorator.addObserver(new ObservableFieldDescriptor.Observer() {
-                @Override
-                public void onFieldEntityCreated(ObservableField field) {
-                    fieldReference.set(new TypedFieldDecorator<T>(
-                            field, Objects.requireNonNull(valueConverter, "Undefined value converter!")));
-                }
-
-                @Override
-                public void onFieldEntityRead(ObservableField field) {
-                    this.onFieldEntityCreated(field);
-                }
-
-                @Override
-                public void onFieldValueRead(ObservableFieldDescriptor descriptor, String value) {
-                    // TODO
-                }
-            });
-
+        public ObjectBuilder<FieldReference<T>> usingValueConverter(final FieldValueConverter<T> valueConverter) {
+            this.valueConverter = Objects.requireNonNull(valueConverter, "Undefined value converter!");
             return this;
         }
 
         @Override
-        public ObservableFieldDescriptor getFieldDescriptorDecorator() {
-            return this.fieldDescriptorDecorator;
+        public ObservableFieldDescriptor getFieldDescriptor() {
+            return this.fieldDescriptor;
         }
 
         @Override
-        public ThreadLocal<TypedFieldDecorator<T>> getThreadLocalFieldReference() {
-            return this.fieldReference;
+        public FieldValueConverter<T> getValueConverter() {
+            return this.valueConverter;
         }
 
         @Override
@@ -134,40 +143,37 @@ public final class FieldReference<T> {
     /**
      * Create a builder to configure and create a new field reference instance.
      * 
-     * @param fieldDescriptor the descriptor of the field to reference.
+     * @param fieldDescriptor the descriptor of the field to be referred to.
      *                        
-     * @param <T> the target type of the field value.
+     * @param <T> the type of the field value.
      *           
      * @return a new builder instance.
      */
-    public static <T> DefineValueConverter<T> newInstance(
-            FlatDataFieldDescriptor<? extends FlatDataMutableField<? extends FlatDataFieldDescriptor<?>>> fieldDescriptor) {
+    public static <T> DefineValueConverter<T> newInstance(ObservableFieldDescriptor fieldDescriptor) {
         return new BuilderImpl<>(fieldDescriptor);
     }
 
-    private final ObservableFieldDescriptor fieldDescriptorDecorator;
-    private final ThreadLocal<TypedFieldDecorator<T>> threadLocalFieldReference;
+    private final FieldValueConverter<T> valueConverter;
+    private final BufferingFieldDescriptorObserver observer = new BufferingFieldDescriptorObserver();
     
     private FieldReference(BuildParams<T> params) {
-        this.fieldDescriptorDecorator = params.getFieldDescriptorDecorator();
-        this.threadLocalFieldReference = params.getThreadLocalFieldReference();
+        this.valueConverter = params.getValueConverter();
+        params.getFieldDescriptor().addObserver(this.observer);
     }
 
     /**
-     * Get the observable decorator of the fields descriptor.
-     * 
-     * @return the descriptor observable decorator.
+     * @return a new field adapter instance adapting the referenced field if one exists. Otherwise {@code null}.
      */
-    public ObservableFieldDescriptor getFieldDescriptorDecorator() {
-        return this.fieldDescriptorDecorator;
+    public ReferencedField<T> getReferencedField() {
+        ObservableField bufferedField = this.observer.getBufferedField();
+        return bufferedField == null ? null : new ReferencedField<>(bufferedField, valueConverter);
     }
 
     /**
-     * Get the reference field for the current thread.
-     * 
-     * @return the reference field.
+     * @return the field value of the referenced field if one exists. Otherwise {@code null}.
      */
-    public TypedFieldDecorator<T> getReferencedField() {
-        return this.threadLocalFieldReference.get();
+    public T getFieldValue() {
+        String fieldValue = this.observer.getBufferedFieldValue();
+        return fieldValue == null ? null : this.valueConverter.convertFromFieldValue(fieldValue);
     }
 }

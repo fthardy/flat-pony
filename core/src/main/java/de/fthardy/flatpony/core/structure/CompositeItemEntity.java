@@ -38,7 +38,7 @@ import java.util.*;
  *
  * @author Frank Timothy Hardy
  */
-public final class CompositeItemEntity extends AbstractFlatDataItemEntity<CompositeItemDescriptor>
+public class CompositeItemEntity extends AbstractFlatDataItemEntity<CompositeItemDescriptor>
         implements FlatDataStructure<CompositeItemDescriptor> {
     
     private static Map<String, FlatDataItemEntity<?>> mapByName(List<FlatDataItemEntity<?>> items) {

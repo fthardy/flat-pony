@@ -52,7 +52,7 @@ import java.util.Objects;
  *
  * @author Frank Timothy Hardy
  */
-public final class DelimitedFieldDescriptor extends AbstractFlatDataFieldDescriptor<DelimitedField>
+public class DelimitedFieldDescriptor extends AbstractFlatDataFieldDescriptor<DelimitedField>
         implements FlatDataFieldDescriptor<DelimitedField> {
 
     /**

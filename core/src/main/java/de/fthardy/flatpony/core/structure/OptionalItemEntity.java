@@ -25,7 +25,7 @@ package de.fthardy.flatpony.core.structure;
 
 import de.fthardy.flatpony.core.AbstractFlatDataItemEntity;
 import de.fthardy.flatpony.core.FlatDataItemEntity;
-import de.fthardy.flatpony.core.util.TypedFieldDecorator;
+import de.fthardy.flatpony.core.util.FieldReference;
 
 import java.io.Writer;
 import java.util.Optional;
@@ -35,12 +35,11 @@ import java.util.Optional;
  *
  * @author Frank Timothy Hardy
  */
-public final class OptionalItemEntity extends AbstractFlatDataItemEntity<OptionalItemDescriptor>
+public class OptionalItemEntity extends AbstractFlatDataItemEntity<OptionalItemDescriptor>
         implements FlatDataStructure<OptionalItemDescriptor> {
 
+    private final FieldReference.ReferencedField<Boolean> flagField;
     private FlatDataItemEntity<?> targetItem;
-
-    private final TypedFieldDecorator<Boolean> flagField;
 
     /**
      * Creates a non-empty instance of this option item entity.
@@ -51,7 +50,7 @@ public final class OptionalItemEntity extends AbstractFlatDataItemEntity<Optiona
     OptionalItemEntity(
             OptionalItemDescriptor descriptor,
             FlatDataItemEntity<?> targetItem,
-            TypedFieldDecorator<Boolean> flagField) {
+            FieldReference.ReferencedField<Boolean> flagField) {
         super(descriptor);
         this.targetItem = targetItem;
         this.flagField = flagField;
@@ -76,14 +75,6 @@ public final class OptionalItemEntity extends AbstractFlatDataItemEntity<Optiona
         } else {
             handler.handleFlatDataItemEntity(this);
         }
-    }
-
-    /**
-     * @return {@code true} if this optional item has currently no target item entity. Otherwise {@code false} is
-     * returned.
-     */
-    public boolean isTargetItemPresent() {
-        return this.targetItem != null;
     }
 
     /**
@@ -125,7 +116,7 @@ public final class OptionalItemEntity extends AbstractFlatDataItemEntity<Optiona
 
     private void updateFlagField() {
         if (this.flagField != null) {
-            this.flagField.setTypedValue(this.targetItem != null);
+            this.flagField.setValue(this.targetItem != null);
         }
     }
 }

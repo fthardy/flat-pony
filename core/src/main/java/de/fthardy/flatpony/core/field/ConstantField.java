@@ -35,7 +35,7 @@ import java.io.Writer;
  *
  * @author Frank Timothy Hardy
  */
-public final class ConstantField extends AbstractFlatDataItemEntity<ConstantFieldDescriptor>
+public class ConstantField extends AbstractFlatDataItemEntity<ConstantFieldDescriptor>
         implements FlatDataField<ConstantFieldDescriptor> {
 
     static String MSG_Write_failed(String fieldName) {

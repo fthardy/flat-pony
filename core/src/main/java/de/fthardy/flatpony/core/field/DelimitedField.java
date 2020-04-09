@@ -37,7 +37,7 @@ import java.io.Writer;
  *
  * @author Frank Timothy Hardy
  */
-public final class DelimitedField extends AbstractFlatDataMutableField<DelimitedFieldDescriptor> {
+public class DelimitedField extends AbstractFlatDataMutableField<DelimitedFieldDescriptor> {
 
     static String MSG_Write_failed(String fieldName) {
         return String.format("Failed to write delimited field '%s' to target stream!", fieldName);

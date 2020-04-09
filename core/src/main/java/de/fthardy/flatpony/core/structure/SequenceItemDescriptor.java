@@ -32,7 +32,6 @@ import de.fthardy.flatpony.core.streamio.PullReadFieldHandler;
 import de.fthardy.flatpony.core.util.AbstractItemDescriptorBuilder;
 import de.fthardy.flatpony.core.util.FieldReference;
 import de.fthardy.flatpony.core.util.ObjectBuilder;
-import de.fthardy.flatpony.core.util.TypedFieldDecorator;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -55,7 +54,7 @@ import java.util.*;
  *
  * @author Frank Timothy Hardy
  */
-public final class SequenceItemDescriptor extends AbstractFlatDataItemDescriptor<SequenceItemEntity>
+public class SequenceItemDescriptor extends AbstractFlatDataItemDescriptor<SequenceItemEntity>
         implements FlatDataStructureDescriptor<SequenceItemEntity> {
 
     /**
@@ -141,8 +140,8 @@ public final class SequenceItemDescriptor extends AbstractFlatDataItemDescriptor
 
         @Override
         public DefineMultiplicity withCountFieldReference(FieldReference<Integer> countFieldReference) {
-            this.countFieldReference =
-                    Objects.requireNonNull(countFieldReference, "Undefined count field reference!");
+            this.countFieldReference = Objects.requireNonNull(
+                    countFieldReference, "Undefined count field reference!");
             return this;
         }
 
@@ -333,12 +332,6 @@ public final class SequenceItemDescriptor extends AbstractFlatDataItemDescriptor
     static String MSG_Read_failed(String itemName) {
         return String.format("Failed to read sequence item '%s' from source stream!", itemName);
     }
-    
-    static String MSG_No_count_field(String itemName) {
-        return String.format(
-                "Expected a count field for sequence item '%s' because it has a field reference defined!",
-                itemName);
-    }
 
     /**
      * Create a builder to construct a new instance of this item descriptor.
@@ -364,47 +357,59 @@ public final class SequenceItemDescriptor extends AbstractFlatDataItemDescriptor
 
     @Override
     public int getMinLength() {
-        int minLength = 0;
-        if (this.multiplicity != null) {
-            minLength = this.elementItemDescriptor.getMinLength() * this.multiplicity.minOccurrences;
-        }
-        return minLength;
+        return this.elementItemDescriptor.getMinLength() * this.multiplicity.minOccurrences;
     }
 
     @Override
     public SequenceItemEntity createItemEntity() {
-
-        assertCountFieldExistsWhenCountFieldIsReferenced();
-
-        return new SequenceItemEntity(this, this.countFieldReference == null ?
-                null : this.countFieldReference.getReferencedField());
+        SequenceItemEntity itemEntity;
+        if (this.countFieldReference == null) {
+            itemEntity = new SequenceItemEntity(this, null); 
+        } else {
+            FieldReference.ReferencedField<Integer> countField = this.countFieldReference.getReferencedField();
+            if (countField == null) {
+                itemEntity = new SequenceItemEntity(this, null);
+            } else {
+                this.assertMultiplicityConstraintOn(countField.getValue());
+                itemEntity = new SequenceItemEntity(this, countField);
+            }
+        }
+        return itemEntity;
     }
 
     @Override
     public SequenceItemEntity readItemEntityFrom(Reader source) {
-
-        assertCountFieldExistsWhenCountFieldIsReferenced();
-
-        TypedFieldDecorator<Integer> countField =
-                this.countFieldReference == null ? null : this.countFieldReference.getReferencedField();
-
-        List<FlatDataItemEntity<?>> elementItems = countField == null ?
-                this.readElementsByTrialAndErrorFrom(source) : this.readWithCountField(source, countField.getTypedValue());
-        
-        return new SequenceItemEntity(this, elementItems, countField);
+        SequenceItemEntity itemEntity;
+        if (this.countFieldReference == null) {
+            itemEntity = new SequenceItemEntity(
+                    this, this.readElementsByTrialAndErrorFrom(source), null);
+        } else {
+            FieldReference.ReferencedField<Integer> countField = this.countFieldReference.getReferencedField();
+            if (countField == null) {
+                itemEntity = new SequenceItemEntity(
+                        this, this.readElementsByTrialAndErrorFrom(source), null);
+            } else {
+                this.assertMultiplicityConstraintOn(countField.getValue());
+                itemEntity = new SequenceItemEntity(
+                        this, this.readWithCountField(source, countField.getValue()), countField);
+            }
+        }
+        return itemEntity;
     }
 
     @Override
     public void pushReadFrom(Reader source, StreamReadHandler handler) {
-
-        assertCountFieldExistsWhenCountFieldIsReferenced();
-        
         handler.onStructureItemStart(this);
 
         if (this.countFieldReference == null) {
             this.pushReadElementsByTrialAndErrorFrom(source, handler); 
         } else {
-            this.pushReadWithCountField(source, handler, this.countFieldReference.getReferencedField().getTypedValue());
+            Integer elementCount = this.countFieldReference.getFieldValue();
+            if (elementCount == null) {
+                this.pushReadElementsByTrialAndErrorFrom(source, handler);
+            } else {
+                this.pushReadWithElementCount(source, handler, elementCount);
+            }
         }
 
         handler.onStructureItemEnd(this);
@@ -412,12 +417,18 @@ public final class SequenceItemDescriptor extends AbstractFlatDataItemDescriptor
 
     @Override
     public PullReadIterator pullReadFrom(Reader source) {
-        
-        assertCountFieldExistsWhenCountFieldIsReferenced();
-        
-        return this.countFieldReference == null ?
-                new PullReadIteratorWithoutCountField(source) :
-                new PullReadIteratorWithCountField(source, countFieldReference.getReferencedField().getTypedValue());
+        PullReadIterator pullReadIterator;
+        if (this.countFieldReference == null) {
+            pullReadIterator = new PullReadIteratorWithoutCountField(source);
+        } else {
+            Integer elementCount = this.countFieldReference.getFieldValue();
+            if (elementCount == null) {
+                pullReadIterator = new PullReadIteratorWithoutCountField(source);
+            } else {
+                pullReadIterator = new PullReadIteratorWithCountField(source, elementCount);
+            }
+        }
+        return pullReadIterator; 
     }
 
     @Override
@@ -441,14 +452,6 @@ public final class SequenceItemDescriptor extends AbstractFlatDataItemDescriptor
      */
     public Multiplicity getMultiplicity() {
         return multiplicity;
-    }
-
-    private void assertCountFieldExistsWhenCountFieldIsReferenced() {
-        if (this.countFieldReference != null && this.countFieldReference.getReferencedField() == null) {
-            throw new IllegalStateException(MSG_No_count_field(this.getName()));
-        } else if (this.countFieldReference != null) {
-            this.assertMultiplicityConstraintOn(this.countFieldReference.getReferencedField().getTypedValue());
-        }
     }
 
     private void assertMultiplicityConstraintOn(int count) {
@@ -494,7 +497,7 @@ public final class SequenceItemDescriptor extends AbstractFlatDataItemDescriptor
         this.assertMultiplicityConstraintOn(elementCount);
     }
 
-    private void pushReadWithCountField(Reader source, StreamReadHandler handler, Integer count) {
+    private void pushReadWithElementCount(Reader source, StreamReadHandler handler, Integer count) {
         for (int i = 0; i < count; i++) {
             this.elementItemDescriptor.pushReadFrom(source, handler);
         }

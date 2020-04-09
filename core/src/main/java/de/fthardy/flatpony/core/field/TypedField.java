@@ -41,7 +41,7 @@ import java.io.Writer;
  *           
  * @author Frank Timothy Hardy
  */
-public final class TypedField<T> extends AbstractFlatDataItemEntity<TypedFieldDescriptor<T>>
+public class TypedField<T> extends AbstractFlatDataItemEntity<TypedFieldDescriptor<T>>
         implements FlatDataMutableField<TypedFieldDescriptor<T>> {
     
     static String MSG_Convert_to_target_type_failed(String fieldValue, String targetTypeName) {

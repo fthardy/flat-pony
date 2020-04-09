@@ -50,7 +50,7 @@ import java.util.UUID;
  *
  * @author Frank Timothy Hardy
  */
-public final class ConstantFieldDescriptor extends AbstractFlatDataFieldDescriptor<ConstantField>
+public class ConstantFieldDescriptor extends AbstractFlatDataFieldDescriptor<ConstantField>
         implements FlatDataFieldDescriptor<ConstantField> {
 
     /**
@@ -200,7 +200,7 @@ public final class ConstantFieldDescriptor extends AbstractFlatDataFieldDescript
         char[] charsToRead = new char[this.getDefaultValue().length()];
         try {
             int length = source.read(charsToRead);
-            if (length != charsToRead.length) {
+            if (length != -1 && length != charsToRead.length) {
                 throw new FlatDataReadException(MSG_Invalid_length(this.getName()));
             }
         } catch (IOException e) {

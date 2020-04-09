@@ -36,7 +36,7 @@ import java.io.Writer;
  *
  * @author Frank Timothy Hardy
  */
-public final class FixedSizeField extends AbstractFlatDataMutableField<FixedSizeFieldDescriptor> {
+public class FixedSizeField extends AbstractFlatDataMutableField<FixedSizeFieldDescriptor> {
 
     static String MSG_Write_failed(String fieldName) {
         return String.format("Failed to write fixed size field '%s' to target stream!", fieldName);
