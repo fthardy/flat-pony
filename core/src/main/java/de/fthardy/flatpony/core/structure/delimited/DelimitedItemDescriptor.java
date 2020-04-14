@@ -198,14 +198,15 @@ public class DelimitedItemDescriptor implements FlatDataStructureDescriptor<Deli
             }
         };
     }
-    
+
     @Override
-    public void applyHandler(FlatDataItemDescriptor.Handler handler) {
+    public <H extends FlatDataItemDescriptor.Handler> H applyHandler(H handler) {
         if (handler instanceof FlatDataStructureDescriptor.Handler) {
             ((FlatDataStructureDescriptor.Handler) handler).handleDelimitedItemDescriptor(this);
         } else {
             handler.handleFlatDataItemDescriptor(this);
         }
+        return handler;
     }
 
     /**

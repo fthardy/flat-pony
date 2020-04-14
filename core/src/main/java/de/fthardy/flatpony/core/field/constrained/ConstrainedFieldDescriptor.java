@@ -216,12 +216,13 @@ public class ConstrainedFieldDescriptor implements FlatDataFieldDescriptor<Const
     }
 
     @Override
-    public void applyHandler(FlatDataItemDescriptor.Handler handler) {
+    public <H extends FlatDataItemDescriptor.Handler> H applyHandler(H handler) {
         if (handler instanceof FlatDataFieldDescriptor.Handler) {
             ((FlatDataFieldDescriptor.Handler) handler).handleConstrainedFieldDescriptor(this);
         } else {
             handler.handleFlatDataItemDescriptor(this);
         }
+        return handler;
     }
 
     /**

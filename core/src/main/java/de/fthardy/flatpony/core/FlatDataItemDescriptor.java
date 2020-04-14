@@ -128,5 +128,5 @@ public interface FlatDataItemDescriptor<T extends FlatDataItemEntity<?>> {
      *
      * @param handler the handler instance.
      */
-    void applyHandler(Handler handler);
+    <H extends Handler> H applyHandler(H handler);
 }

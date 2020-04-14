@@ -432,14 +432,15 @@ public class SequenceItemDescriptor extends AbstractFlatDataItemDescriptor<Seque
         }
         return pullReadIterator; 
     }
-
+    
     @Override
-    public void applyHandler(FlatDataItemDescriptor.Handler handler) {
+    public <H extends FlatDataItemDescriptor.Handler> H applyHandler(H handler) {
         if (handler instanceof FlatDataStructureDescriptor.Handler) {
             ((FlatDataStructureDescriptor.Handler) handler).handleSequenceItemDescriptor(this);
         } else {
             handler.handleFlatDataItemDescriptor(this);
         }
+        return handler;
     }
 
     /**

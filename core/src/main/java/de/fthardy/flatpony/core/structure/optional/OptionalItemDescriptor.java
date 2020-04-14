@@ -314,12 +314,13 @@ public class OptionalItemDescriptor implements FlatDataStructureDescriptor<Optio
     }
 
     @Override
-    public void applyHandler(FlatDataItemDescriptor.Handler handler) {
+    public <H extends FlatDataItemDescriptor.Handler> H applyHandler(H handler) {
         if (handler instanceof FlatDataStructureDescriptor.Handler) {
             ((FlatDataStructureDescriptor.Handler) handler).handleOptionalItemDescriptor(this);
         } else {
             handler.handleFlatDataItemDescriptor(this);
         }
+        return handler;
     }
 
     /**

@@ -247,12 +247,13 @@ public class ObservableFieldDescriptor implements FlatDataFieldDescriptor<Observ
     }
 
     @Override
-    public void applyHandler(FlatDataItemDescriptor.Handler handler) {
+    public <H extends FlatDataItemDescriptor.Handler> H applyHandler(H handler) {
         if (handler instanceof FlatDataFieldDescriptor.Handler) {
             ((FlatDataFieldDescriptor.Handler) handler).handleObservableFieldDescriptor(this);
         } else {
             handler.handleFlatDataItemDescriptor(this);
         }
+        return handler;
     }
 
     /**

@@ -214,12 +214,13 @@ public class DelimitedFieldDescriptor extends AbstractFlatDataFieldDescriptor<De
     }
 
     @Override
-    public void applyHandler(FlatDataItemDescriptor.Handler handler) {
+    public <H extends FlatDataItemDescriptor.Handler> H applyHandler(H handler) {
         if (handler instanceof FlatDataFieldDescriptor.Handler) {
             ((FlatDataFieldDescriptor.Handler) handler).handleDelimitedFieldDescriptor(this);
         } else {
             handler.handleFlatDataItemDescriptor(this);
         }
+        return handler;
     }
 
     /**

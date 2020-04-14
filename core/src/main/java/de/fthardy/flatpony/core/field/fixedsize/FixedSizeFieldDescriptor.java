@@ -271,12 +271,13 @@ public class FixedSizeFieldDescriptor extends AbstractFlatDataFieldDescriptor<Fi
     }
 
     @Override
-    public void applyHandler(FlatDataItemDescriptor.Handler handler) {
+    public <H extends FlatDataItemDescriptor.Handler> H applyHandler(H handler) {
         if (handler instanceof FlatDataFieldDescriptor.Handler) {
             ((FlatDataFieldDescriptor.Handler) handler).handleFixedSizeFieldDescriptor(this);
         } else {
             handler.handleFlatDataItemDescriptor(this);
         }
+        return handler;
     }
 
     String makeContentFromValue(String value) {

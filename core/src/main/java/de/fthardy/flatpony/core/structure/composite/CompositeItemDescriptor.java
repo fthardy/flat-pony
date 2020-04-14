@@ -231,12 +231,13 @@ public class CompositeItemDescriptor extends AbstractFlatDataItemDescriptor<Comp
     }
 
     @Override
-    public void applyHandler(FlatDataItemDescriptor.Handler handler) {
+    public <H extends FlatDataItemDescriptor.Handler> H applyHandler(H handler) {
         if (handler instanceof FlatDataStructureDescriptor.Handler) {
             ((FlatDataStructureDescriptor.Handler) handler).handleCompositeItemDescriptor(this);
         } else {
             handler.handleFlatDataItemDescriptor(this);
         }
+        return handler;
     }
 
     /**
