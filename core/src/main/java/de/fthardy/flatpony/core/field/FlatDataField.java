@@ -24,7 +24,12 @@ SOFTWARE.
 package de.fthardy.flatpony.core.field;
 
 import de.fthardy.flatpony.core.FlatDataItemEntity;
+import de.fthardy.flatpony.core.field.constant.ConstantField;
+import de.fthardy.flatpony.core.field.constrained.ConstrainedField;
+import de.fthardy.flatpony.core.field.delimited.DelimitedField;
 import de.fthardy.flatpony.core.field.fixedsize.FixedSizeField;
+import de.fthardy.flatpony.core.field.observable.ObservableField;
+import de.fthardy.flatpony.core.field.typed.TypedField;
 
 /**
  * The interface definition for a flat data field.

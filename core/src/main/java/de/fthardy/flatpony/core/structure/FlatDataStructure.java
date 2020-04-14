@@ -24,8 +24,10 @@ SOFTWARE.
 package de.fthardy.flatpony.core.structure;
 
 import de.fthardy.flatpony.core.FlatDataItemEntity;
-
-import java.util.List;
+import de.fthardy.flatpony.core.structure.composite.CompositeItemEntity;
+import de.fthardy.flatpony.core.structure.delimited.DelimitedItemEntity;
+import de.fthardy.flatpony.core.structure.optional.OptionalItemEntity;
+import de.fthardy.flatpony.core.structure.sequence.SequenceItemEntity;
 
 /**
  * The interface for a flat data structure.

@@ -23,9 +23,11 @@ SOFTWARE.
  */
 package de.fthardy.flatpony.core.util;
 
-import de.fthardy.flatpony.core.field.ObservableField;
-import de.fthardy.flatpony.core.field.ObservableFieldDescriptor;
-import de.fthardy.flatpony.core.field.converter.FieldValueConverter;
+import de.fthardy.flatpony.core.field.observable.ObservableField;
+import de.fthardy.flatpony.core.field.observable.ObservableFieldDescriptor;
+import de.fthardy.flatpony.core.field.typed.converter.FieldValueConverter;
+import de.fthardy.flatpony.core.structure.optional.OptionalItemDescriptor;
+import de.fthardy.flatpony.core.structure.sequence.SequenceItemDescriptor;
 
 import java.util.Objects;
 
@@ -41,8 +43,8 @@ import java.util.Objects;
  *
  * @param <T> the type of the field value.
  *           
- * @see de.fthardy.flatpony.core.structure.OptionalItemDescriptor
- * @see de.fthardy.flatpony.core.structure.SequenceItemDescriptor
+ * @see OptionalItemDescriptor
+ * @see SequenceItemDescriptor
  *     
  * @author Frank Timothy Hardy
  */

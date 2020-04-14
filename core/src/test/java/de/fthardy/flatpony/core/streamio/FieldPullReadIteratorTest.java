@@ -23,7 +23,7 @@ SOFTWARE.
  */
 package de.fthardy.flatpony.core.streamio;
 
-import de.fthardy.flatpony.core.field.ConstantFieldDescriptor;
+import de.fthardy.flatpony.core.field.constant.ConstantFieldDescriptor;
 import org.junit.jupiter.api.Test;
 
 import java.io.Reader;

@@ -24,7 +24,12 @@ SOFTWARE.
 package de.fthardy.flatpony.core.field;
 
 import de.fthardy.flatpony.core.FlatDataItemDescriptor;
+import de.fthardy.flatpony.core.field.constant.ConstantFieldDescriptor;
+import de.fthardy.flatpony.core.field.constrained.ConstrainedFieldDescriptor;
+import de.fthardy.flatpony.core.field.delimited.DelimitedFieldDescriptor;
 import de.fthardy.flatpony.core.field.fixedsize.FixedSizeFieldDescriptor;
+import de.fthardy.flatpony.core.field.observable.ObservableFieldDescriptor;
+import de.fthardy.flatpony.core.field.typed.TypedFieldDescriptor;
 
 import java.io.Reader;
 

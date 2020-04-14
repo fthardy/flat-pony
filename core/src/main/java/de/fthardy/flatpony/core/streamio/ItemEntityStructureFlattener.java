@@ -25,8 +25,17 @@ package de.fthardy.flatpony.core.streamio;
 
 import de.fthardy.flatpony.core.FlatDataItemEntity;
 import de.fthardy.flatpony.core.field.*;
+import de.fthardy.flatpony.core.field.constant.ConstantField;
+import de.fthardy.flatpony.core.field.constrained.ConstrainedField;
+import de.fthardy.flatpony.core.field.delimited.DelimitedField;
 import de.fthardy.flatpony.core.field.fixedsize.FixedSizeField;
+import de.fthardy.flatpony.core.field.observable.ObservableField;
+import de.fthardy.flatpony.core.field.typed.TypedField;
 import de.fthardy.flatpony.core.structure.*;
+import de.fthardy.flatpony.core.structure.composite.CompositeItemEntity;
+import de.fthardy.flatpony.core.structure.delimited.DelimitedItemEntity;
+import de.fthardy.flatpony.core.structure.optional.OptionalItemEntity;
+import de.fthardy.flatpony.core.structure.sequence.SequenceItemEntity;
 
 import java.util.ArrayList;
 import java.util.Collections;

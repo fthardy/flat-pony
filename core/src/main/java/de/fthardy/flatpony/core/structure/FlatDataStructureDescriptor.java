@@ -24,8 +24,10 @@ SOFTWARE.
 package de.fthardy.flatpony.core.structure;
 
 import de.fthardy.flatpony.core.FlatDataItemDescriptor;
-
-import java.util.List;
+import de.fthardy.flatpony.core.structure.composite.CompositeItemDescriptor;
+import de.fthardy.flatpony.core.structure.delimited.DelimitedItemDescriptor;
+import de.fthardy.flatpony.core.structure.optional.OptionalItemDescriptor;
+import de.fthardy.flatpony.core.structure.sequence.SequenceItemDescriptor;
 
 /**
  * The interface for a flat data structure descriptor.

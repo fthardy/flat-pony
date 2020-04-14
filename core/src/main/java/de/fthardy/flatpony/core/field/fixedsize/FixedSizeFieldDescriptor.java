@@ -27,6 +27,7 @@ import de.fthardy.flatpony.core.FlatDataItemDescriptor;
 import de.fthardy.flatpony.core.FlatDataReadException;
 import de.fthardy.flatpony.core.field.AbstractFlatDataFieldDescriptor;
 import de.fthardy.flatpony.core.field.FlatDataFieldDescriptor;
+import de.fthardy.flatpony.core.field.constrained.ConstrainedFieldDescriptor;
 import de.fthardy.flatpony.core.streamio.FieldPullReadIterator;
 import de.fthardy.flatpony.core.streamio.PullReadIterator;
 import de.fthardy.flatpony.core.streamio.StreamReadHandler;
@@ -55,7 +56,7 @@ import java.util.Objects;
  * case of "nothing" the field content is going to be completely filled up with fill characters. When reading a field
  * from a source stream which has only fill characters in its content, than the empty string is set as its value. This
  * means also that a fixed size field is per se not mandatory. If a fixed size field has to be mandatory (never empty)
- * then it has to be wrapped by a {@link de.fthardy.flatpony.core.field.ConstrainedFieldDescriptor} which has some
+ * then it has to be wrapped by a {@link ConstrainedFieldDescriptor} which has some
  * proper value constraints.
  * </p>
  *

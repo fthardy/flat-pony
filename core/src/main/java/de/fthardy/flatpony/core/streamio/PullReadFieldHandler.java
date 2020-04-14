@@ -25,7 +25,12 @@ package de.fthardy.flatpony.core.streamio;
 
 import de.fthardy.flatpony.core.FlatDataItemEntity;
 import de.fthardy.flatpony.core.field.*;
+import de.fthardy.flatpony.core.field.constant.ConstantField;
+import de.fthardy.flatpony.core.field.constrained.ConstrainedField;
+import de.fthardy.flatpony.core.field.delimited.DelimitedField;
 import de.fthardy.flatpony.core.field.fixedsize.FixedSizeField;
+import de.fthardy.flatpony.core.field.observable.ObservableField;
+import de.fthardy.flatpony.core.field.typed.TypedField;
 
 /**
  * A field entity handler (visitor) implementation which is used during a pull read process in a trial and error

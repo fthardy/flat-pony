@@ -23,8 +23,8 @@ SOFTWARE.
  */
 package de.fthardy.flatpony.core.util;
 
-import de.fthardy.flatpony.core.field.ObservableField;
-import de.fthardy.flatpony.core.field.ObservableFieldDescriptor;
+import de.fthardy.flatpony.core.field.observable.ObservableField;
+import de.fthardy.flatpony.core.field.observable.ObservableFieldDescriptor;
 
 /**
  * An observer implementation for an {@link ObservableFieldDescriptor} which buffers the notified field entity instance

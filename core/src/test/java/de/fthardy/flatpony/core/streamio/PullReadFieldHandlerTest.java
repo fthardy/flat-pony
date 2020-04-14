@@ -25,12 +25,19 @@ package de.fthardy.flatpony.core.streamio;
 
 import de.fthardy.flatpony.core.FlatDataItemDescriptor;
 import de.fthardy.flatpony.core.FlatDataItemEntity;
-import de.fthardy.flatpony.core.field.*;
-import de.fthardy.flatpony.core.field.constraint.ValueConstraint;
-import de.fthardy.flatpony.core.field.converter.FieldValueConvertException;
-import de.fthardy.flatpony.core.field.converter.FieldValueConverter;
+import de.fthardy.flatpony.core.field.constant.ConstantField;
+import de.fthardy.flatpony.core.field.constant.ConstantFieldDescriptor;
+import de.fthardy.flatpony.core.field.constrained.ConstrainedField;
+import de.fthardy.flatpony.core.field.constrained.ConstrainedFieldDescriptor;
+import de.fthardy.flatpony.core.field.constrained.constraint.ValueConstraint;
+import de.fthardy.flatpony.core.field.typed.converter.FieldValueConvertException;
+import de.fthardy.flatpony.core.field.typed.converter.FieldValueConverter;
+import de.fthardy.flatpony.core.field.delimited.DelimitedField;
+import de.fthardy.flatpony.core.field.delimited.DelimitedFieldDescriptor;
 import de.fthardy.flatpony.core.field.fixedsize.FixedSizeField;
 import de.fthardy.flatpony.core.field.fixedsize.FixedSizeFieldDescriptor;
+import de.fthardy.flatpony.core.field.typed.TypedField;
+import de.fthardy.flatpony.core.field.typed.TypedFieldDescriptor;
 import org.junit.jupiter.api.Test;
 import org.mockito.stubbing.Answer;
 
