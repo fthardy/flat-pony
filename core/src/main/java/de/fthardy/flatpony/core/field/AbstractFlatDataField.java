@@ -47,6 +47,12 @@ public abstract class AbstractFlatDataField<T extends FlatDataFieldDescriptor<?>
     }
 
     @Override
+    public String toString() {
+        return this.getClass().getSimpleName() + "@" + System.identityHashCode(this) +
+                "[value='" + this.value + "', descriptor=" + this.getDescriptor().toString() + "]";
+    }
+
+    @Override
     public String getValue() {
         return this.value;
     }

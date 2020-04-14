@@ -88,6 +88,7 @@ public class SequenceItemTest {
 
         SequenceItemDescriptor sequenceItemDescriptor = SequenceItemDescriptor.newInstance("Sequence")
                 .withElementItemDescriptor(itemDescriptorMock).build();
+        assertThat(sequenceItemDescriptor.toString()).startsWith(SequenceItemDescriptor.class.getSimpleName());
         assertThat(sequenceItemDescriptor.getName()).isEqualTo("Sequence");
         assertThat(sequenceItemDescriptor.getMinLength()).isEqualTo(0);
         assertThat(sequenceItemDescriptor.getElementItemDescriptor()).isSameAs(itemDescriptorMock);
@@ -144,8 +145,9 @@ public class SequenceItemTest {
 
         SequenceItemDescriptor sequenceItemDescriptor = SequenceItemDescriptor.newInstance("Sequence")
                 .withElementItemDescriptor(itemDescriptorMock).build();
-
+        
         SequenceItemEntity sequenceItemEntity = sequenceItemDescriptor.createItemEntity();
+        assertThat(sequenceItemEntity.toString()).startsWith(SequenceItemEntity.class.getSimpleName());
         assertThat(sequenceItemEntity.getLength()).isEqualTo(0);
         assertThat(sequenceItemEntity.getElementItemEntities()).isEmpty();
 

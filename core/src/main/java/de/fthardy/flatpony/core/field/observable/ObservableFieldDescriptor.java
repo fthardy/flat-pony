@@ -188,6 +188,12 @@ public class ObservableFieldDescriptor implements FlatDataFieldDescriptor<Observ
     }
 
     @Override
+    public String toString() {
+        return this.getClass().getSimpleName() + "@" + System.identityHashCode(this) +
+                "[observed-descriptor=" + this.observedFieldDescriptor.toString() + "]";
+    }
+
+    @Override
     public String getName() {
         return this.observedFieldDescriptor.getName();
     }

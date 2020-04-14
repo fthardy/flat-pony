@@ -103,6 +103,7 @@ public class ObservableFieldItemTest {
                 .addObserver(observerMock1)
                 .addObservers(observerMock2, observerMock3)
                 .addObservers(Arrays.asList(observerMock4, observerMock5)).build();
+        assertThat(descriptor.toString()).startsWith(ObservableFieldDescriptor.class.getSimpleName());
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> 
                 descriptor.addObserver(observerMock1));
@@ -165,6 +166,7 @@ public class ObservableFieldItemTest {
                 .addObservers(observerMock1, observerMock2).build();
         
         ObservableField field = descriptor.createItemEntity();
+        assertThat(field.toString()).startsWith(ObservableField.class.getSimpleName());
         assertThat(field.getDescriptor()).isSameAs(descriptor);
         assertThat(field.getLength()).isEqualTo(42);
         assertThat(field.getObservedField()).isSameAs(fieldMock);

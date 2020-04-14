@@ -41,6 +41,7 @@ public class TypedFieldItemTest {
         
         TypedFieldDescriptor<Object> descriptor = TypedFieldDescriptor
                 .newInstance(fieldDescriptorMock).withFieldValueConverter(converterMock).build();
+        assertThat(descriptor.toString()).startsWith(TypedFieldDescriptor.class.getSimpleName());
 
         assertThat(descriptor.getDecoratedFieldDescriptor()).isSameAs(fieldDescriptorMock);
         assertThat(descriptor.getFieldValueConverter()).isSameAs(converterMock);
@@ -108,6 +109,7 @@ public class TypedFieldItemTest {
                 .newInstance(fieldDescriptorMock).withFieldValueConverter(converterMock).build();
 
         TypedField<Object> field = descriptor.createItemEntity();
+        assertThat(field.toString()).startsWith(TypedField.class.getSimpleName());
         
         assertThat(field.getDecoratedField()).isSameAs(fieldMock);
         

@@ -60,6 +60,13 @@ public class DelimitedItemEntity extends AbstractFlatDataItemEntity<DelimitedIte
     }
 
     @Override
+    public String toString() {
+        return this.getClass().getSimpleName() + "@" + System.identityHashCode(this) +
+                "[descriptor=" + this.getDescriptor().toString() +
+                ", target-item=" + this.targetItem.toString() + "]";
+    }
+
+    @Override
     public int getLength() {
         return targetItem.getLength();
     }

@@ -67,6 +67,7 @@ public class OptionalItemTest {
         when(itemDescriptorMock.getMinLength()).thenReturn(42);
 
         OptionalItemDescriptor optionalItemDescriptor = OptionalItemDescriptor.newInstance(itemDescriptorMock).build();
+        assertThat(optionalItemDescriptor.toString()).startsWith(OptionalItemDescriptor.class.getSimpleName());
         assertThat(optionalItemDescriptor.getName()).isEqualTo("mock");
         assertThat(optionalItemDescriptor.getMinLength()).isEqualTo(0); // is always 0
         assertThat(optionalItemDescriptor.getTargetItemDescriptor()).isSameAs(itemDescriptorMock);
@@ -112,6 +113,7 @@ public class OptionalItemTest {
         OptionalItemDescriptor optionalItemDescriptor = OptionalItemDescriptor.newInstance(itemDescriptorMock).build();
         
         OptionalItemEntity itemEntity = optionalItemDescriptor.createItemEntity();
+        assertThat(itemEntity.toString()).startsWith(OptionalItemEntity.class.getSimpleName());
         assertThat(itemEntity.getLength()).isEqualTo(0);
         assertFalse(itemEntity.getTargetItem().isPresent());
 

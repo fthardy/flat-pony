@@ -55,6 +55,13 @@ public class ConstrainedField extends AbstractFlatDataItemEntity<ConstrainedFiel
     }
 
     @Override
+    public String toString() {
+        return this.getClass().getSimpleName() + "@" + System.identityHashCode(this) +
+                "[descriptor=" + this.getDescriptor().toString() +
+                ", decorated-field=" + this.decoratedField.toString() + "]";
+    }
+
+    @Override
     public int getLength() {
         return this.decoratedField.getLength();
     }

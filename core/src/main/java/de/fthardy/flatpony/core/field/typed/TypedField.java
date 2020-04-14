@@ -72,6 +72,13 @@ public class TypedField<T> extends AbstractFlatDataItemEntity<TypedFieldDescript
     }
 
     @Override
+    public String toString() {
+        return this.getClass().getSimpleName() + "@" + System.identityHashCode(this) + 
+                "[descriptor=" + this.getDescriptor().toString() + 
+                ", decorated-field=" + this.decoratedField.toString() + "]";
+    }
+
+    @Override
     public String getValue() {
         return this.decoratedField.getValue();
     }

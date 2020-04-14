@@ -62,6 +62,7 @@ class DelimitedItemTest {
 
         DelimitedItemDescriptor descriptor = 
                 DelimitedItemDescriptor.newInstance(itemDescriptorMock).withDelimiter('\t').build();
+        assertThat(descriptor.toString()).startsWith(DelimitedItemDescriptor.class.getSimpleName());
         
         assertThat(descriptor.getName()).isEqualTo("mock");
         assertThat(descriptor.getMinLength()).isEqualTo(42);
@@ -87,6 +88,7 @@ class DelimitedItemTest {
                 DelimitedItemDescriptor.newInstance(itemDescriptorMock).withDelimiter('\t').build();
 
         DelimitedItemEntity entity = descriptor.createItemEntity();
+        assertThat(entity.toString()).startsWith(DelimitedItemEntity.class.getSimpleName());
 
         assertThat(entity.getLength()).isEqualTo(42);
         assertThat(entity.getTargetItem()).isSameAs(itemEntityMock);

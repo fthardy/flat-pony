@@ -77,6 +77,7 @@ class ConstantFieldItemTest {
     void Create_descriptor() {
         ConstantFieldDescriptor descriptor =
                 ConstantFieldDescriptor.newInstance("Constant").withConstant("Foo").build();
+        assertThat(descriptor.toString()).startsWith(ConstantFieldDescriptor.class.getSimpleName());
         
         assertThat(descriptor.getMinLength()).isEqualTo(descriptor.getDefaultValue().length());
         assertThat(descriptor.getDefaultValue()).isEqualTo("Foo");
@@ -140,6 +141,7 @@ class ConstantFieldItemTest {
     void Apply_handler_to_field() {
         ConstantField field = 
                 ConstantFieldDescriptor.newInstance("Constant").withConstant("Foo").build().createItemEntity();
+        assertThat(field.toString()).startsWith(ConstantField.class.getSimpleName());
 
         FlatDataItemEntity.Handler handlerMock = mock(FlatDataItemEntity.Handler.class);
         FlatDataField.Handler fieldHandlerMock = mock(FlatDataField.Handler.class);

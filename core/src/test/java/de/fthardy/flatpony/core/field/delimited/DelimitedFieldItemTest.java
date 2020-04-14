@@ -52,6 +52,7 @@ public class DelimitedFieldItemTest {
     @Test
     void Create_descriptor_with_default_configuration() {
         DelimitedFieldDescriptor fieldDescriptor = DelimitedFieldDescriptor.newInstance("Field").build();
+        assertThat(fieldDescriptor.toString()).startsWith(DelimitedFieldDescriptor.class.getSimpleName());
         
         assertThat(fieldDescriptor.getName()).isEqualTo("Field");
         assertThat(fieldDescriptor.getMinLength()).isEqualTo(0);
@@ -145,6 +146,7 @@ public class DelimitedFieldItemTest {
                 .withDefaultValue("Bar")
                 .build()
                 .createItemEntity();
+        assertThat(field.toString()).startsWith(DelimitedField.class.getSimpleName());
 
         FlatDataItemEntity.Handler handlerMock = mock(FlatDataItemEntity.Handler.class);
         FlatDataField.Handler fieldHandlerMock = mock(FlatDataField.Handler.class);

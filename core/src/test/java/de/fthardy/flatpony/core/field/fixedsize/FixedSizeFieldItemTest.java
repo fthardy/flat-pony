@@ -68,6 +68,7 @@ class FixedSizeFieldItemTest {
     @Test
     void Create_descriptor_with_default_configuration() {
         FixedSizeFieldDescriptor fieldDescriptor = FixedSizeFieldDescriptor.newInstance("Field").build();
+        assertThat(fieldDescriptor.toString()).startsWith(FixedSizeFieldDescriptor.class.getSimpleName());
         
         assertThat(fieldDescriptor.getName()).isEqualTo("Field");
         assertThat(fieldDescriptor.getMinLength()).isEqualTo(1);
@@ -187,6 +188,7 @@ class FixedSizeFieldItemTest {
     @Test
     void Apply_handler_to_field() {
         FixedSizeField field = FixedSizeFieldDescriptor.newInstance("Field").build().createItemEntity();
+        assertThat(field.toString()).startsWith(FixedSizeField.class.getSimpleName());
 
         FlatDataItemEntity.Handler handlerMock = mock(FlatDataItemEntity.Handler.class);
         FlatDataField.Handler fieldHandlerMock = mock(FlatDataField.Handler.class);

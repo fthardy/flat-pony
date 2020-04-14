@@ -93,6 +93,7 @@ class CompositeItemTest {
         CompositeItemDescriptor descriptor = CompositeItemDescriptor.newInstance("Record")
                 .addComponentItemDescriptors(fieldDescriptorMock1, fieldDescriptorMock2)
                 .build();
+        assertThat(descriptor.toString()).startsWith(CompositeItemDescriptor.class.getSimpleName());
         
         assertThat(descriptor.getMinLength()).isEqualTo(42);
         assertThat(descriptor.getComponentItemDescriptorByName("Field1")).isSameAs(fieldDescriptorMock1);
@@ -125,6 +126,7 @@ class CompositeItemTest {
                 .build();
 
         CompositeItemEntity entity = descriptor.createItemEntity();
+        assertThat(entity.toString()).startsWith(CompositeItemEntity.class.getSimpleName());
         assertThat(entity.getLength()).isEqualTo(42);
         
         assertThat(entity.getComponentItemEntities()).containsExactly(fieldMock1, fieldMock2);

@@ -121,7 +121,13 @@ public class TypedFieldDescriptor<T> implements FlatDataFieldDescriptor<TypedFie
         this.decoratedFieldDescriptor = builder.getFieldDescriptor();
         this.fieldValueConverter = builder.getFieldValueConverter();
     }
-    
+
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName() + "@" + System.identityHashCode(this) +
+                "[decorated-descriptor=" + this.decoratedFieldDescriptor.toString() + "]";
+    }
+
     @Override
     public String getDefaultValue() {
         return this.decoratedFieldDescriptor.getDefaultValue();

@@ -160,53 +160,59 @@ public class ConstrainedFieldDescriptor implements FlatDataFieldDescriptor<Const
         return new BuilderImpl(fieldDescriptor);
     }
 
-    private final FlatDataFieldDescriptor<?> fieldDescriptor;
+    private final FlatDataFieldDescriptor<?> decoratedFieldDescriptor;
     private final Set<ValueConstraint> constraints;
 
     private ConstrainedFieldDescriptor(BuildParams params) {
-        this.fieldDescriptor = params.getFieldDescriptor();
+        this.decoratedFieldDescriptor = params.getFieldDescriptor();
         this.constraints = params.getConstraints();
-        this.checkForConstraintViolation(fieldDescriptor.getDefaultValue());
+        this.checkForConstraintViolation(decoratedFieldDescriptor.getDefaultValue());
+    }
+
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName() + "@" + System.identityHashCode(this) +
+                "[decorated-descriptor=" + this.decoratedFieldDescriptor.toString() + "]";
     }
 
     @Override
     public String getName() {
-        return this.fieldDescriptor.getName();
+        return this.decoratedFieldDescriptor.getName();
     }
 
     @Override
     public String getDefaultValue() {
-        return this.fieldDescriptor.getDefaultValue();
+        return this.decoratedFieldDescriptor.getDefaultValue();
     }
 
     @Override
     public int getMinLength() {
-        return this.fieldDescriptor.getMinLength();
+        return this.decoratedFieldDescriptor.getMinLength();
     }
 
     @Override
     public ConstrainedField createItemEntity() {
-        return new ConstrainedField(this, this.fieldDescriptor.createItemEntity());
+        return new ConstrainedField(this, this.decoratedFieldDescriptor.createItemEntity());
     }
 
     @Override
     public ConstrainedField readItemEntityFrom(Reader source) {
-        return new ConstrainedField(this, this.fieldDescriptor.readItemEntityFrom(source));
+        return new ConstrainedField(this, this.decoratedFieldDescriptor.readItemEntityFrom(source));
     }
 
     @Override
     public void pushReadFrom(Reader source, StreamReadHandler handler) {
-        this.fieldDescriptor.pushReadFrom(source, handler);
+        this.decoratedFieldDescriptor.pushReadFrom(source, handler);
     }
 
     @Override
     public PullReadIterator pullReadFrom(Reader source) {
-        return this.fieldDescriptor.pullReadFrom(source);
+        return this.decoratedFieldDescriptor.pullReadFrom(source);
     }
 
     @Override
     public String readValue(Reader source) {
-        return this.fieldDescriptor.readValue(source);
+        return this.decoratedFieldDescriptor.readValue(source);
     }
 
     @Override
@@ -223,8 +229,8 @@ public class ConstrainedFieldDescriptor implements FlatDataFieldDescriptor<Const
      *
      * @return the decorated field descriptor.
      */
-    public FlatDataFieldDescriptor<?> getFieldDescriptor() {
-        return this.fieldDescriptor;
+    public FlatDataFieldDescriptor<?> getDecoratedFieldDescriptor() {
+        return this.decoratedFieldDescriptor;
     }
 
     /**

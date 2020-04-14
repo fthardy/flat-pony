@@ -80,6 +80,13 @@ public class ObservableField extends AbstractFlatDataItemEntity<ObservableFieldD
     }
 
     @Override
+    public String toString() {
+        return this.getClass().getSimpleName() + "@" + System.identityHashCode(this) +
+                "[descriptor=" + this.getDescriptor().toString() +
+                ", observed-field=" + this.observedField.toString() + "]";
+    }
+
+    @Override
     public void setValue(String value) {
         String currentValue = this.observedField.getValue();
         this.observedField.setValue(value);

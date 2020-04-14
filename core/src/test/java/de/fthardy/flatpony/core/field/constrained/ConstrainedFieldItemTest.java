@@ -5,8 +5,6 @@ import de.fthardy.flatpony.core.FlatDataItemEntity;
 import de.fthardy.flatpony.core.field.FlatDataField;
 import de.fthardy.flatpony.core.field.FlatDataFieldDescriptor;
 import de.fthardy.flatpony.core.field.FlatDataMutableField;
-import de.fthardy.flatpony.core.field.constrained.ConstrainedField;
-import de.fthardy.flatpony.core.field.constrained.ConstrainedFieldDescriptor;
 import de.fthardy.flatpony.core.field.constrained.constraint.ValueConstraint;
 import de.fthardy.flatpony.core.field.constrained.constraint.ValueConstraintViolationException;
 import de.fthardy.flatpony.core.streamio.StreamReadHandler;
@@ -108,8 +106,9 @@ public class ConstrainedFieldItemTest {
 
         ConstrainedFieldDescriptor descriptor =
                 ConstrainedFieldDescriptor.newInstance(fieldDescriptorMock).addConstraint(constraintMock).build();
+        assertThat(descriptor.toString()).startsWith(ConstrainedFieldDescriptor.class.getSimpleName());
         
-        assertThat(descriptor.getFieldDescriptor()).isSameAs(fieldDescriptorMock);
+        assertThat(descriptor.getDecoratedFieldDescriptor()).isSameAs(fieldDescriptorMock);
         
         assertThat(descriptor.getName()).isEqualTo("Field");
         assertThat(descriptor.getDefaultValue()).isEqualTo("Default value");
@@ -170,14 +169,18 @@ public class ConstrainedFieldItemTest {
         when(constraintMock.getName()).thenReturn("Constraint");
         when(constraintMock.acceptValue(anyString())).thenReturn(true, false);
 
+        FlatDataField<?> fieldMock = mock(FlatDataField.class);
+        
         FlatDataFieldDescriptor<?> fieldDescriptorMock = mock(FlatDataFieldDescriptor.class);
         when(fieldDescriptorMock.getName()).thenReturn("Field");
         when(fieldDescriptorMock.getDefaultValue()).thenReturn("Default value");
+        when(fieldDescriptorMock.createItemEntity()).thenAnswer(i -> fieldMock);
 
         ConstrainedFieldDescriptor descriptor =
                 ConstrainedFieldDescriptor.newInstance(fieldDescriptorMock).addConstraint(constraintMock).build();
 
         ConstrainedField field = descriptor.createItemEntity();
+        assertThat(field.toString()).startsWith(ConstrainedField.class.getSimpleName());
 
         assertThrows(ValueConstraintViolationException.class, () -> field.setValue("Bad value"));
 
@@ -185,13 +188,11 @@ public class ConstrainedFieldItemTest {
         verify(fieldDescriptorMock).getDefaultValue();
         verify(fieldDescriptorMock).createItemEntity();
 
-        verifyNoMoreInteractions(fieldDescriptorMock);
-
         verify(constraintMock, times(3)).getName();
         verify(constraintMock).acceptValue("Default value");
         verify(constraintMock).acceptValue("Bad value");
         
-        verifyNoMoreInteractions(constraintMock);
+        verifyNoMoreInteractions(constraintMock, fieldMock, fieldDescriptorMock);
     }
 
     @Test

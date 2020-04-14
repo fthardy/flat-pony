@@ -58,6 +58,13 @@ public class OptionalItemEntity extends AbstractFlatDataItemEntity<OptionalItemD
     }
 
     @Override
+    public String toString() {
+        return this.getClass().getSimpleName() + "@" + System.identityHashCode(this) +
+                "[descriptor=" + this.getDescriptor().toString() +
+                ", target-item=" + (this.targetItem == null ? "<NA>" : this.targetItem.toString()) + "]";
+    }
+
+    @Override
     public int getLength() {
         return targetItem == null ? 0 : targetItem.getLength();
     }

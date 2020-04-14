@@ -49,6 +49,12 @@ public abstract class AbstractFlatDataItemDescriptor<T extends FlatDataItemEntit
     }
 
     @Override
+    public String toString() {
+        return this.getClass().getSimpleName() + "@" + System.identityHashCode(this) + 
+                "[name=" + this.getName() + "]";
+    }
+
+    @Override
     public String getName() {
         return this.name;
     }

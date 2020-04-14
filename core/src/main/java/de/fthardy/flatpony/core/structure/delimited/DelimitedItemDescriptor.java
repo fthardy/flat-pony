@@ -140,6 +140,12 @@ public class DelimitedItemDescriptor implements FlatDataStructureDescriptor<Deli
     }
 
     @Override
+    public String toString() {
+        return this.getClass().getSimpleName() + "@" + System.identityHashCode(this) +
+                "[target-item-descriptor=" + this.targetItemDescriptor.toString() + "]";
+    }
+
+    @Override
     public String getName() {
         return this.targetItemDescriptor.getName();
     }
