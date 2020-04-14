@@ -74,12 +74,13 @@ public class CompositeItemEntity extends AbstractFlatDataItemEntity<CompositeIte
     }
 
     @Override
-    public void applyHandler(FlatDataItemEntity.Handler handler) {
+    public <H extends FlatDataItemEntity.Handler> H applyHandler(H handler) {
         if (handler instanceof FlatDataStructure.Handler) {
             ((FlatDataStructure.Handler) handler).handleCompositeItemEntity(this);
         } else {
             handler.handleFlatDataItemEntity(this);
         }
+        return handler;
     }
 
     /**

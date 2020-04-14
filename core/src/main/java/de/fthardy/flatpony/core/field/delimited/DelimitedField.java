@@ -71,11 +71,12 @@ public class DelimitedField extends AbstractFlatDataMutableField<DelimitedFieldD
     }
 
     @Override
-    public void applyHandler(FlatDataItemEntity.Handler handler) {
+    public <H extends FlatDataItemEntity.Handler> H applyHandler(H handler) {
         if (handler instanceof FlatDataField.Handler) {
             ((FlatDataField.Handler) handler).handleDelimitedField(this);
         } else {
             handler.handleFlatDataItemEntity(this);
         }
+        return handler;
     }
 }

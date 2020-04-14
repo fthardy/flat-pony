@@ -78,11 +78,12 @@ public class ConstantField extends AbstractFlatDataItemEntity<ConstantFieldDescr
     }
 
     @Override
-    public void applyHandler(FlatDataItemEntity.Handler handler) {
+    public <H extends FlatDataItemEntity.Handler> H applyHandler(H handler) {
         if (handler instanceof FlatDataField.Handler) {
             ((FlatDataField.Handler) handler).handleConstantField(this);
         } else {
             handler.handleFlatDataItemEntity(this);
         }
+        return handler;
     }
 }

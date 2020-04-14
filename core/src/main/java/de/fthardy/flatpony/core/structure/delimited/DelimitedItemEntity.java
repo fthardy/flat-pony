@@ -82,12 +82,13 @@ public class DelimitedItemEntity extends AbstractFlatDataItemEntity<DelimitedIte
     }
 
     @Override
-    public void applyHandler(FlatDataItemEntity.Handler handler) {
+    public <H extends FlatDataItemEntity.Handler> H applyHandler(H handler) {
         if (handler instanceof FlatDataStructure.Handler) {
             ((FlatDataStructure.Handler) handler).handleDelimitedItemEntity(this);
         } else {
             handler.handleFlatDataItemEntity(this);
         }
+        return handler;
     }
 
     /**

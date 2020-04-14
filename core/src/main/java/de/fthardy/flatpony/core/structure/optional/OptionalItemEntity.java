@@ -77,12 +77,13 @@ public class OptionalItemEntity extends AbstractFlatDataItemEntity<OptionalItemD
     }
 
     @Override
-    public void applyHandler(FlatDataItemEntity.Handler handler) {
+    public <H extends FlatDataItemEntity.Handler> H applyHandler(H handler) {
         if (handler instanceof FlatDataStructure.Handler) {
             ((FlatDataStructure.Handler) handler).handleOptionalItemEntity(this);
         } else {
             handler.handleFlatDataItemEntity(this);
         }
+        return handler;
     }
 
     /**

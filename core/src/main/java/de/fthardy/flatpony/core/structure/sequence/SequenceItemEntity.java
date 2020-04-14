@@ -113,12 +113,13 @@ public class SequenceItemEntity extends AbstractFlatDataItemEntity<SequenceItemD
     }
 
     @Override
-    public void applyHandler(FlatDataItemEntity.Handler handler) {
+    public <H extends FlatDataItemEntity.Handler> H applyHandler(H handler) {
         if (handler instanceof FlatDataStructure.Handler) {
             ((FlatDataStructure.Handler) handler).handleSequenceItemEntity(this);
         } else {
             handler.handleFlatDataItemEntity(this);
         }
+        return handler;
     }
 
     /**

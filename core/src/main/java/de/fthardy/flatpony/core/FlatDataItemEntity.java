@@ -92,6 +92,8 @@ public interface FlatDataItemEntity<T extends FlatDataItemDescriptor<?>> {
      * Apply a handler to the receiving item instance.
      *
      * @param handler the handler to be applied.
+     *                
+     * @return the applied handler for convenience to do subsequent calls to the handler.
      */
-    void applyHandler(Handler handler);
+    <H extends Handler> H applyHandler(H handler);
 }

@@ -105,12 +105,13 @@ public class TypedField<T> extends AbstractFlatDataItemEntity<TypedFieldDescript
     }
 
     @Override
-    public void applyHandler(FlatDataItemEntity.Handler handler) {
+    public <H extends FlatDataItemEntity.Handler> H applyHandler(H handler) {
         if (handler instanceof FlatDataField.Handler) {
             ((FlatDataField.Handler) handler).handleTypedField(this);
         } else {
             handler.handleFlatDataItemEntity(this);
         }
+        return handler;
     }
 
     /**
