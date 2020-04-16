@@ -50,27 +50,6 @@ import java.io.Reader;
 public interface FlatDataItemDescriptor<T extends FlatDataItemEntity<?>> {
 
     /**
-     * The interface definition for a handler which handles descriptor instances.
-     * <p>
-     * This handler interface is part of the visitor pattern and takes the role of the visitor. The descriptors are the
-     * visitable elements and provide for this purpose the method
-     * {@link FlatDataItemDescriptor#applyHandler(Handler)} which allows to apply an implementation
-     * instance of this interface type.
-     * </p>
-     *
-     * @author Frank Timothy Hardy
-     */
-    interface Handler {
-
-        /**
-         * Handles an item descriptor.
-         *
-         * @param descriptor the descriptor instance to be handled by the receiving instance.
-         */
-        void handleFlatDataItemDescriptor(FlatDataItemDescriptor<?> descriptor);
-    }
-
-    /**
      * The name of the descriptor.
      *
      * @return the name of the receiving descriptor instance.
@@ -121,12 +100,12 @@ public interface FlatDataItemDescriptor<T extends FlatDataItemEntity<?>> {
      *               
      * @return the iterator to read the items.
      */
-    default PullReadIterator pullReadFrom(Reader reader) { return null; }
+    PullReadIterator pullReadFrom(Reader reader);
 
     /**
      * Apply a handler to the receiving descriptor.
      *
      * @param handler the handler instance.
      */
-    <H extends Handler> H applyHandler(H handler);
+    <H extends FlatDataItemDescriptorHandler> H applyHandler(H handler);
 }

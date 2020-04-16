@@ -23,15 +23,11 @@ SOFTWARE.
  */
 package de.fthardy.flatpony.core.structure.optional;
 
-import de.fthardy.flatpony.core.FlatDataItemDescriptor;
-import de.fthardy.flatpony.core.FlatDataItemEntity;
-import de.fthardy.flatpony.core.FlatDataReadException;
+import de.fthardy.flatpony.core.*;
 import de.fthardy.flatpony.core.field.constant.ConstantFieldDescriptor;
 import de.fthardy.flatpony.core.streamio.*;
-import de.fthardy.flatpony.core.structure.FlatDataStructure;
-import de.fthardy.flatpony.core.structure.FlatDataStructureDescriptor;
-import de.fthardy.flatpony.core.structure.optional.OptionalItemDescriptor;
-import de.fthardy.flatpony.core.structure.optional.OptionalItemEntity;
+import de.fthardy.flatpony.core.structure.FlatDataStructureDescriptorHandler;
+import de.fthardy.flatpony.core.structure.FlatDataStructureHandler;
 import de.fthardy.flatpony.core.util.FieldReference;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
@@ -250,8 +246,8 @@ public class OptionalItemTest {
 
     @Test
     void Apply_handler_to_descriptor() {
-        FlatDataItemDescriptor.Handler handlerMock = mock(FlatDataItemDescriptor.Handler.class);
-        FlatDataStructureDescriptor.Handler descriptorHandlerMock = mock(FlatDataStructureDescriptor.Handler.class);
+        FlatDataItemDescriptorHandler handlerMock = mock(FlatDataItemDescriptorHandler.class);
+        FlatDataStructureDescriptorHandler descriptorHandlerMock = mock(FlatDataStructureDescriptorHandler.class);
 
         FlatDataItemDescriptor<?> itemDescriptorMock = mock(FlatDataItemDescriptor.class);
         when(itemDescriptorMock.getName()).thenReturn("mock");
@@ -272,8 +268,8 @@ public class OptionalItemTest {
 
     @Test
     void Apply_handler_to_entity() {
-        FlatDataItemEntity.Handler handlerMock = mock(FlatDataItemEntity.Handler.class);
-        FlatDataStructure.Handler structureHandlerMock = mock(FlatDataStructure.Handler.class);
+        FlatDataItemEntityHandler handlerMock = mock(FlatDataItemEntityHandler.class);
+        FlatDataStructureHandler structureHandlerMock = mock(FlatDataStructureHandler.class);
 
         FlatDataItemDescriptor<?> itemDescriptorMock = mock(FlatDataItemDescriptor.class);
         when(itemDescriptorMock.getName()).thenReturn("mock");

@@ -20,7 +20,7 @@ import de.fthardy.flatpony.core.structure.sequence.SequenceItemEntity;
  * 
  * @author Frank Timothy Hardy
  */
-public final class PushReadItemEntityTreeWalker implements FlatDataField.Handler, FlatDataStructure.Handler {
+public final class PushReadItemEntityTreeWalker implements FlatDataFieldHandler, FlatDataStructureHandler {
     
     static String MSG_Unsupported_item_entity(FlatDataItemEntity itemEntity) {
         return String.format("Unsupported item entity '%s' [%s]!",

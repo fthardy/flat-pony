@@ -23,12 +23,12 @@ SOFTWARE.
  */
 package de.fthardy.flatpony.core.field.constrained;
 
-import de.fthardy.flatpony.core.FlatDataItemDescriptor;
+import de.fthardy.flatpony.core.FlatDataItemDescriptorHandler;
 import de.fthardy.flatpony.core.field.FlatDataFieldDescriptor;
 import de.fthardy.flatpony.core.field.constrained.constraint.ValueConstraint;
 import de.fthardy.flatpony.core.field.constrained.constraint.ValueConstraintViolationException;
-import de.fthardy.flatpony.core.streamio.StreamReadHandler;
 import de.fthardy.flatpony.core.streamio.PullReadIterator;
+import de.fthardy.flatpony.core.streamio.StreamReadHandler;
 import de.fthardy.flatpony.core.util.AbstractItemDescriptorBuilder;
 import de.fthardy.flatpony.core.util.ObjectBuilder;
 
@@ -216,9 +216,9 @@ public class ConstrainedFieldDescriptor implements FlatDataFieldDescriptor<Const
     }
 
     @Override
-    public <H extends FlatDataItemDescriptor.Handler> H applyHandler(H handler) {
-        if (handler instanceof FlatDataFieldDescriptor.Handler) {
-            ((FlatDataFieldDescriptor.Handler) handler).handleConstrainedFieldDescriptor(this);
+    public <H extends FlatDataItemDescriptorHandler> H applyHandler(H handler) {
+        if (handler instanceof ConstrainedFieldDescriptorHandler) {
+            ((ConstrainedFieldDescriptorHandler) handler).handleConstrainedFieldDescriptor(this);
         } else {
             handler.handleFlatDataItemDescriptor(this);
         }

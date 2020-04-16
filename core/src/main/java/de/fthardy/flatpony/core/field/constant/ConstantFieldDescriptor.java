@@ -23,7 +23,7 @@ SOFTWARE.
  */
 package de.fthardy.flatpony.core.field.constant;
 
-import de.fthardy.flatpony.core.FlatDataItemDescriptor;
+import de.fthardy.flatpony.core.FlatDataItemDescriptorHandler;
 import de.fthardy.flatpony.core.FlatDataReadException;
 import de.fthardy.flatpony.core.field.AbstractFlatDataFieldDescriptor;
 import de.fthardy.flatpony.core.field.FlatDataFieldDescriptor;
@@ -213,9 +213,9 @@ public class ConstantFieldDescriptor extends AbstractFlatDataFieldDescriptor<Con
     }
 
     @Override
-    public <H extends FlatDataItemDescriptor.Handler> H applyHandler(H handler) {
-        if (handler instanceof FlatDataFieldDescriptor.Handler) {
-            ((FlatDataFieldDescriptor.Handler) handler).handleConstantFieldDescriptor(this);
+    public <H extends FlatDataItemDescriptorHandler> H applyHandler(H handler) {
+        if (handler instanceof ConstantFieldDescriptorHandler) {
+            ((ConstantFieldDescriptorHandler) handler).handleConstantFieldDescriptor(this);
         } else {
             handler.handleFlatDataItemDescriptor(this);
         }

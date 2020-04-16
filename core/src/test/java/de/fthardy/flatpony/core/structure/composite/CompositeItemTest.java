@@ -24,16 +24,16 @@ SOFTWARE.
 package de.fthardy.flatpony.core.structure.composite;
 
 import de.fthardy.flatpony.core.FlatDataItemDescriptor;
-import de.fthardy.flatpony.core.FlatDataItemEntity;
+import de.fthardy.flatpony.core.FlatDataItemDescriptorHandler;
+import de.fthardy.flatpony.core.FlatDataItemEntityHandler;
 import de.fthardy.flatpony.core.field.FlatDataField;
 import de.fthardy.flatpony.core.field.FlatDataFieldDescriptor;
 import de.fthardy.flatpony.core.streamio.PullReadIterator;
 import de.fthardy.flatpony.core.streamio.StreamReadHandler;
 import de.fthardy.flatpony.core.streamio.StructureItemPullReadIteratorBase;
-import de.fthardy.flatpony.core.structure.FlatDataStructure;
 import de.fthardy.flatpony.core.structure.FlatDataStructureDescriptor;
-import de.fthardy.flatpony.core.structure.composite.CompositeItemDescriptor;
-import de.fthardy.flatpony.core.structure.composite.CompositeItemEntity;
+import de.fthardy.flatpony.core.structure.FlatDataStructureDescriptorHandler;
+import de.fthardy.flatpony.core.structure.FlatDataStructureHandler;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 
@@ -148,8 +148,8 @@ class CompositeItemTest {
                 .addComponentItemDescriptor(fieldDescriptorMock)
                 .build();
 
-        FlatDataItemDescriptor.Handler handlerMock = mock(FlatDataItemDescriptor.Handler.class);
-        FlatDataStructureDescriptor.Handler descriptorHandlerMock = mock(FlatDataStructureDescriptor.Handler.class);
+        FlatDataItemDescriptorHandler handlerMock = mock(FlatDataItemDescriptorHandler.class);
+        FlatDataStructureDescriptorHandler descriptorHandlerMock = mock(FlatDataStructureDescriptorHandler.class);
 
         descriptor.applyHandler(handlerMock);
         descriptor.applyHandler(descriptorHandlerMock);
@@ -176,8 +176,8 @@ class CompositeItemTest {
                 .build()
                 .createItemEntity();
 
-        FlatDataItemEntity.Handler handlerMock = mock(FlatDataItemEntity.Handler.class);
-        FlatDataStructure.Handler structureHandlerMock = mock(FlatDataStructure.Handler.class);
+        FlatDataItemEntityHandler handlerMock = mock(FlatDataItemEntityHandler.class);
+        FlatDataStructureHandler structureHandlerMock = mock(FlatDataStructureHandler.class);
 
         entity.applyHandler(handlerMock);
         entity.applyHandler(structureHandlerMock);

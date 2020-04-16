@@ -24,7 +24,7 @@ SOFTWARE.
 package de.fthardy.flatpony.core.field.typed;
 
 import de.fthardy.flatpony.core.AbstractFlatDataItemEntity;
-import de.fthardy.flatpony.core.FlatDataItemEntity;
+import de.fthardy.flatpony.core.FlatDataItemEntityHandler;
 import de.fthardy.flatpony.core.field.FlatDataField;
 import de.fthardy.flatpony.core.field.FlatDataMutableField;
 import de.fthardy.flatpony.core.field.typed.converter.FieldValueConvertException;
@@ -105,9 +105,9 @@ public class TypedField<T> extends AbstractFlatDataItemEntity<TypedFieldDescript
     }
 
     @Override
-    public <H extends FlatDataItemEntity.Handler> H applyHandler(H handler) {
-        if (handler instanceof FlatDataField.Handler) {
-            ((FlatDataField.Handler) handler).handleTypedField(this);
+    public <H extends FlatDataItemEntityHandler> H applyHandler(H handler) {
+        if (handler instanceof TypedFieldHandler) {
+            ((TypedFieldHandler) handler).handleTypedField(this);
         } else {
             handler.handleFlatDataItemEntity(this);
         }

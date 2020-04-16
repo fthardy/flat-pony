@@ -24,6 +24,7 @@ SOFTWARE.
 package de.fthardy.flatpony.core.structure.optional;
 
 import de.fthardy.flatpony.core.FlatDataItemDescriptor;
+import de.fthardy.flatpony.core.FlatDataItemDescriptorHandler;
 import de.fthardy.flatpony.core.FlatDataItemEntity;
 import de.fthardy.flatpony.core.FlatDataReadException;
 import de.fthardy.flatpony.core.streamio.*;
@@ -314,9 +315,9 @@ public class OptionalItemDescriptor implements FlatDataStructureDescriptor<Optio
     }
 
     @Override
-    public <H extends FlatDataItemDescriptor.Handler> H applyHandler(H handler) {
-        if (handler instanceof FlatDataStructureDescriptor.Handler) {
-            ((FlatDataStructureDescriptor.Handler) handler).handleOptionalItemDescriptor(this);
+    public <H extends FlatDataItemDescriptorHandler> H applyHandler(H handler) {
+        if (handler instanceof OptionalItemDescriptorHandler) {
+            ((OptionalItemDescriptorHandler) handler).handleOptionalItemDescriptor(this);
         } else {
             handler.handleFlatDataItemDescriptor(this);
         }

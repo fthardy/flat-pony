@@ -24,11 +24,12 @@ SOFTWARE.
 package de.fthardy.flatpony.core.structure.delimited;
 
 import de.fthardy.flatpony.core.FlatDataItemDescriptor;
+import de.fthardy.flatpony.core.FlatDataItemDescriptorHandler;
 import de.fthardy.flatpony.core.FlatDataItemEntity;
 import de.fthardy.flatpony.core.FlatDataReadException;
-import de.fthardy.flatpony.core.streamio.StructureItemPullReadIteratorBase;
 import de.fthardy.flatpony.core.streamio.PullReadIterator;
 import de.fthardy.flatpony.core.streamio.StreamReadHandler;
+import de.fthardy.flatpony.core.streamio.StructureItemPullReadIteratorBase;
 import de.fthardy.flatpony.core.structure.FlatDataStructureDescriptor;
 import de.fthardy.flatpony.core.util.AbstractItemDescriptorBuilder;
 import de.fthardy.flatpony.core.util.ObjectBuilder;
@@ -78,7 +79,7 @@ public class DelimitedItemDescriptor implements FlatDataStructureDescriptor<Deli
     private static final class BuilderImpl extends AbstractItemDescriptorBuilder<DelimitedItemDescriptor> 
             implements DefineDelimiter, BuildParams {
         
-        private FlatDataItemDescriptor<?> targetItemDescriptor;
+        private final FlatDataItemDescriptor<?> targetItemDescriptor;
         private int delimiter = DEFAULT_DELIMITER;
         
         BuilderImpl(FlatDataItemDescriptor<?> targetItemDescriptor) {
@@ -200,9 +201,9 @@ public class DelimitedItemDescriptor implements FlatDataStructureDescriptor<Deli
     }
 
     @Override
-    public <H extends FlatDataItemDescriptor.Handler> H applyHandler(H handler) {
-        if (handler instanceof FlatDataStructureDescriptor.Handler) {
-            ((FlatDataStructureDescriptor.Handler) handler).handleDelimitedItemDescriptor(this);
+    public <H extends FlatDataItemDescriptorHandler> H applyHandler(H handler) {
+        if (handler instanceof DelimitedItemDescriptorHandler) {
+            ((DelimitedItemDescriptorHandler) handler).handleDelimitedItemDescriptor(this);
         } else {
             handler.handleFlatDataItemDescriptor(this);
         }

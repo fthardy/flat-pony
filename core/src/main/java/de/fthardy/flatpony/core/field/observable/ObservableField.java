@@ -24,8 +24,7 @@ SOFTWARE.
 package de.fthardy.flatpony.core.field.observable;
 
 import de.fthardy.flatpony.core.AbstractFlatDataItemEntity;
-import de.fthardy.flatpony.core.FlatDataItemEntity;
-import de.fthardy.flatpony.core.field.FlatDataField;
+import de.fthardy.flatpony.core.FlatDataItemEntityHandler;
 import de.fthardy.flatpony.core.field.FlatDataMutableField;
 
 import java.io.Writer;
@@ -116,9 +115,9 @@ public class ObservableField extends AbstractFlatDataItemEntity<ObservableFieldD
     }
 
     @Override
-    public <H extends FlatDataItemEntity.Handler> H applyHandler(H handler) {
-        if (handler instanceof FlatDataField.Handler) {
-            ((FlatDataField.Handler) handler).handleObservableField(this);
+    public <H extends FlatDataItemEntityHandler> H applyHandler(H handler) {
+        if (handler instanceof ObservableFieldHandler) {
+            ((ObservableFieldHandler) handler).handleObservableField(this);
         } else {
             handler.handleFlatDataItemEntity(this);
         }

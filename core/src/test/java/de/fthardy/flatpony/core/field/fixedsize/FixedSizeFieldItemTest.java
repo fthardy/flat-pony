@@ -23,12 +23,9 @@ SOFTWARE.
  */
 package de.fthardy.flatpony.core.field.fixedsize;
 
-import de.fthardy.flatpony.core.FlatDataItemDescriptor;
-import de.fthardy.flatpony.core.FlatDataItemEntity;
-import de.fthardy.flatpony.core.FlatDataReadException;
-import de.fthardy.flatpony.core.FlatDataWriteException;
-import de.fthardy.flatpony.core.field.FlatDataField;
-import de.fthardy.flatpony.core.field.FlatDataFieldDescriptor;
+import de.fthardy.flatpony.core.*;
+import de.fthardy.flatpony.core.field.FlatDataFieldDescriptorHandler;
+import de.fthardy.flatpony.core.field.FlatDataFieldHandler;
 import de.fthardy.flatpony.core.streamio.PullReadIterator;
 import de.fthardy.flatpony.core.streamio.StreamReadHandler;
 import org.junit.jupiter.api.Test;
@@ -173,8 +170,8 @@ class FixedSizeFieldItemTest {
     void Apply_handler_to_descriptor() {
         FixedSizeFieldDescriptor descriptor = FixedSizeFieldDescriptor.newInstance("Field").build();
 
-        FlatDataItemDescriptor.Handler handlerMock = mock(FlatDataItemDescriptor.Handler.class);
-        FlatDataFieldDescriptor.Handler fieldDescriptorHandlerMock = mock(FlatDataFieldDescriptor.Handler.class);
+        FlatDataItemDescriptorHandler handlerMock = mock(FlatDataItemDescriptorHandler.class);
+        FlatDataFieldDescriptorHandler fieldDescriptorHandlerMock = mock(FlatDataFieldDescriptorHandler.class);
 
         descriptor.applyHandler(handlerMock);
         descriptor.applyHandler(fieldDescriptorHandlerMock);
@@ -190,8 +187,8 @@ class FixedSizeFieldItemTest {
         FixedSizeField field = FixedSizeFieldDescriptor.newInstance("Field").build().createItemEntity();
         assertThat(field.toString()).startsWith(FixedSizeField.class.getSimpleName());
 
-        FlatDataItemEntity.Handler handlerMock = mock(FlatDataItemEntity.Handler.class);
-        FlatDataField.Handler fieldHandlerMock = mock(FlatDataField.Handler.class);
+        FlatDataItemEntityHandler handlerMock = mock(FlatDataItemEntityHandler.class);
+        FlatDataFieldHandler fieldHandlerMock = mock(FlatDataFieldHandler.class);
 
         field.applyHandler(handlerMock);
         field.applyHandler(fieldHandlerMock);

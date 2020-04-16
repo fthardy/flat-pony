@@ -23,14 +23,9 @@ SOFTWARE.
  */
 package de.fthardy.flatpony.core.field.delimited;
 
-import de.fthardy.flatpony.core.FlatDataItemDescriptor;
-import de.fthardy.flatpony.core.FlatDataItemEntity;
-import de.fthardy.flatpony.core.FlatDataReadException;
-import de.fthardy.flatpony.core.FlatDataWriteException;
-import de.fthardy.flatpony.core.field.FlatDataField;
-import de.fthardy.flatpony.core.field.FlatDataFieldDescriptor;
-import de.fthardy.flatpony.core.field.delimited.DelimitedField;
-import de.fthardy.flatpony.core.field.delimited.DelimitedFieldDescriptor;
+import de.fthardy.flatpony.core.*;
+import de.fthardy.flatpony.core.field.FlatDataFieldDescriptorHandler;
+import de.fthardy.flatpony.core.field.FlatDataFieldHandler;
 import de.fthardy.flatpony.core.streamio.PullReadIterator;
 import de.fthardy.flatpony.core.streamio.StreamReadHandler;
 import org.junit.jupiter.api.Test;
@@ -128,8 +123,8 @@ public class DelimitedFieldItemTest {
     void Apply_handler_to_descriptor() {
         DelimitedFieldDescriptor descriptor = DelimitedFieldDescriptor.newInstance("Field").build();
 
-        FlatDataItemDescriptor.Handler handlerMock = mock(FlatDataItemDescriptor.Handler.class);
-        FlatDataFieldDescriptor.Handler fieldDescriptorHandlerMock = mock(FlatDataFieldDescriptor.Handler.class);
+        FlatDataItemDescriptorHandler handlerMock = mock(FlatDataItemDescriptorHandler.class);
+        FlatDataFieldDescriptorHandler fieldDescriptorHandlerMock = mock(FlatDataFieldDescriptorHandler.class);
 
         descriptor.applyHandler(handlerMock);
         descriptor.applyHandler(fieldDescriptorHandlerMock);
@@ -148,8 +143,8 @@ public class DelimitedFieldItemTest {
                 .createItemEntity();
         assertThat(field.toString()).startsWith(DelimitedField.class.getSimpleName());
 
-        FlatDataItemEntity.Handler handlerMock = mock(FlatDataItemEntity.Handler.class);
-        FlatDataField.Handler fieldHandlerMock = mock(FlatDataField.Handler.class);
+        FlatDataItemEntityHandler handlerMock = mock(FlatDataItemEntityHandler.class);
+        FlatDataFieldHandler fieldHandlerMock = mock(FlatDataFieldHandler.class);
 
         field.applyHandler(handlerMock);
         field.applyHandler(fieldHandlerMock);

@@ -25,6 +25,7 @@ package de.fthardy.flatpony.core.structure.sequence;
 
 import de.fthardy.flatpony.core.AbstractFlatDataItemEntity;
 import de.fthardy.flatpony.core.FlatDataItemEntity;
+import de.fthardy.flatpony.core.FlatDataItemEntityHandler;
 import de.fthardy.flatpony.core.FlatDataWriteException;
 import de.fthardy.flatpony.core.structure.FlatDataStructure;
 import de.fthardy.flatpony.core.util.FieldReference;
@@ -113,9 +114,9 @@ public class SequenceItemEntity extends AbstractFlatDataItemEntity<SequenceItemD
     }
 
     @Override
-    public <H extends FlatDataItemEntity.Handler> H applyHandler(H handler) {
-        if (handler instanceof FlatDataStructure.Handler) {
-            ((FlatDataStructure.Handler) handler).handleSequenceItemEntity(this);
+    public <H extends FlatDataItemEntityHandler> H applyHandler(H handler) {
+        if (handler instanceof SequenceItemEntityHandler) {
+            ((SequenceItemEntityHandler) handler).handleSequenceItemEntity(this);
         } else {
             handler.handleFlatDataItemEntity(this);
         }

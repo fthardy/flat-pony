@@ -24,12 +24,6 @@ SOFTWARE.
 package de.fthardy.flatpony.core.field;
 
 import de.fthardy.flatpony.core.FlatDataItemEntity;
-import de.fthardy.flatpony.core.field.constant.ConstantField;
-import de.fthardy.flatpony.core.field.constrained.ConstrainedField;
-import de.fthardy.flatpony.core.field.delimited.DelimitedField;
-import de.fthardy.flatpony.core.field.fixedsize.FixedSizeField;
-import de.fthardy.flatpony.core.field.observable.ObservableField;
-import de.fthardy.flatpony.core.field.typed.TypedField;
 
 /**
  * The interface definition for a flat data field.
@@ -44,56 +38,6 @@ import de.fthardy.flatpony.core.field.typed.TypedField;
  * @author Frank Timothy Hardy
  */
 public interface FlatDataField<T extends FlatDataFieldDescriptor<?>> extends FlatDataItemEntity<T> {
-
-    /**
-     * The interface for a handler which can handle the various field  type implementations provided by the core package.
-     *
-     * @author Frank Timothy Hardy.
-     */
-    interface Handler extends FlatDataItemEntity.Handler {
-
-        /**
-         * Handle a constant field.
-         *
-         * @param field the field to be handled
-         */
-        void handleConstantField(ConstantField field);
-
-        /**
-         * Handle a delimited field.
-         *
-         * @param field the field to be handled
-         */
-        void handleDelimitedField(DelimitedField field);
-
-        /**
-         * Handle a fixed size field.
-         *
-         * @param field the field to be handled
-         */
-        void handleFixedSizeField(FixedSizeField field);
-
-        /**
-         * Handle a constrained field.
-         *
-         * @param field the field to be handled.
-         */
-        void handleConstrainedField(ConstrainedField field);
-
-        /**
-         * Handle a typed field.
-         *
-         * @param field the field to be handled.
-         */
-        void handleTypedField(TypedField<?> field);
-
-        /**
-         * Handle an observable field.
-         *
-         * @param field the field to be handled.
-         */
-        void handleObservableField(ObservableField field);
-    }
 
     /**
      * @return the length of the field.

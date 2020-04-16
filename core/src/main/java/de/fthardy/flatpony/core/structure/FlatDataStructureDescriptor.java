@@ -24,10 +24,6 @@ SOFTWARE.
 package de.fthardy.flatpony.core.structure;
 
 import de.fthardy.flatpony.core.FlatDataItemDescriptor;
-import de.fthardy.flatpony.core.structure.composite.CompositeItemDescriptor;
-import de.fthardy.flatpony.core.structure.delimited.DelimitedItemDescriptor;
-import de.fthardy.flatpony.core.structure.optional.OptionalItemDescriptor;
-import de.fthardy.flatpony.core.structure.sequence.SequenceItemDescriptor;
 
 /**
  * The interface for a flat data structure descriptor.
@@ -37,42 +33,6 @@ import de.fthardy.flatpony.core.structure.sequence.SequenceItemDescriptor;
  * @author Frank Timothy Hardy
  */
 public interface FlatDataStructureDescriptor<T extends FlatDataStructure<?>> extends FlatDataItemDescriptor<T> {
-
-    /**
-     * The interface for a handler which can handle the various structure descriptor type implementations provided by the
-     * core package.
-     *
-     * @author Frank Timothy Hardy.
-     */
-    interface Handler extends FlatDataItemDescriptor.Handler {
-
-        /**
-         * Handle a composite item descriptor.
-         *
-         * @param descriptor the descriptor to be handled by the receiving instance.
-         */
-        void handleCompositeItemDescriptor(CompositeItemDescriptor descriptor);
-
-        /**
-         * Handle a delimited item descriptor.
-         *
-         * @param descriptor the descriptor to be handled by the receiving instance.
-         */
-        void handleDelimitedItemDescriptor(DelimitedItemDescriptor descriptor);
-
-        /**
-         * Handle an optional item descriptor.
-         *
-         * @param descriptor the descriptor to be handled by the receiving instance.
-         */
-        void handleOptionalItemDescriptor(OptionalItemDescriptor descriptor);
-
-        /**
-         * Handle a sequence item descriptor.
-         *
-         * @param descriptor the descriptor to be handled by the receiving instance.
-         */
-        void handleSequenceItemDescriptor(SequenceItemDescriptor descriptor);
-    }
+    // Currently no further method definitions.
 }
 

@@ -23,7 +23,7 @@ SOFTWARE.
  */
 package de.fthardy.flatpony.core.field.observable;
 
-import de.fthardy.flatpony.core.FlatDataItemDescriptor;
+import de.fthardy.flatpony.core.FlatDataItemDescriptorHandler;
 import de.fthardy.flatpony.core.field.FlatDataFieldDescriptor;
 import de.fthardy.flatpony.core.field.FlatDataMutableField;
 import de.fthardy.flatpony.core.streamio.FieldPullReadIterator;
@@ -247,9 +247,9 @@ public class ObservableFieldDescriptor implements FlatDataFieldDescriptor<Observ
     }
 
     @Override
-    public <H extends FlatDataItemDescriptor.Handler> H applyHandler(H handler) {
-        if (handler instanceof FlatDataFieldDescriptor.Handler) {
-            ((FlatDataFieldDescriptor.Handler) handler).handleObservableFieldDescriptor(this);
+    public <H extends FlatDataItemDescriptorHandler> H applyHandler(H handler) {
+        if (handler instanceof ObservableFieldDescriptorHandler) {
+            ((ObservableFieldDescriptorHandler) handler).handleObservableFieldDescriptor(this);
         } else {
             handler.handleFlatDataItemDescriptor(this);
         }

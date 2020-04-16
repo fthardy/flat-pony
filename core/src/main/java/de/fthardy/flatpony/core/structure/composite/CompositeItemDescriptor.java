@@ -25,6 +25,7 @@ package de.fthardy.flatpony.core.structure.composite;
 
 import de.fthardy.flatpony.core.AbstractFlatDataItemDescriptor;
 import de.fthardy.flatpony.core.FlatDataItemDescriptor;
+import de.fthardy.flatpony.core.FlatDataItemDescriptorHandler;
 import de.fthardy.flatpony.core.streamio.PullReadIterator;
 import de.fthardy.flatpony.core.streamio.StreamReadHandler;
 import de.fthardy.flatpony.core.streamio.StructureItemPullReadIteratorBase;
@@ -231,9 +232,9 @@ public class CompositeItemDescriptor extends AbstractFlatDataItemDescriptor<Comp
     }
 
     @Override
-    public <H extends FlatDataItemDescriptor.Handler> H applyHandler(H handler) {
-        if (handler instanceof FlatDataStructureDescriptor.Handler) {
-            ((FlatDataStructureDescriptor.Handler) handler).handleCompositeItemDescriptor(this);
+    public <H extends FlatDataItemDescriptorHandler> H applyHandler(H handler) {
+        if (handler instanceof CompositeItemDescriptorHandler) {
+            ((CompositeItemDescriptorHandler) handler).handleCompositeItemDescriptor(this);
         } else {
             handler.handleFlatDataItemDescriptor(this);
         }

@@ -50,7 +50,7 @@ import java.util.List;
  * 
  * @see PullReadFieldHandler
  */
-public final class ItemEntityStructureFlattener implements FlatDataField.Handler, FlatDataStructure.Handler {
+public final class ItemEntityStructureFlattener implements FlatDataFieldHandler, FlatDataStructureHandler {
 
     static String MSG_Unsupported_item_entity(FlatDataItemEntity<?> itemEntity) {
         return String.format("Unsupported item entity '%s' [%s]!",

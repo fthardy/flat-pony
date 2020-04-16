@@ -25,6 +25,7 @@ package de.fthardy.flatpony.core.structure.composite;
 
 import de.fthardy.flatpony.core.AbstractFlatDataItemEntity;
 import de.fthardy.flatpony.core.FlatDataItemEntity;
+import de.fthardy.flatpony.core.FlatDataItemEntityHandler;
 import de.fthardy.flatpony.core.structure.FlatDataStructure;
 
 import java.io.Writer;
@@ -74,9 +75,9 @@ public class CompositeItemEntity extends AbstractFlatDataItemEntity<CompositeIte
     }
 
     @Override
-    public <H extends FlatDataItemEntity.Handler> H applyHandler(H handler) {
-        if (handler instanceof FlatDataStructure.Handler) {
-            ((FlatDataStructure.Handler) handler).handleCompositeItemEntity(this);
+    public <H extends FlatDataItemEntityHandler> H applyHandler(H handler) {
+        if (handler instanceof CompositeItemEntityHandler) {
+            ((CompositeItemEntityHandler) handler).handleCompositeItemEntity(this);
         } else {
             handler.handleFlatDataItemEntity(this);
         }

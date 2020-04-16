@@ -25,10 +25,6 @@ package de.fthardy.flatpony.core.structure.sequence;
 
 import de.fthardy.flatpony.core.*;
 import de.fthardy.flatpony.core.streamio.*;
-import de.fthardy.flatpony.core.streamio.PushReadItemEntityTreeWalker;
-import de.fthardy.flatpony.core.streamio.StructureItemPullReadIteratorBase;
-import de.fthardy.flatpony.core.streamio.ItemEntityStructureFlattener;
-import de.fthardy.flatpony.core.streamio.PullReadFieldHandler;
 import de.fthardy.flatpony.core.structure.FlatDataStructure;
 import de.fthardy.flatpony.core.structure.FlatDataStructureDescriptor;
 import de.fthardy.flatpony.core.util.AbstractItemDescriptorBuilder;
@@ -434,9 +430,9 @@ public class SequenceItemDescriptor extends AbstractFlatDataItemDescriptor<Seque
     }
     
     @Override
-    public <H extends FlatDataItemDescriptor.Handler> H applyHandler(H handler) {
-        if (handler instanceof FlatDataStructureDescriptor.Handler) {
-            ((FlatDataStructureDescriptor.Handler) handler).handleSequenceItemDescriptor(this);
+    public <H extends FlatDataItemDescriptorHandler> H applyHandler(H handler) {
+        if (handler instanceof SequenceItemDescriptorHandler) {
+            ((SequenceItemDescriptorHandler) handler).handleSequenceItemDescriptor(this);
         } else {
             handler.handleFlatDataItemDescriptor(this);
         }

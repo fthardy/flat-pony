@@ -24,7 +24,7 @@ SOFTWARE.
 package de.fthardy.flatpony.core.field.constrained;
 
 import de.fthardy.flatpony.core.AbstractFlatDataItemEntity;
-import de.fthardy.flatpony.core.FlatDataItemEntity;
+import de.fthardy.flatpony.core.FlatDataItemEntityHandler;
 import de.fthardy.flatpony.core.field.FlatDataField;
 import de.fthardy.flatpony.core.field.FlatDataMutableField;
 
@@ -72,9 +72,9 @@ public class ConstrainedField extends AbstractFlatDataItemEntity<ConstrainedFiel
     }
 
     @Override
-    public <H extends FlatDataItemEntity.Handler> H applyHandler(H handler) {
-        if (handler instanceof FlatDataField.Handler) {
-            ((FlatDataField.Handler) handler).handleConstrainedField(this);
+    public <H extends FlatDataItemEntityHandler> H applyHandler(H handler) {
+        if (handler instanceof ConstrainedFieldHandler) {
+            ((ConstrainedFieldHandler) handler).handleConstrainedField(this);
         } else {
             handler.handleFlatDataItemEntity(this);
         }

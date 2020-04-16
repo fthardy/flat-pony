@@ -25,6 +25,7 @@ package de.fthardy.flatpony.core.structure.delimited;
 
 import de.fthardy.flatpony.core.AbstractFlatDataItemEntity;
 import de.fthardy.flatpony.core.FlatDataItemEntity;
+import de.fthardy.flatpony.core.FlatDataItemEntityHandler;
 import de.fthardy.flatpony.core.FlatDataWriteException;
 import de.fthardy.flatpony.core.structure.FlatDataStructure;
 
@@ -82,9 +83,9 @@ public class DelimitedItemEntity extends AbstractFlatDataItemEntity<DelimitedIte
     }
 
     @Override
-    public <H extends FlatDataItemEntity.Handler> H applyHandler(H handler) {
-        if (handler instanceof FlatDataStructure.Handler) {
-            ((FlatDataStructure.Handler) handler).handleDelimitedItemEntity(this);
+    public <H extends FlatDataItemEntityHandler> H applyHandler(H handler) {
+        if (handler instanceof DelimitedItemEntityHandler) {
+            ((DelimitedItemEntityHandler) handler).handleDelimitedItemEntity(this);
         } else {
             handler.handleFlatDataItemEntity(this);
         }

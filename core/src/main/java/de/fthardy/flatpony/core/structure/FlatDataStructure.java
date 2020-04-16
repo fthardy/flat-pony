@@ -24,10 +24,6 @@ SOFTWARE.
 package de.fthardy.flatpony.core.structure;
 
 import de.fthardy.flatpony.core.FlatDataItemEntity;
-import de.fthardy.flatpony.core.structure.composite.CompositeItemEntity;
-import de.fthardy.flatpony.core.structure.delimited.DelimitedItemEntity;
-import de.fthardy.flatpony.core.structure.optional.OptionalItemEntity;
-import de.fthardy.flatpony.core.structure.sequence.SequenceItemEntity;
 
 /**
  * The interface for a flat data structure.
@@ -40,40 +36,5 @@ import de.fthardy.flatpony.core.structure.sequence.SequenceItemEntity;
  * @author Frank Timothy Hardy
  */
 public interface FlatDataStructure<T extends FlatDataStructureDescriptor<?>> extends FlatDataItemEntity<T> {
-
-    /**
-     * The interface for a handler which can handle the various structure type implementations provided by the core package.
-     *
-     * @author Frank Timothy Hardy.
-     */
-    interface Handler extends FlatDataItemEntity.Handler {
-
-        /**
-         * Handle a composite item entity.
-         *
-         * @param item the item entity to be handled by the receiving instance.
-         */
-        void handleCompositeItemEntity(CompositeItemEntity item);
-
-        /**
-         * Handle a delimited item entity.
-         *
-         * @param item the item entity to be handled by the receiving instance.
-         */
-        void handleDelimitedItemEntity(DelimitedItemEntity item);
-
-        /**
-         * Handle an optional item entity.
-         *
-         * @param item the item entity to be handled by the receiving instance.
-         */
-        void handleOptionalItemEntity(OptionalItemEntity item);
-
-        /**
-         * Handle a sequence item entity.
-         *
-         * @param item the item entity to be handled by the receiving instance.
-         */
-        void handleSequenceItemEntity(SequenceItemEntity item);
-    }
+    // Currently no further method definitions.
 }

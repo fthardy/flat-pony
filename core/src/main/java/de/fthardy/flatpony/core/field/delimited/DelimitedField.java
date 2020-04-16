@@ -23,10 +23,9 @@ SOFTWARE.
  */
 package de.fthardy.flatpony.core.field.delimited;
 
-import de.fthardy.flatpony.core.FlatDataItemEntity;
+import de.fthardy.flatpony.core.FlatDataItemEntityHandler;
 import de.fthardy.flatpony.core.FlatDataWriteException;
 import de.fthardy.flatpony.core.field.AbstractFlatDataMutableField;
-import de.fthardy.flatpony.core.field.FlatDataField;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -71,9 +70,9 @@ public class DelimitedField extends AbstractFlatDataMutableField<DelimitedFieldD
     }
 
     @Override
-    public <H extends FlatDataItemEntity.Handler> H applyHandler(H handler) {
-        if (handler instanceof FlatDataField.Handler) {
-            ((FlatDataField.Handler) handler).handleDelimitedField(this);
+    public <H extends FlatDataItemEntityHandler> H applyHandler(H handler) {
+        if (handler instanceof DelimitedFieldHandler) {
+            ((DelimitedFieldHandler) handler).handleDelimitedField(this);
         } else {
             handler.handleFlatDataItemEntity(this);
         }

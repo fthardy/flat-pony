@@ -41,7 +41,7 @@ import de.fthardy.flatpony.core.field.typed.TypedField;
  * 
  * @see ItemEntityStructureFlattener
  */
-public final class PullReadFieldHandler implements FlatDataField.Handler {
+public final class PullReadFieldHandler implements FlatDataFieldHandler {
     
     static String MSG_Unsupported_item_entity(FlatDataItemEntity<?> itemEntity) {
         return String.format("Unsupported item entity '%s' [%s]!", 

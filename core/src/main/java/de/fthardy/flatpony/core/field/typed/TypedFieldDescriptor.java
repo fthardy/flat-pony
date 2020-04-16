@@ -23,11 +23,11 @@ SOFTWARE.
  */
 package de.fthardy.flatpony.core.field.typed;
 
-import de.fthardy.flatpony.core.FlatDataItemDescriptor;
+import de.fthardy.flatpony.core.FlatDataItemDescriptorHandler;
 import de.fthardy.flatpony.core.field.FlatDataFieldDescriptor;
 import de.fthardy.flatpony.core.field.typed.converter.FieldValueConverter;
-import de.fthardy.flatpony.core.streamio.StreamReadHandler;
 import de.fthardy.flatpony.core.streamio.PullReadIterator;
+import de.fthardy.flatpony.core.streamio.StreamReadHandler;
 import de.fthardy.flatpony.core.util.AbstractItemDescriptorBuilder;
 import de.fthardy.flatpony.core.util.ObjectBuilder;
 
@@ -169,9 +169,9 @@ public class TypedFieldDescriptor<T> implements FlatDataFieldDescriptor<TypedFie
     }
 
     @Override
-    public <H extends FlatDataItemDescriptor.Handler> H applyHandler(H handler) {
-        if (handler instanceof FlatDataFieldDescriptor.Handler) {
-            ((FlatDataFieldDescriptor.Handler) handler).handleTypedFieldDescriptor(this);
+    public <H extends FlatDataItemDescriptorHandler> H applyHandler(H handler) {
+        if (handler instanceof TypedFieldDescriptorHandler) {
+            ((TypedFieldDescriptorHandler) handler).handleTypedFieldDescriptor(this);
         } else {
             handler.handleFlatDataItemDescriptor(this);
         }

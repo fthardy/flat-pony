@@ -1,10 +1,8 @@
 package de.fthardy.flatpony.core.field.constrained;
 
-import de.fthardy.flatpony.core.FlatDataItemDescriptor;
-import de.fthardy.flatpony.core.FlatDataItemEntity;
-import de.fthardy.flatpony.core.field.FlatDataField;
-import de.fthardy.flatpony.core.field.FlatDataFieldDescriptor;
-import de.fthardy.flatpony.core.field.FlatDataMutableField;
+import de.fthardy.flatpony.core.FlatDataItemDescriptorHandler;
+import de.fthardy.flatpony.core.FlatDataItemEntityHandler;
+import de.fthardy.flatpony.core.field.*;
 import de.fthardy.flatpony.core.field.constrained.constraint.ValueConstraint;
 import de.fthardy.flatpony.core.field.constrained.constraint.ValueConstraintViolationException;
 import de.fthardy.flatpony.core.streamio.StreamReadHandler;
@@ -139,8 +137,8 @@ public class ConstrainedFieldItemTest {
         ConstrainedFieldDescriptor descriptor =
                 ConstrainedFieldDescriptor.newInstance(fieldDescriptorMock).addConstraint(constraintMock).build();
 
-        FlatDataItemDescriptor.Handler handlerMock = mock(FlatDataItemDescriptor.Handler.class);
-        FlatDataFieldDescriptor.Handler fieldDescriptorHandlerMock = mock(FlatDataFieldDescriptor.Handler.class);
+        FlatDataItemDescriptorHandler handlerMock = mock(FlatDataItemDescriptorHandler.class);
+        FlatDataFieldDescriptorHandler fieldDescriptorHandlerMock = mock(FlatDataFieldDescriptorHandler.class);
 
         descriptor.applyHandler(handlerMock);
         descriptor.applyHandler(fieldDescriptorHandlerMock);
@@ -258,8 +256,8 @@ public class ConstrainedFieldItemTest {
 
         ConstrainedField field = descriptor.createItemEntity();
 
-        FlatDataItemEntity.Handler handlerMock = mock(FlatDataItemEntity.Handler.class);
-        FlatDataField.Handler fieldHandlerMock = mock(FlatDataField.Handler.class);
+        FlatDataItemEntityHandler handlerMock = mock(FlatDataItemEntityHandler.class);
+        FlatDataFieldHandler fieldHandlerMock = mock(FlatDataFieldHandler.class);
 
         field.applyHandler(handlerMock);
         field.applyHandler(fieldHandlerMock);

@@ -25,6 +25,7 @@ package de.fthardy.flatpony.core.structure.optional;
 
 import de.fthardy.flatpony.core.AbstractFlatDataItemEntity;
 import de.fthardy.flatpony.core.FlatDataItemEntity;
+import de.fthardy.flatpony.core.FlatDataItemEntityHandler;
 import de.fthardy.flatpony.core.structure.FlatDataStructure;
 import de.fthardy.flatpony.core.util.FieldReference;
 
@@ -77,9 +78,9 @@ public class OptionalItemEntity extends AbstractFlatDataItemEntity<OptionalItemD
     }
 
     @Override
-    public <H extends FlatDataItemEntity.Handler> H applyHandler(H handler) {
-        if (handler instanceof FlatDataStructure.Handler) {
-            ((FlatDataStructure.Handler) handler).handleOptionalItemEntity(this);
+    public <H extends FlatDataItemEntityHandler> H applyHandler(H handler) {
+        if (handler instanceof OptionalItemEntityHandler) {
+            ((OptionalItemEntityHandler) handler).handleOptionalItemEntity(this);
         } else {
             handler.handleFlatDataItemEntity(this);
         }

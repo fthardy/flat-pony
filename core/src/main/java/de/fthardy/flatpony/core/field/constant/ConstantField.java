@@ -24,7 +24,7 @@ SOFTWARE.
 package de.fthardy.flatpony.core.field.constant;
 
 import de.fthardy.flatpony.core.AbstractFlatDataItemEntity;
-import de.fthardy.flatpony.core.FlatDataItemEntity;
+import de.fthardy.flatpony.core.FlatDataItemEntityHandler;
 import de.fthardy.flatpony.core.FlatDataWriteException;
 import de.fthardy.flatpony.core.field.FlatDataField;
 import de.fthardy.flatpony.core.field.FlatDataMutableField;
@@ -78,9 +78,9 @@ public class ConstantField extends AbstractFlatDataItemEntity<ConstantFieldDescr
     }
 
     @Override
-    public <H extends FlatDataItemEntity.Handler> H applyHandler(H handler) {
-        if (handler instanceof FlatDataField.Handler) {
-            ((FlatDataField.Handler) handler).handleConstantField(this);
+    public <H extends FlatDataItemEntityHandler> H applyHandler(H handler) {
+        if (handler instanceof ConstantFieldHandler) {
+            ((ConstantFieldHandler) handler).handleConstantField(this);
         } else {
             handler.handleFlatDataItemEntity(this);
         }
