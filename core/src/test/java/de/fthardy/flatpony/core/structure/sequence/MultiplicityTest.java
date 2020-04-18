@@ -26,6 +26,9 @@ package de.fthardy.flatpony.core.structure.sequence;
 import de.fthardy.flatpony.core.structure.sequence.SequenceItemDescriptor;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.assertj.core.api.Assertions.*;
 
@@ -81,5 +84,27 @@ public class MultiplicityTest {
 
         assertTrue(multiplicity.isSizeNotWithinBounds(-1));
         assertTrue(multiplicity.isSizeNotWithinBounds(5));
+    }
+    
+    @Test
+    void Is_a_value_object() {
+        SequenceItemDescriptor.Multiplicity multiplicity1 = new SequenceItemDescriptor.Multiplicity(4, 0);
+        SequenceItemDescriptor.Multiplicity multiplicity2 = new SequenceItemDescriptor.Multiplicity(0, 4);
+        SequenceItemDescriptor.Multiplicity multiplicity3 = new SequenceItemDescriptor.Multiplicity(4, 2);
+        
+        assertThat(multiplicity1).isNotSameAs(multiplicity2);
+        assertEquals(multiplicity1, multiplicity2);
+        assertNotEquals(multiplicity1, multiplicity3);
+        assertNotEquals(multiplicity2, multiplicity3);
+        
+        assertEquals(multiplicity1.hashCode(), multiplicity2.hashCode());
+        assertNotEquals(multiplicity1.hashCode(), multiplicity3.hashCode());
+        assertNotEquals(multiplicity2.hashCode(), multiplicity3.hashCode());
+
+        Set<SequenceItemDescriptor.Multiplicity> set = new HashSet<>();
+        assertTrue(set.add(multiplicity1));
+        assertFalse(set.add(multiplicity2));
+        assertTrue(set.add(multiplicity3));
+        assertThat(set).hasSize(2);
     }
 }

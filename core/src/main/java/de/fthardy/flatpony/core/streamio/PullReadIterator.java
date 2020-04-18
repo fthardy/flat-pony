@@ -32,6 +32,10 @@ public interface PullReadIterator {
 
     /**
      * Check if there is a next event to read.
+     * <p><strong>
+     * Important note:
+     * Every implementation must provide at least one event. Hence the first call to this method must return {@code true}.
+     * </strong></p>
      * 
      * @return {@code true} if there is a next event.
      */
@@ -39,6 +43,11 @@ public interface PullReadIterator {
 
     /**
      * Advance to the next event.
+     * <p><strong>
+     * Important note:
+     * Every implementation must provide at least one event. Hence the first call to this method should be safely done
+     * without a pre-check by calling {@link #hasNextEvent()}.
+     * </strong></p>
      * 
      * @param handler the handler to handle the read event.
      */

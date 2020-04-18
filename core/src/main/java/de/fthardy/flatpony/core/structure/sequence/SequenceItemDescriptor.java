@@ -38,16 +38,29 @@ import java.util.*;
 /**
  * The implementation of a descriptor for a sequence item.
  * <p>
- * A sequence item represents a sequence of element items where each element item is of the same item type. A sequence
- * can optionally be linked with a field that contains the count of the elements. Such a field is expected to be located
- * before the sequence item. If no reference count field is defined then the read strategy is "trial and error" which
- * means the read algorithm tries to read an element item until it fails.
+ * A sequence item represents a sequence of element items where each element item has the same item type and name. A
+ * sequence can optionally be linked with a field that contains the number of the elements. Such a count field is
+ * expected to be located before (upstream) the sequence item. If no count field reference is defined or no element
+ * number is available then the read strategy is "trial and error" which means the read algorithm tries to read the
+ * element items until it fails or the maximum number of elements defined by the multiplicity has been reached.
  * </p>
  * <p>
- * Additionally it is possible to define a multiplicity for the element items. If the number of the read element items
- * is not within the bounds of the defined multiplicity a {@link FlatDataReadException} is thrown. Conversely if the
- * sequence is going to be written to a target stream and the number of element items to write is not within the bounds
- * of the defined multiplicity then a {@link FlatDataWriteException} is thrown.
+ * The multiplicity defines the allowed minimum and maximum number of elements. It can be optionally configured on
+ * creation. If none is configured the multiplicity is by default 0 to {@link Integer#MAX_VALUE}. When a sequence is
+ * read the number of elements is checked if it is within the bounds of the configured multiplicity. If not a
+ * {@link FlatDataReadException} is thrown.
+ * </p>
+ * <p>
+ * Important note:
+ * The trial and error strategy cannot know when the sequence actually ends. Hence in this case it is possible to get
+ * undesired results when for instance a sequence defines a fixed size field as element item and the sequence is not at
+ * the end of the stream (i.e. other items follow after the sequence). The algorithm needs something to "detect" the
+ * end. This might be for example a constant field and/or a proper multiplicity definition.
+ * </p>
+ * <p>
+ * If a count field is referenced the read process has to have read that field before otherwise no count value is
+ * available causing the sequence read algorithm to fall back to the "trial and error" strategy even though a count
+ * field reference has been defined. Keep that in mind. 
  * </p>
  *
  * @author Frank Timothy Hardy
@@ -254,6 +267,7 @@ public class SequenceItemDescriptor extends AbstractFlatDataItemDescriptor<Seque
             } else {
                 elementItemStreamIterator = elementItemDescriptor.pullReadFrom(source);
                 currentElementCount++;
+                elementItemStreamIterator.nextEvent(handler);
             }
             return false;
         }
@@ -296,6 +310,14 @@ public class SequenceItemDescriptor extends AbstractFlatDataItemDescriptor<Seque
                 ItemEntityStructureFlattener itemCollector = new ItemEntityStructureFlattener();
                 itemEntity.applyHandler(itemCollector);
                 flattenedElementItemEntityIterator = itemCollector.getFlattenedItemEntities().iterator();
+                FlatDataItemEntity<?> nextItemEntity = flattenedElementItemEntityIterator.next();
+                if (nextItemEntity instanceof FlatDataStructure) {
+                    FlatDataStructure<?> structure = (FlatDataStructure<?>) nextItemEntity;
+                    lastStructureItemEntityDeque.push(structure);
+                    handler.onStructureItemStart(structure.getDescriptor());
+                } else {
+                    nextItemEntity.applyHandler(new PullReadFieldHandler(handler));
+                }
             } else {
                 sendEndEvent = true;
             }
@@ -304,7 +326,7 @@ public class SequenceItemDescriptor extends AbstractFlatDataItemDescriptor<Seque
 
         @Override
         protected void fetchContent() {
-            elementItemEntityIterator = readElementsByTrialAndErrorFrom(source).iterator();
+            elementItemEntityIterator = readElementEntitiesByTrialAndErrorFrom(source).iterator();
         }
     }
 
@@ -380,12 +402,12 @@ public class SequenceItemDescriptor extends AbstractFlatDataItemDescriptor<Seque
         SequenceItemEntity itemEntity;
         if (this.countFieldReference == null) {
             itemEntity = new SequenceItemEntity(
-                    this, this.readElementsByTrialAndErrorFrom(source), null);
+                    this, this.readElementEntitiesByTrialAndErrorFrom(source), null);
         } else {
             FieldReference.ReferencedField<Integer> countField = this.countFieldReference.getReferencedField();
             if (countField == null) {
                 itemEntity = new SequenceItemEntity(
-                        this, this.readElementsByTrialAndErrorFrom(source), null);
+                        this, this.readElementEntitiesByTrialAndErrorFrom(source), null);
             } else {
                 this.assertMultiplicityConstraintOn(countField.getValue());
                 itemEntity = new SequenceItemEntity(
@@ -459,7 +481,7 @@ public class SequenceItemDescriptor extends AbstractFlatDataItemDescriptor<Seque
         }
     }
 
-    private List<FlatDataItemEntity<?>> readElementsByTrialAndErrorFrom(Reader source) {
+    private List<FlatDataItemEntity<?>> readElementEntitiesByTrialAndErrorFrom(Reader source) {
         List<FlatDataItemEntity<?>> elementItems = new ArrayList<>();
         FlatDataItemEntity<?> itemEntity;
         do {
@@ -467,7 +489,7 @@ public class SequenceItemDescriptor extends AbstractFlatDataItemDescriptor<Seque
             if (itemEntity != null) {
                 elementItems.add(itemEntity);
             }
-        } while(itemEntity != null);
+        } while(itemEntity != null && elementItems.size() < multiplicity.maxOccurrences);
         
         this.assertMultiplicityConstraintOn(elementItems.size());
         
@@ -491,7 +513,7 @@ public class SequenceItemDescriptor extends AbstractFlatDataItemDescriptor<Seque
                 elementCount++;
                 itemEntity.applyHandler(new PushReadItemEntityTreeWalker(handler));
             }
-        } while (itemEntity != null);
+        } while (itemEntity != null && elementCount < multiplicity.maxOccurrences);
         
         this.assertMultiplicityConstraintOn(elementCount);
     }
