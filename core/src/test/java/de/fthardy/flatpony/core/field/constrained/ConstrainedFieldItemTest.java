@@ -165,9 +165,10 @@ public class ConstrainedFieldItemTest {
     void New_value_at_field_violates_constraint() {
         ValueConstraint constraintMock = mock(ValueConstraint.class);
         when(constraintMock.getName()).thenReturn("Constraint");
-        when(constraintMock.acceptValue(anyString())).thenReturn(true, false);
+        when(constraintMock.acceptValue(anyString())).thenReturn(true, true, false);
 
         FlatDataField<?> fieldMock = mock(FlatDataField.class);
+        when(fieldMock.getValue()).thenReturn("Value on create");
         
         FlatDataFieldDescriptor<?> fieldDescriptorMock = mock(FlatDataFieldDescriptor.class);
         when(fieldDescriptorMock.getName()).thenReturn("Field");
@@ -188,7 +189,10 @@ public class ConstrainedFieldItemTest {
 
         verify(constraintMock, times(3)).getName();
         verify(constraintMock).acceptValue("Default value");
+        verify(constraintMock).acceptValue("Value on create");
         verify(constraintMock).acceptValue("Bad value");
+        
+        verify(fieldMock).getValue();
         
         verifyNoMoreInteractions(constraintMock, fieldMock, fieldDescriptorMock);
     }
@@ -197,7 +201,7 @@ public class ConstrainedFieldItemTest {
     void Set_new_valid_value_at_field() {
         ValueConstraint constraintMock = mock(ValueConstraint.class);
         when(constraintMock.getName()).thenReturn("Constraint");
-        when(constraintMock.acceptValue(anyString())).thenReturn(true, true);
+        when(constraintMock.acceptValue(anyString())).thenReturn(true, true, true);
         
         final FlatDataMutableField<?> fieldMock = mock(FlatDataMutableField.class);
         when(fieldMock.getLength()).thenReturn(42);
@@ -228,7 +232,7 @@ public class ConstrainedFieldItemTest {
         verifyNoMoreInteractions(fieldDescriptorMock);
 
         verify(fieldMock).getLength();
-        verify(fieldMock).getValue();
+        verify(fieldMock, times(2)).getValue();
         verify(fieldMock).setValue("Good value");
         verify(fieldMock).asMutableField();
         
@@ -236,6 +240,7 @@ public class ConstrainedFieldItemTest {
 
         verify(constraintMock, times(2)).getName();
         verify(constraintMock).acceptValue("Default value");
+        verify(constraintMock).acceptValue("Value");
         verify(constraintMock).acceptValue("Good value");
         
         verifyNoMoreInteractions(constraintMock);
@@ -245,11 +250,15 @@ public class ConstrainedFieldItemTest {
     void Apply_handler_to_field() {
         ValueConstraint constraintMock = mock(ValueConstraint.class);
         when(constraintMock.getName()).thenReturn("Constraint");
-        when(constraintMock.acceptValue(anyString())).thenReturn(true, false);
+        when(constraintMock.acceptValue(anyString())).thenReturn(true, true, false);
+        
+        FlatDataField<?> fieldMock = mock(FlatDataField.class);
+        when(fieldMock.getValue()).thenReturn("Value");
 
         FlatDataFieldDescriptor<?> fieldDescriptorMock = mock(FlatDataFieldDescriptor.class);
         when(fieldDescriptorMock.getName()).thenReturn("Field");
         when(fieldDescriptorMock.getDefaultValue()).thenReturn("Default value");
+        when(fieldDescriptorMock.createItemEntity()).thenAnswer(i -> fieldMock);
 
         ConstrainedFieldDescriptor descriptor =
                 ConstrainedFieldDescriptor.newInstance(fieldDescriptorMock).addConstraint(constraintMock).build();
@@ -264,29 +273,26 @@ public class ConstrainedFieldItemTest {
 
         verify(handlerMock).handleFlatDataItemEntity(field);
         
-        verifyNoMoreInteractions(handlerMock);
-        
         verify(fieldHandlerMock).handleConstrainedField(field);
         
-        verifyNoMoreInteractions(fieldHandlerMock);
-
         verify(fieldDescriptorMock).getName();
         verify(fieldDescriptorMock).getDefaultValue();
         verify(fieldDescriptorMock).createItemEntity();
-
-        verifyNoMoreInteractions(fieldDescriptorMock);
+        
+        verify(fieldMock).getValue();
         
         verify(constraintMock, times(2)).getName();
         verify(constraintMock).acceptValue("Default value");
+        verify(constraintMock).acceptValue("Value");
 
-        verifyNoMoreInteractions(constraintMock);
+        verifyNoMoreInteractions(handlerMock, fieldHandlerMock, fieldMock, fieldDescriptorMock, constraintMock);
     }
     
     @Test
     void Read_from_source_stream_and_write_back_to_target_stream() {
         ValueConstraint constraintMock = mock(ValueConstraint.class);
         when(constraintMock.getName()).thenReturn("Constraint");
-        when(constraintMock.acceptValue(anyString())).thenReturn(true, true);
+        when(constraintMock.acceptValue(anyString())).thenReturn(true, true, true);
 
         final FlatDataMutableField<?> fieldMock = mock(FlatDataMutableField.class);
         when(fieldMock.getLength()).thenReturn(42);
@@ -312,16 +318,14 @@ public class ConstrainedFieldItemTest {
         verify(fieldDescriptorMock).getDefaultValue();
         verify(fieldDescriptorMock).readItemEntityFrom(readerMock);
 
-        verifyNoMoreInteractions(fieldDescriptorMock);
-        
         verify(fieldMock).writeTo(writerMock);
+        verify(fieldMock).getValue();
         
-        verifyNoMoreInteractions(fieldMock);
-
         verify(constraintMock, times(2)).getName();
         verify(constraintMock).acceptValue("Default value");
+        verify(constraintMock).acceptValue("Value");
 
-        verifyNoMoreInteractions(constraintMock);
+        verifyNoMoreInteractions(fieldDescriptorMock, fieldMock, constraintMock);
         
         verifyZeroInteractions(readerMock);
         verifyZeroInteractions(writerMock);

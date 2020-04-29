@@ -51,6 +51,7 @@ public class ConstrainedField extends AbstractFlatDataItemEntity<ConstrainedFiel
      */
     ConstrainedField(ConstrainedFieldDescriptor descriptor, FlatDataField<?> decoratedField) {
         super(descriptor);
+        descriptor.checkForConstraintViolation(decoratedField.getValue());
         this.decoratedField = decoratedField;
     }
 
