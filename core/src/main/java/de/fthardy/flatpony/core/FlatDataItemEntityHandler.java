@@ -40,5 +40,8 @@ public interface FlatDataItemEntityHandler {
      *
      * @param item the item entity to be handled by the receiving instance.
      */
-    void handleFlatDataItemEntity(FlatDataItemEntity<?> item);
+    default void handleFlatDataItemEntity(FlatDataItemEntity<?> item) {
+        throw new IllegalStateException(String.format(
+                "Unhandled flat data item entity: %s@%s", System.identityHashCode(item), item.getClass().getName()));
+    }
 }

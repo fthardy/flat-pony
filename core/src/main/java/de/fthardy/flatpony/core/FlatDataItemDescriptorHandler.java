@@ -41,5 +41,9 @@ public interface FlatDataItemDescriptorHandler {
      *
      * @param descriptor the descriptor instance to be handled by the receiving instance.
      */
-    void handleFlatDataItemDescriptor(FlatDataItemDescriptor<?> descriptor);
+    default void handleFlatDataItemDescriptor(FlatDataItemDescriptor<?> descriptor) {
+        throw new IllegalStateException(String.format(
+                "Unhandled flat data item descriptor: %s@%s", 
+                System.identityHashCode(descriptor), descriptor.getClass().getName()));
+    }
 }
